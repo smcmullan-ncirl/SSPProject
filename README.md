@@ -1,8 +1,14 @@
 # Data Intensive Architecture Project
 
-##### Stephen McMullan
-###### x19139497@student.ncirl.ie
-###### PGDDA Sept 2019
+Stephen McMullan (x19139497@student.ncirl.ie)
+
+Semester 2, Data Intensive Architectures, Postgraduate Diploma in Data Analytics
+
+National College of Ireland
+
+## GitHub Project Code Repository
+
+https://github.com/smcmullan-ncirl/DAPProject
 
 ## Setup Instructions
 
