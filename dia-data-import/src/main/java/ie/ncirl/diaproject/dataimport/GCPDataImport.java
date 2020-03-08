@@ -49,6 +49,8 @@ public class GCPDataImport {
         Bucket bucket = storage.get(bucketName);
         Page<Blob> blobs = bucket.list();
 
+        long startTime = System.currentTimeMillis();
+
         for (Blob blob : blobs.iterateAll()) {
             String blobName = blob.getName();
             logger.info("Processing {}", blobName);
@@ -88,7 +90,10 @@ public class GCPDataImport {
             processedFiles++;
         }
 
-        logger.info("Processed {} files, {} records, {} discarded records", processedFiles, processedRecords, discardedRecords);
+        long endTime = System.currentTimeMillis();
+        long processingTime = (endTime - startTime)/1000;
+
+        logger.info("Processed {} files, {} records, {} discarded records in {} seconds", processedFiles, processedRecords, discardedRecords, processingTime);
 
         producer.close();
     }
