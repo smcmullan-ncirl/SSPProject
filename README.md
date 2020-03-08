@@ -1,8 +1,8 @@
 # Data Intensive Architecture Project
 
-##Stephen McMullan
-###x19139497@student.ncirl.ie
-###PGDDA Sept 2019
+##### Stephen McMullan
+###### x19139497@student.ncirl.ie
+###### PGDDA Sept 2019
 
 ## Setup Instructions
 
