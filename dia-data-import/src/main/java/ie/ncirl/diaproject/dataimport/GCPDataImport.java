@@ -3,6 +3,8 @@ package ie.ncirl.diaproject.dataimport;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
@@ -16,13 +18,11 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -30,74 +30,173 @@ import java.util.zip.ZipInputStream;
 public class GCPDataImport {
     private static Logger logger = LoggerFactory.getLogger(GCPDataImport.class);
 
-    private static Producer<String, JsonNode> producer = null;
-    private static ObjectMapper objectMapper = null;
+    private static Properties prop = new Properties();
+    private static final String CONFIG_PROPERTIES = "config.properties";
+    private static final String GCP_BUCKET_NAME = "gcp.bucketname";
+    private static final String TEMP_FILE_DIR = "tempfile.dir";
+    private static final String KAFKA_ENABLED = "kafka.enabled";
+    private static final String KAFKA_SERVER = "kafka.server";
+    private static final String KAFKA_TOPIC = "kafka.topic";
+    private static final String DB_ENABLED = "db.enabled";
+    private static final String DB_URL = "db.url";
+    private static final String DB_USER = "db.user";
+    private static final String DB_PASSWORD = "db.password";
+    private static final String CSV_ENABLED = "csv.enabled";
+    private static final String CSV_FILE = "csv.file";
 
+    private static String tempFileDir = null;
+
+    private static boolean kafkaEnabled = false;
+    private static boolean dbEnabled = false;
+    private static boolean csvEnabled = false;
+
+    private static ObjectMapper objectMapper = new ObjectMapper();
+
+    private static Producer<String, JsonNode> producer = null;
+    private static String topic = null;
+
+    private static final String dbQuery = "INSERT INTO authors(id, name) VALUES(?, ?)";
     private static Connection dbConn = null;
     private static Statement st = null;
     private static ResultSet rs = null;
+    private static PreparedStatement pst = null;
+
+    private static CsvSchema.Builder csvSchemaBuilder = null;
+    private static CsvMapper csvMapper = null;
+    private static String csvFile = null;
 
     private static int processedFiles = 0;
     private static int processedRecords = 0;
-    private static int discardedRecords = 0;
-
-    private static final String bucketName = "openmobiledata_public";
-    private static final String destFileDir = "/tmp";
-    private static final String kafkaServer = "localhost:9092";
-    private static final String kafkaTopic = "my-topic";
-    private static final String dbUrl = "jdbc:postgresql://localhost:5432/diadb";
-    private static final String dbUser = "diauser";
-    private static final String dbPassword = "diapasswd*";
 
     public static void main(String[] args) {
-        initKafkaConnection();
+        loadProperties();
 
-        initDbConnection();
+        if (kafkaEnabled)
+            initKafkaConnection();
 
-        Storage storage = StorageOptions.getDefaultInstance().getService();
+        if (dbEnabled)
+            initDbConnection();
 
-        Bucket bucket = storage.get(bucketName);
-        Page<Blob> blobs = bucket.list();
+        if (csvEnabled)
+            initCsv();
 
         long startTime = System.currentTimeMillis();
+
+        processGCPBlobs();
+
+        long endTime = System.currentTimeMillis();
+        long processingTime = (endTime - startTime)/1000;
+        long processingRate = processedRecords/processingTime;
+
+        logger.info("Processed {} files, {} records in {} seconds at a rate of {} records/sec",
+                processedFiles, processedRecords, processingTime, processingRate);
+
+        if (dbEnabled)
+            closeDbConnection();
+
+        if (kafkaEnabled)
+            closeKafkaConnection();
+    }
+
+    private static void loadProperties() {
+        try {
+            prop.load(Objects.requireNonNull(GCPDataImport.class.getClassLoader().getResourceAsStream(CONFIG_PROPERTIES)));
+
+            tempFileDir = prop.getProperty(TEMP_FILE_DIR, "/tmp");
+
+            if (Boolean.parseBoolean(prop.getProperty(KAFKA_ENABLED, "false")))
+                kafkaEnabled = true;
+
+            if (Boolean.parseBoolean(prop.getProperty(DB_ENABLED, "false")))
+                dbEnabled = true;
+
+            if (Boolean.parseBoolean(prop.getProperty(CSV_ENABLED, "false")))
+                csvEnabled = true;
+        } catch (IOException e) {
+           logger.error("Unable to load config.properties from classpath");
+        }
+    }
+
+    private static void initKafkaConnection() {
+        Properties producerProps = new Properties();
+        producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, prop.get(KAFKA_SERVER));
+        producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+
+        producer = new KafkaProducer<>(producerProps);
+        topic = prop.getProperty(KAFKA_TOPIC);
+    }
+
+    private static void closeKafkaConnection() {
+        if (producer!= null)
+            producer.close();
+            producer = null;
+    }
+
+    private static void initDbConnection() {
+        try {
+            dbConn = DriverManager.getConnection(
+                    prop.getProperty(DB_URL), prop.getProperty(DB_USER), prop.getProperty(DB_PASSWORD));
+            pst = dbConn.prepareStatement(dbQuery);
+
+            st = dbConn.createStatement();
+            rs = st.executeQuery("SELECT VERSION()");
+
+            if (rs.next()) {
+                logger.info("Connected to db version {}", rs.getString(1));
+            }
+        } catch (SQLException e) {
+            logger.error("Cannot connect to db", e);
+        }
+    }
+
+    private static void closeDbConnection() {
+        try {
+            if (rs != null && !rs.isClosed()) {
+                rs.close();
+                rs = null;
+            }
+
+            if (st != null && !st.isClosed()) {
+                st.close();
+                st = null;
+            }
+
+            if (pst != null && !pst.isClosed()) {
+                pst.close();
+                pst = null;
+            }
+
+            if  (dbConn != null && !dbConn.isClosed()) {
+                dbConn.close();
+                dbConn = null;
+            }
+        } catch (SQLException e) {
+            logger.error("Can't close connection to db", e);
+        }
+    }
+
+    private static void initCsv() {
+        csvSchemaBuilder = CsvSchema.builder();
+        csvMapper = new CsvMapper();
+        csvFile = prop.getProperty(CSV_FILE);
+    }
+
+    private static void processGCPBlobs() {
+        Storage storage = StorageOptions.getDefaultInstance().getService();
+
+        Bucket bucket = storage.get(prop.getProperty(GCP_BUCKET_NAME));
+        Page<Blob> blobs = bucket.list();
 
         for (Blob blob : blobs.iterateAll()) {
             String blobName = blob.getName();
             logger.info("Processing {}", blobName);
-            Path destBlobFilePath = Paths.get(destFileDir, blobName);
+            Path destBlobFilePath = Paths.get(tempFileDir, blobName);
             blob.downloadTo(destBlobFilePath);
 
             File zipFile = destBlobFilePath.toFile();
 
-            try {
-                byte[] buffer = new byte[1024];
-                ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
-                ZipEntry zipEntry = zis.getNextEntry();
-
-                while (zipEntry != null) {
-                    File measurementFile = new File(destFileDir,
-                            blobName.substring(0, blobName.lastIndexOf("zip")) + "json");
-                    FileOutputStream fos = new FileOutputStream(measurementFile);
-                    int len;
-                    while ((len = zis.read(buffer)) > 0) {
-                        fos.write(buffer, 0, len);
-                    }
-                    fos.close();
-
-                    publishFile(measurementFile);
-
-                    if (!measurementFile.delete()) {
-                        logger.warn("Could not delete measurement file {}", measurementFile.getName());
-                    }
-
-                    zipEntry = zis.getNextEntry();
-                }
-
-                zis.closeEntry();
-                zis.close();
-            } catch (IOException e) {
-                logger.error("Can't process {}: {}", blobName, e);
-            }
+            processZipFile(zipFile);
 
             if (!zipFile.delete()) {
                 logger.warn("Could not delete zip file {}", zipFile.getName());
@@ -105,50 +204,38 @@ public class GCPDataImport {
 
             processedFiles++;
         }
-
-        long endTime = System.currentTimeMillis();
-        long processingTime = (endTime - startTime)/1000;
-        long processingRate = (processedRecords + discardedRecords)/processingTime;
-
-        logger.info("Processed {} files, {} records, {} discarded records in {} seconds at a rate of {} records/sec",
-                processedFiles, processedRecords, discardedRecords, processingTime, processingRate);
-
-        try {
-            if (rs != null && !rs.isClosed())
-                rs.close();
-            if (st != null && !st.isClosed())
-                st.close();
-            if  (dbConn != null && !dbConn.isClosed())
-                dbConn.close();
-        } catch (SQLException e) {
-            logger.error("Can't close connection to db", e);
-        }
-
-        if (producer!= null)
-            producer.close();
     }
 
-    private static void initKafkaConnection() {
-        Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-
-        producer = new KafkaProducer<>(props);
-        objectMapper = new ObjectMapper();
-    }
-
-    private static void initDbConnection() {
+    private static void processZipFile(File zipFile) {
         try {
-            dbConn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-            st = dbConn.createStatement();
-            rs = st.executeQuery("SELECT VERSION()");
+            String zipFileName = zipFile.getName();
+            byte[] buffer = new byte[1024];
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
+            ZipEntry zipEntry = zis.getNextEntry();
 
-            if (rs.next()) {
-                logger.info("Connect to db version {}", rs.getString(1));
+            while (zipEntry != null) {
+                File measurementFile = new File(tempFileDir,
+                        zipFileName.substring(0, zipFileName.lastIndexOf("zip")) + "json");
+                FileOutputStream fos = new FileOutputStream(measurementFile);
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+                fos.close();
+
+                publishFile(measurementFile);
+
+                if (!measurementFile.delete()) {
+                    logger.warn("Could not delete measurement file {}", measurementFile.getName());
+                }
+
+                zipEntry = zis.getNextEntry();
             }
-        } catch (SQLException e) {
-            logger.error("Cannot connect to db", e);
+
+            zis.closeEntry();
+            zis.close();
+        } catch (IOException e) {
+            logger.error("Can't process zip file", e);
         }
     }
 
@@ -163,6 +250,7 @@ public class GCPDataImport {
             for (int i = 0; i < arrayNode.size(); i++) {
                 JsonNode elementNode = arrayNode.get(i);
                 publishRecord(elementNode);
+                processedRecords++;
             }
         } else if (jsonNode.isValueNode()) {
             logger.error("Unsupported operation: Node is Value");
@@ -170,16 +258,19 @@ public class GCPDataImport {
     }
 
     private static void publishRecord(JsonNode jsonNode) {
-        // Publish record to Kafka
-        publishRecordToKafka(jsonNode);
+        if (kafkaEnabled)
+            publishRecordToKafka(jsonNode);
 
-        // Publish record to Postgres
-        publishRecordToDb(jsonNode);
+        if (dbEnabled)
+            publishRecordToDb(jsonNode);
+
+        if (csvEnabled)
+            publishRecordToCsv(jsonNode);
     }
 
     private static void publishRecordToKafka(JsonNode jsonNode) {
         // Publish record to Kafka
-        ProducerRecord<String, JsonNode> rec = new ProducerRecord<>(kafkaTopic, jsonNode);
+        ProducerRecord<String, JsonNode> rec = new ProducerRecord<>(topic, jsonNode);
 
         if (logger.isDebugEnabled()) {
             producer.send(rec, (recordMetadata, e) -> {
@@ -189,10 +280,8 @@ public class GCPDataImport {
                             "Partition: " + recordMetadata.partition() + "\n" +
                             "Offset: " + recordMetadata.offset() + "\n" +
                             "Timestamp: " + recordMetadata.timestamp());
-                    processedRecords++;
                 } else {
                     logger.error("Error sending record to Kafka", e);
-                    discardedRecords++;
                 }
             });
         } else {
@@ -201,6 +290,28 @@ public class GCPDataImport {
     }
 
     private static void publishRecordToDb(JsonNode jsonNode) {
+        int id = 0;
+        String author = "";
 
+        try {
+            pst.setInt(1, id);
+            pst.setString(2, author);
+            pst.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("Can't publish record to DB", e);
+        }
+    }
+
+    private static void publishRecordToCsv(JsonNode jsonNode) {
+        jsonNode.fieldNames().forEachRemaining(csvSchemaBuilder::addColumn);
+        CsvSchema csvSchema = csvSchemaBuilder.build().withoutHeader();
+
+        try {
+            csvMapper.writerFor(JsonNode.class)
+                    .with(csvSchema)
+                    .writeValue(new File(csvFile), jsonNode);
+        } catch (IOException e) {
+            logger.error("Can't publish record to CSV", e);
+        }
     }
 }
