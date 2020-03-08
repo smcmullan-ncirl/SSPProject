@@ -8,7 +8,7 @@ National College of Ireland
 
 ## GitHub Project Code Repository
 
-https://github.com/smcmullan-ncirl/DAPProject
+https://github.com/smcmullan-ncirl/DIAProject
 
 ## Setup Instructions
 
