@@ -10,7 +10,34 @@ National College of Ireland
 
 https://github.com/smcmullan-ncirl/DIAProject
 
-## Setup Instructions
+## About
+
+https://www.measurementlab.net/
+
+https://www.measurementlab.net/tests/mobiperf/
+
+## Datasets
+
+16806 files, 8564395 records
+
+https://console.cloud.google.com/storage/browser/openmobiledata_public
+
+## Prerequisites
+1. VM
+2. Linux OS
+3. RAM
+4. CPU
+5. Disk Space
+
+## Setup Build Environment Instructions
+
+    sudo apt-get install maven
+    sudo apt install git
+    git clone https://github.com/smcmullan-ncirl/DIAProject.git
+    cd DIAProject
+    mvn clean package
+
+## Setup Runtime Environment Instructions
 
 First install Docker and add your user to the docker group
 
@@ -24,14 +51,8 @@ You can then check if Docker is running correctly by running the Hello World con
     
     docker run hello-world
 
-Install git in order to retrieve the project
-
-    sudo apt install git
-    https://github.com/smcmullan-ncirl/DIAProject.git
-    
 ## Run Instructions
 
-    cd DIAProject
     docker-compose up -d
     docker-compose ps
     docker-compose exec kafka kafka-topics.sh --create --replication-factor 1 --partitions 1 --bootstrap-server localhost:9092 --topic my-topic
@@ -45,6 +66,15 @@ Install git in order to retrieve the project
 
     sudo apt-get install postgresql-client
     sudo apt install postgresql-client-common
+
+## Starting Processing Instructons
+
+    cd dia-data-import
+    mvn exec:java
+    
+or
+
+    java -jar dia-data-import/target/gcpdataimport-jar-with-dependencies.jar
     
 ## Shutdown Instructions
 

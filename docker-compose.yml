@@ -5,6 +5,8 @@ services:
  
     kafka:
         image: wurstmeister/kafka
+        depends_on:
+            - zookeeper
         ports:
             - "9092:9092"
         environment:
@@ -22,6 +24,60 @@ services:
             POSTGRES_DATA: /var/lib/postgresql/data/pgdata
         volumes:
             - "postgres:/var/lib/postgresql/data"
+
+    spark-master:
+        image: bitnami/spark
+        depends_on:
+            - kafka
+            - postgres
+        environment:
+            - SPARK_MODE=master
+            - SPARK_RPC_AUTHENTICATION_ENABLED=no
+            - SPARK_RPC_ENCRYPTION_ENABLED=no
+            - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+            - SPARK_SSL_ENABLED=no
+        ports:
+            - '8080:8080'
+
+    spark-worker:
+        image: bitnami/spark
+        depends_on:
+            - spark-master
+        environment:
+            - SPARK_MODE=worker
+            - SPARK_MASTER_URL=spark://spark-master:7077
+            - SPARK_WORKER_MEMORY=1G
+            - SPARK_WORKER_CORES=1
+            - SPARK_RPC_AUTHENTICATION_ENABLED=no
+            - SPARK_RPC_ENCRYPTION_ENABLED=no
+            - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+            - SPARK_SSL_ENABLED=no
+
+    flink-jobmanager:
+        image: flink
+        depends_on:
+            - kafka
+            - postgres
+        expose:
+            - "6123"
+        ports:
+            - "8081:8081"
+        command: jobmanager
+        environment:
+            - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+
+    flink-taskmanager:
+        image: flink
+        depends_on:
+            - flink-jobmanager
+        expose:
+            - "6121"
+            - "6122"
+        command: taskmanager
+        links:
+            - "flink-jobmanager:jobmanager"
+        environment:
+            - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
 
 volumes:
   postgres:

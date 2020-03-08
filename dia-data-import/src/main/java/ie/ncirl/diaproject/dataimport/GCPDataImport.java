@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.*;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -29,20 +30,29 @@ import java.util.zip.ZipInputStream;
 public class GCPDataImport {
     private static Logger logger = LoggerFactory.getLogger(GCPDataImport.class);
 
-    private static Producer<String, JsonNode> producer;
-    private static ObjectMapper objectMapper;
+    private static Producer<String, JsonNode> producer = null;
+    private static ObjectMapper objectMapper = null;
+
+    private static Connection dbConn = null;
+    private static Statement st = null;
+    private static ResultSet rs = null;
 
     private static int processedFiles = 0;
     private static int processedRecords = 0;
     private static int discardedRecords = 0;
 
-    private static String bucketName = "openmobiledata_public";
-    private static String destFileDir = "/tmp";
-    private static String kafkaServer = "localhost:9092";
-    private static String kafkaTopic = "my-topic";
+    private static final String bucketName = "openmobiledata_public";
+    private static final String destFileDir = "/tmp";
+    private static final String kafkaServer = "localhost:9092";
+    private static final String kafkaTopic = "my-topic";
+    private static final String dbUrl = "jdbc:postgresql://localhost:5432/diadb";
+    private static final String dbUser = "diauser";
+    private static final String dbPassword = "diapasswd*";
 
     public static void main(String[] args) {
         initKafkaConnection();
+
+        initDbConnection();
 
         Storage storage = StorageOptions.getDefaultInstance().getService();
 
@@ -65,7 +75,8 @@ public class GCPDataImport {
                 ZipEntry zipEntry = zis.getNextEntry();
 
                 while (zipEntry != null) {
-                    File measurementFile = new File(destFileDir, blobName.substring(0, blobName.lastIndexOf("zip")) + "json");
+                    File measurementFile = new File(destFileDir,
+                            blobName.substring(0, blobName.lastIndexOf("zip")) + "json");
                     FileOutputStream fos = new FileOutputStream(measurementFile);
                     int len;
                     while ((len = zis.read(buffer)) > 0) {
@@ -73,9 +84,11 @@ public class GCPDataImport {
                     }
                     fos.close();
 
-                    publishFileToKafka(measurementFile);
+                    publishFile(measurementFile);
 
-                    measurementFile.delete();
+                    if (!measurementFile.delete()) {
+                        logger.warn("Could not delete measurement file {}", measurementFile.getName());
+                    }
 
                     zipEntry = zis.getNextEntry();
                 }
@@ -86,16 +99,33 @@ public class GCPDataImport {
                 logger.error("Can't process {}: {}", blobName, e);
             }
 
-            zipFile.delete();
+            if (!zipFile.delete()) {
+                logger.warn("Could not delete zip file {}", zipFile.getName());
+            }
+
             processedFiles++;
         }
 
         long endTime = System.currentTimeMillis();
         long processingTime = (endTime - startTime)/1000;
+        long processingRate = (processedRecords + discardedRecords)/processingTime;
 
-        logger.info("Processed {} files, {} records, {} discarded records in {} seconds", processedFiles, processedRecords, discardedRecords, processingTime);
+        logger.info("Processed {} files, {} records, {} discarded records in {} seconds at a rate of {} records/sec",
+                processedFiles, processedRecords, discardedRecords, processingTime, processingRate);
 
-        producer.close();
+        try {
+            if (rs != null && !rs.isClosed())
+                rs.close();
+            if (st != null && !st.isClosed())
+                st.close();
+            if  (dbConn != null && !dbConn.isClosed())
+                dbConn.close();
+        } catch (SQLException e) {
+            logger.error("Can't close connection to db", e);
+        }
+
+        if (producer!= null)
+            producer.close();
     }
 
     private static void initKafkaConnection() {
@@ -108,7 +138,21 @@ public class GCPDataImport {
         objectMapper = new ObjectMapper();
     }
 
-    private static void publishFileToKafka(File measurementFile) throws IOException {
+    private static void initDbConnection() {
+        try {
+            dbConn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+            st = dbConn.createStatement();
+            rs = st.executeQuery("SELECT VERSION()");
+
+            if (rs.next()) {
+                logger.info("Connect to db version {}", rs.getString(1));
+            }
+        } catch (SQLException e) {
+            logger.error("Cannot connect to db", e);
+        }
+    }
+
+    private static void publishFile(File measurementFile) throws IOException {
         JsonNode jsonNode = objectMapper.readTree(measurementFile);
 
         if (jsonNode.isObject()) {
@@ -118,27 +162,45 @@ public class GCPDataImport {
 
             for (int i = 0; i < arrayNode.size(); i++) {
                 JsonNode elementNode = arrayNode.get(i);
-                publishRecordToKafka(elementNode);
+                publishRecord(elementNode);
             }
         } else if (jsonNode.isValueNode()) {
             logger.error("Unsupported operation: Node is Value");
         }
     }
 
+    private static void publishRecord(JsonNode jsonNode) {
+        // Publish record to Kafka
+        publishRecordToKafka(jsonNode);
+
+        // Publish record to Postgres
+        publishRecordToDb(jsonNode);
+    }
+
     private static void publishRecordToKafka(JsonNode jsonNode) {
-        ProducerRecord<String, JsonNode> rec = new ProducerRecord<String, JsonNode>(kafkaTopic, jsonNode);
-        producer.send(rec, (recordMetadata, e) -> {
-            if (e== null) {
-                logger.debug("Successfully published to Kafka as: \n" +
-                        "Topic: " + recordMetadata.topic() + "\n" +
-                        "Partition: " + recordMetadata.partition() + "\n" +
-                        "Offset: " + recordMetadata.offset() + "\n" +
-                        "Timestamp: " + recordMetadata.timestamp());
-                processedRecords++;
-            } else {
-                logger.error("Error sending record to Kafka", e);
-                discardedRecords++;
-            }
-        });
+        // Publish record to Kafka
+        ProducerRecord<String, JsonNode> rec = new ProducerRecord<>(kafkaTopic, jsonNode);
+
+        if (logger.isDebugEnabled()) {
+            producer.send(rec, (recordMetadata, e) -> {
+                if (e == null) {
+                    logger.debug("Successfully published to Kafka as: \n" +
+                            "Topic: " + recordMetadata.topic() + "\n" +
+                            "Partition: " + recordMetadata.partition() + "\n" +
+                            "Offset: " + recordMetadata.offset() + "\n" +
+                            "Timestamp: " + recordMetadata.timestamp());
+                    processedRecords++;
+                } else {
+                    logger.error("Error sending record to Kafka", e);
+                    discardedRecords++;
+                }
+            });
+        } else {
+            producer.send(rec);
+        }
+    }
+
+    private static void publishRecordToDb(JsonNode jsonNode) {
+
     }
 }
