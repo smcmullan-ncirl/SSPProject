@@ -34,7 +34,12 @@ Install git in order to retrieve the project
 ## Kafka Consumer Instructions
 
     docker-compose exec kafka kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic my-topic
-   
+
+## Postgres Setup Instructions
+
+    sudo apt-get install postgresql-client
+    sudo apt install postgresql-client-common
+    
 ## Shutdown Instructions
 
     docker-compose exec kafka kafka-topics.sh --delete --bootstrap-server localhost:9092 --topic my-topic
