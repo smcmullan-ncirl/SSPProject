@@ -57,7 +57,8 @@ If the schedule is empty, the device will stop performing measurements.
       { /* Additional Task... */ }
     ]
 
-# /postmeasurement - Used by the device to post a set of measurement results to the service.
+# /postmeasurement
+Used by the device to post a set of measurement results to the service.
 
 ## Input
 JSON representation of a list of Measurement objects, with embedded DeviceProperties.
@@ -128,7 +129,8 @@ All parameters and values are strings (since this is how they are represented in
     (optional)  ping_timeout_sec - the number of seconds we wait for a ping response. Default to 2.
     (optional) ping_interval_sec - the interval between successive pings in seconds. Default to 0.5.
     (optional) pings_per_hop - the number of pings we use for each ttl value. Default to 3.
-    (optional) max_hop_count - the total number of hops we ping before we declare the traceroute fails. Default to 10.
+    (optional) max_hop_count - the total number of hops we ping before we declare the traceroute fails.
+        Default to 10.
 
 ### Traceroute results
 
