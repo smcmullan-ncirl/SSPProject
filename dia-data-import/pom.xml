@@ -58,22 +58,36 @@
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.6.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <finalName>gcpdataimport</finalName>
         <plugins>
-            <!-- Maven Assembly Plugin -->
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.2.0</version>
                 <configuration>
-                    <!-- get all project dependencies -->
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
-                    <!-- MainClass in mainfest make a executable jar -->
                     <archive>
                         <manifest>
                             <mainClass>ie.ncirl.diaproject.dataimport.GCPDataImport</mainClass>
@@ -83,7 +97,6 @@
                 <executions>
                     <execution>
                         <id>make-assembly</id>
-                        <!-- bind to the packaging phase -->
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -91,6 +104,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -100,5 +114,11 @@
                 </configuration>
             </plugin>
         </plugins>
+
+        <testResources>
+            <testResource>
+                <directory>${project.basedir}/src/test/resources</directory>
+            </testResource>
+        </testResources>
     </build>
 </project>

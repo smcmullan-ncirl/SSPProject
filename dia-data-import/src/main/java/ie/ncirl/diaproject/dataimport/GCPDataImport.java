@@ -2,6 +2,7 @@ package ie.ncirl.diaproject.dataimport;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
@@ -61,9 +62,9 @@ public class GCPDataImport {
     private static ResultSet rs = null;
     private static PreparedStatement pst = null;
 
-    private static CsvSchema.Builder csvSchemaBuilder = null;
     private static CsvMapper csvMapper = null;
-    private static String csvFile = null;
+    private static CsvSchema csvSchema = null;
+    private static File csvFile = null;
 
     private static int processedFiles = 0;
     private static int processedRecords = 0;
@@ -71,14 +72,7 @@ public class GCPDataImport {
     public static void main(String[] args) {
         loadProperties();
 
-        if (kafkaEnabled)
-            initKafkaConnection();
-
-        if (dbEnabled)
-            initDbConnection();
-
-        if (csvEnabled)
-            initCsv();
+        init();
 
         long startTime = System.currentTimeMillis();
 
@@ -91,11 +85,7 @@ public class GCPDataImport {
         logger.info("Processed {} files, {} records in {} seconds at a rate of {} records/sec",
                 processedFiles, processedRecords, processingTime, processingRate);
 
-        if (dbEnabled)
-            closeDbConnection();
-
-        if (kafkaEnabled)
-            closeKafkaConnection();
+        shutdown();
     }
 
     private static void loadProperties() {
@@ -115,6 +105,25 @@ public class GCPDataImport {
         } catch (IOException e) {
            logger.error("Unable to load config.properties from classpath");
         }
+    }
+
+    private static void init() {
+        if (kafkaEnabled)
+            initKafkaConnection();
+
+        if (dbEnabled)
+            initDbConnection();
+
+        if (csvEnabled)
+            initCsv();
+    }
+
+    private static void shutdown() {
+        if (dbEnabled)
+            closeDbConnection();
+
+        if (kafkaEnabled)
+            closeKafkaConnection();
     }
 
     private static void initKafkaConnection() {
@@ -177,9 +186,9 @@ public class GCPDataImport {
     }
 
     private static void initCsv() {
-        csvSchemaBuilder = CsvSchema.builder();
         csvMapper = new CsvMapper();
-        csvFile = prop.getProperty(CSV_FILE);
+        csvSchema = csvMapper.schemaFor(Measurement.class).withoutHeader();
+        csvFile = new File(prop.getProperty(CSV_FILE, "/tmp/output.csv"));
     }
 
     private static void processGCPBlobs() {
@@ -303,15 +312,14 @@ public class GCPDataImport {
     }
 
     private static void publishRecordToCsv(JsonNode jsonNode) {
-        jsonNode.fieldNames().forEachRemaining(csvSchemaBuilder::addColumn);
-        CsvSchema csvSchema = csvSchemaBuilder.build().withoutHeader();
-
         try {
-            csvMapper.writerFor(JsonNode.class)
-                    .with(csvSchema)
-                    .writeValue(new File(csvFile), jsonNode);
+            Measurement measurement = objectMapper.treeToValue(jsonNode, Measurement.class);
+
+            ObjectWriter writer = csvMapper.writer(csvSchema);
+            OutputStream outstream = new FileOutputStream(csvFile , true);
+            writer.writeValue(outstream, measurement);
         } catch (IOException e) {
-            logger.error("Can't publish record to CSV", e);
+            logger.error("Can't write CSV file {} {}", csvFile.getName(), e);
         }
     }
 }
