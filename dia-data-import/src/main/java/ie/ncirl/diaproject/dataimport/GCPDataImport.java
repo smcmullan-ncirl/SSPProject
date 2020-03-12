@@ -192,6 +192,7 @@ public class GCPDataImport {
         try {
             tsvWriter = new BufferedWriter(new FileWriter(tsvFile));
             tsvWriter.write(Measurement.toHdr());
+            tsvWriter.newLine();
         } catch (IOException e) {
             logger.error("Can't open TSV writer", e);
         }
@@ -330,6 +331,7 @@ public class GCPDataImport {
         try {
             Measurement measurement = objectMapper.treeToValue(jsonNode, Measurement.class);
             tsvWriter.write(measurement.toTSV());
+            tsvWriter.newLine();
         } catch (IOException e) {
             logger.error("Can't write CSV file {} {}", tsvFile.getName(), e);
         }
