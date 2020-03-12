@@ -1,72 +1,70 @@
-[
-  {
-    "task": {
-      "count": -1,
-      "filter": null,
-      "parameters": {
-        "location_update_distance": "300",
-        "target": "facebook.com",
-        "trigger_location_update": "true"
-      },
-      "created": 1337207286349294,
-      "start_time": null,
-      "interval_sec": 600.0,
-      "priority": null,
-      "tag": null,
-      "end_time": null,
-      "type": "ping",
-      "id": "446555"
-    },
+{
+  "task": {
+    "count": -1,
+    "filter": null,
     "parameters": {
-      "count": -1,
+      "location_update_distance": "300",
       "target": "facebook.com",
-      "parameters": null,
-      "start_time": "2012-06-04T02:13:38.055Z",
-      "interval_sec": 600,
-      "ping_timeout_sec": 10,
-      "priority": 0,
-      "packet_size_byte": 56,
-      "ping_exe": "/system/bin/ping",
-      "key": "446555",
-      "type": "ping",
-      "end_time": "2012-06-05T01:10:27.700Z"
+      "trigger_location_update": "true"
     },
-    "success": true,
-    "timestamp": 1338775495379000,
-    "device_properties": {
-      "battery_level": 64,
-      "cell_info": null,
-      "timestamp": 1338775495375000,
-      "network_type": "EDGE",
-      "os_version": "INCREMENTAL:299849, RELEASE:4.0.4, SDK_INT:15",
-      "device_info": {
-        "model": "Nexus S",
-        "os": "INCREMENTAL:299849, RELEASE:4.0.4, SDK_INT:15",
-        "manufacturer": "samsung"
-      },
-      "carrier": "AT&T",
-      "location": {
-        "latitude": 47.651000000000003,
-        "longitude": -122.307
-      },
-      "rssi": 26,
-      "app_version": "1.0.7",
-      "location_type": "network",
-      "is_battery_charging": false
-    },
-    "values": {
-      "packets_sent": "10",
-      "packet_loss": "0.0",
-      "mean_rtt_ms": "252.2",
-      "CalledByLocation": "true",
-      "MeasurementLatitude": "47.6515008",
-      "max_rtt_ms": "265.0",
-      "target_ip": "\"66.220.149.11\"",
-      "stddev_rtt_ms": "10.017983829094554",
-      "min_rtt_ms": "240.0",
-      "MeasurementLongitude": "-122.3079537"
-    },
+    "created": 1337207286349294,
+    "start_time": null,
+    "interval_sec": 600.0,
+    "priority": null,
+    "tag": null,
+    "end_time": null,
     "type": "ping",
-    "id": "6089"
-  }
-]
+    "id": "446555"
+  },
+  "parameters": {
+    "count": -1,
+    "target": "facebook.com",
+    "parameters": null,
+    "start_time": "2012-06-04T02:13:38.055Z",
+    "interval_sec": 600,
+    "ping_timeout_sec": 10,
+    "priority": 0,
+    "packet_size_byte": 56,
+    "ping_exe": "/system/bin/ping",
+    "key": "446555",
+    "type": "ping",
+    "end_time": "2012-06-05T01:10:27.700Z"
+  },
+  "success": true,
+  "timestamp": 1338775495379000,
+  "device_properties": {
+    "battery_level": 64,
+    "cell_info": null,
+    "timestamp": 1338775495375000,
+    "network_type": "EDGE",
+    "os_version": "INCREMENTAL:299849, RELEASE:4.0.4, SDK_INT:15",
+    "device_info": {
+      "model": "Nexus S",
+      "os": "INCREMENTAL:299849, RELEASE:4.0.4, SDK_INT:15",
+      "manufacturer": "samsung"
+    },
+    "carrier": "AT&T",
+    "location": {
+      "latitude": 47.651000000000003,
+      "longitude": -122.307
+    },
+    "rssi": 26,
+    "app_version": "1.0.7",
+    "location_type": "network",
+    "is_battery_charging": false
+  },
+  "values": {
+    "packets_sent": "10",
+    "packet_loss": "0.0",
+    "mean_rtt_ms": "252.2",
+    "CalledByLocation": "true",
+    "MeasurementLatitude": "47.6515008",
+    "max_rtt_ms": "265.0",
+    "target_ip": "\"66.220.149.11\"",
+    "stddev_rtt_ms": "10.017983829094554",
+    "min_rtt_ms": "240.0",
+    "MeasurementLongitude": "-122.3079537"
+  },
+  "type": "ping",
+  "id": "6089"
+}
