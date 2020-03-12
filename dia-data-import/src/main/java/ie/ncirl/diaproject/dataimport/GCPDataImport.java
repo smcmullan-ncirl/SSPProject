@@ -42,14 +42,14 @@ public class GCPDataImport {
     private static final String DB_URL = "db.url";
     private static final String DB_USER = "db.user";
     private static final String DB_PASSWORD = "db.password";
-    private static final String CSV_ENABLED = "csv.enabled";
-    private static final String CSV_FILE = "csv.file";
+    private static final String TSV_ENABLED = "tsv.enabled";
+    private static final String TSV_FILE = "tsv.file";
 
     private static String tempFileDir = null;
 
     private static boolean kafkaEnabled = false;
     private static boolean dbEnabled = false;
-    private static boolean csvEnabled = false;
+    private static boolean tsvEnabled = false;
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -62,9 +62,8 @@ public class GCPDataImport {
     private static ResultSet rs = null;
     private static PreparedStatement pst = null;
 
-    private static CsvMapper csvMapper = null;
-    private static CsvSchema csvSchema = null;
-    private static File csvFile = null;
+    private static File tsvFile = null;
+    private static BufferedWriter tsvWriter = null;
 
     private static int processedFiles = 0;
     private static int processedRecords = 0;
@@ -100,8 +99,8 @@ public class GCPDataImport {
             if (Boolean.parseBoolean(prop.getProperty(DB_ENABLED, "false")))
                 dbEnabled = true;
 
-            if (Boolean.parseBoolean(prop.getProperty(CSV_ENABLED, "false")))
-                csvEnabled = true;
+            if (Boolean.parseBoolean(prop.getProperty(TSV_ENABLED, "false")))
+                tsvEnabled = true;
         } catch (IOException e) {
            logger.error("Unable to load config.properties from classpath");
         }
@@ -114,8 +113,8 @@ public class GCPDataImport {
         if (dbEnabled)
             initDbConnection();
 
-        if (csvEnabled)
-            initCsv();
+        if (tsvEnabled)
+            initTsvFile();
     }
 
     private static void shutdown() {
@@ -124,6 +123,9 @@ public class GCPDataImport {
 
         if (kafkaEnabled)
             closeKafkaConnection();
+
+        if (tsvEnabled)
+            closeTsvFile();
     }
 
     private static void initKafkaConnection() {
@@ -185,12 +187,25 @@ public class GCPDataImport {
         }
     }
 
-    private static void initCsv() {
-        csvMapper = new CsvMapper();
-        csvSchema = csvMapper.schemaFor(Measurement.class).withoutHeader();
-        csvFile = new File(prop.getProperty(CSV_FILE, "/tmp/output.csv"));
+    private static void initTsvFile() {
+        tsvFile = new File(prop.getProperty(TSV_FILE, "/tmp/output.tsv"));
+        try {
+            tsvWriter = new BufferedWriter(new FileWriter(tsvFile));
+            tsvWriter.write(Measurement.toHdr());
+        } catch (IOException e) {
+            logger.error("Can't open TSV writer", e);
+        }
     }
 
+    private static void closeTsvFile() {
+        if (tsvWriter != null) {
+            try {
+                tsvWriter.close();
+            } catch (IOException e) {
+                logger.error("Can't close CSV writer", e);
+            }
+        }
+    }
     private static void processGCPBlobs() {
         Storage storage = StorageOptions.getDefaultInstance().getService();
 
@@ -273,7 +288,7 @@ public class GCPDataImport {
         if (dbEnabled)
             publishRecordToDb(jsonNode);
 
-        if (csvEnabled)
+        if (tsvEnabled)
             publishRecordToCsv(jsonNode);
     }
 
@@ -314,12 +329,9 @@ public class GCPDataImport {
     private static void publishRecordToCsv(JsonNode jsonNode) {
         try {
             Measurement measurement = objectMapper.treeToValue(jsonNode, Measurement.class);
-
-            ObjectWriter writer = csvMapper.writer(csvSchema);
-            OutputStream outstream = new FileOutputStream(csvFile , true);
-            writer.writeValue(outstream, measurement);
+            tsvWriter.write(measurement.toTSV());
         } catch (IOException e) {
-            logger.error("Can't write CSV file {} {}", csvFile.getName(), e);
+            logger.error("Can't write CSV file {} {}", tsvFile.getName(), e);
         }
     }
 }
