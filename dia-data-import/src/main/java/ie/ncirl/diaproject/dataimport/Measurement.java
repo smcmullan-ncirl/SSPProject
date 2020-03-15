@@ -86,12 +86,28 @@ public class Measurement {
         public String location_update_distance;
         public String target;
         public String trigger_location_update;
+        public String server;
+        public String url;
+        public String max_hop_count;
+        public String packet_size_byte;
+        public String pings_per_hop;
+        public String ping_timeout_sec;
+        public String headers;
+        public String method;
 
         public static String toHdr() {
             StringBuffer sb = new StringBuffer()
                     .append("location_update_distance").append("\t")
                     .append("target").append("\t")
-                    .append("trigger_location_update");
+                    .append("trigger_location_update").append("\t")
+                    .append("server").append("\t")
+                    .append("url").append("\t")
+                    .append("max_hop_count").append("\t")
+                    .append("packet_size_byte").append("\t")
+                    .append("pings_per_hop").append("\t")
+                    .append("ping_timeout_sec").append("\t")
+                    .append("headers").append("\t")
+                    .append("method");
             return(sb.toString());
         }
 
@@ -99,7 +115,15 @@ public class Measurement {
             StringBuffer sb = new StringBuffer()
                     .append(location_update_distance).append("\t")
                     .append(target).append("\t")
-                    .append(trigger_location_update);
+                    .append(trigger_location_update).append("\t")
+                    .append(server).append("\t")
+                    .append(url).append("\t")
+                    .append(max_hop_count).append("\t")
+                    .append(packet_size_byte).append("\t")
+                    .append(pings_per_hop).append("\t")
+                    .append(ping_timeout_sec).append("\t")
+                    .append(headers).append("\t")
+                    .append(method);
             return(sb.toString());
         }
     }
@@ -117,6 +141,14 @@ public class Measurement {
         public String key;
         public String type;
         public String end_time;
+        public String server;
+        public String pings_per_hop;
+        public String ping_interval_sec;
+        public String body;
+        public String url;
+        public String max_hop_count;
+        public String headers;
+        public String method;
 
         public static String toHdr() {
             StringBuffer sb = new StringBuffer()
@@ -131,7 +163,15 @@ public class Measurement {
                     .append("ping_exe").append("\t")
                     .append("key").append("\t")
                     .append("type").append("\t")
-                    .append("end_time");
+                    .append("end_time").append("\t")
+                    .append("server").append("\t")
+                    .append("pings_per_hop").append("\t")
+                    .append("ping_interval_sec").append("\t")
+                    .append("body").append("\t")
+                    .append("url").append("\t")
+                    .append("max_hop_count").append("\t")
+                    .append("headers").append("\t")
+                    .append("method");
             return(sb.toString());
         }
 
@@ -148,7 +188,15 @@ public class Measurement {
                     .append(ping_exe).append("\t")
                     .append(key).append("\t")
                     .append(type).append("\t")
-                    .append(end_time);
+                    .append(end_time).append("\t")
+                    .append(server).append("\t")
+                    .append(pings_per_hop).append("\t")
+                    .append(ping_interval_sec).append("\t")
+                    .append(body).append("\t")
+                    .append(url).append("\t")
+                    .append(max_hop_count).append("\t")
+                    .append(headers).append("\t")
+                    .append(method);
             return(sb.toString());
         }
     }
@@ -254,6 +302,36 @@ public class Measurement {
         public String stddev_rtt_ms;
         public String min_rtt_ms;
         public String MeasurementLongitude;
+        public String time_ms;
+        public String filtered_mean_rtt_ms;
+        public String real_hostname;
+        public String address;
+        public String error;
+        public String hop_0_rtt_ms;
+        public String hop_1_rtt_ms;
+        public String hop_2_rtt_ms;
+        public String hop_3_rtt_ms;
+        public String hop_7_rtt_ms;
+        public String hop_11_rtt_ms;
+        public String hop_12_rtt_ms;
+        public String hop_13_rtt_ms;
+        public String hop_14_rtt_ms;
+        public String code;
+        public String body;
+        public String hop_0_addr_1;
+        public String hop_4_addr_1;
+        public String hop_7_addr_1;
+        public String hop_10_addr_1;
+        public String hop_11_addr_1;
+        public String hop_15_addr_1;
+        public String hop_1_addr_2;
+        public String hop_11_addr_2;
+        public String hop_15_addr_2;
+        public String hop_16_addr_2;
+        public String body_len;
+        public String headers;
+        public String headers_len;
+        public String num_hops;
 
         public static String toHdr() {
             StringBuffer sb = new StringBuffer()
@@ -266,7 +344,37 @@ public class Measurement {
                     .append("target_ip").append("\t")
                     .append("stddev_rtt_ms").append("\t")
                     .append("min_rtt_ms").append("\t")
-                    .append("MeasurementLongitude");
+                    .append("MeasurementLongitude").append("\t")
+                    .append("time_ms").append("\t")
+                    .append("filtered_mean_rtt_ms").append("\t")
+                    .append("real_hostname").append("\t")
+                    .append("address").append("\t")
+                    .append("error").append("\t")
+                    .append("hop_0_rtt_ms").append("\t")
+                    .append("hop_1_rtt_ms").append("\t")
+                    .append("hop_2_rtt_ms").append("\t")
+                    .append("hop_3_rtt_ms").append("\t")
+                    .append("hop_7_rtt_ms").append("\t")
+                    .append("hop_11_rtt_ms").append("\t")
+                    .append("hop_12_rtt_ms").append("\t")
+                    .append("hop_13_rtt_ms").append("\t")
+                    .append("hop_14_rtt_ms").append("\t")
+                    .append("code").append("\t")
+                    .append("body").append("\t")
+                    .append("hop_0_addr_1").append("\t")
+                    .append("hop_4_addr_1").append("\t")
+                    .append("hop_7_addr_1").append("\t")
+                    .append("hop_10_addr_1").append("\t")
+                    .append("hop_11_addr_1").append("\t")
+                    .append("hop_15_addr_1").append("\t")
+                    .append("hop_1_addr_2").append("\t")
+                    .append("hop_11_addr_2").append("\t")
+                    .append("hop_15_addr_2").append("\t")
+                    .append("hop_16_addr_2").append("\t")
+                    .append("body_len").append("\t")
+                    .append("headers").append("\t")
+                    .append("headers_len").append("\t")
+                    .append("num_hops");
             return(sb.toString());
         }
 
@@ -281,7 +389,37 @@ public class Measurement {
                     .append(target_ip).append("\t")
                     .append(stddev_rtt_ms).append("\t")
                     .append(min_rtt_ms).append("\t")
-                    .append(MeasurementLongitude);
+                    .append(MeasurementLongitude).append("\t")
+                    .append(time_ms).append("\t")
+                    .append(filtered_mean_rtt_ms).append("\t")
+                    .append(real_hostname).append("\t")
+                    .append(address).append("\t")
+                    .append(error).append("\t")
+                    .append(hop_0_rtt_ms).append("\t")
+                    .append(hop_1_rtt_ms).append("\t")
+                    .append(hop_2_rtt_ms).append("\t")
+                    .append(hop_3_rtt_ms).append("\t")
+                    .append(hop_7_rtt_ms).append("\t")
+                    .append(hop_11_rtt_ms).append("\t")
+                    .append(hop_12_rtt_ms).append("\t")
+                    .append(hop_13_rtt_ms).append("\t")
+                    .append(hop_14_rtt_ms).append("\t")
+                    .append(code).append("\t")
+                    .append(body).append("\t")
+                    .append(hop_0_addr_1).append("\t")
+                    .append(hop_4_addr_1).append("\t")
+                    .append(hop_7_addr_1).append("\t")
+                    .append(hop_10_addr_1).append("\t")
+                    .append(hop_11_addr_1).append("\t")
+                    .append(hop_15_addr_1).append("\t")
+                    .append(hop_1_addr_2).append("\t")
+                    .append(hop_11_addr_2).append("\t")
+                    .append(hop_15_addr_2).append("\t")
+                    .append(hop_16_addr_2).append("\t")
+                    .append(body_len).append("\t")
+                    .append(headers_len).append("\t")
+                    .append(headers).append("\t")
+                    .append(num_hops);
             return(sb.toString());
         }
     }

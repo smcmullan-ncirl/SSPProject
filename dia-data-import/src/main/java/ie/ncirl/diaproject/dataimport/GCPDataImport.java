@@ -333,7 +333,7 @@ public class GCPDataImport {
             tsvWriter.write(measurement.toTSV());
             tsvWriter.newLine();
         } catch (IOException e) {
-            logger.error("Can't write CSV file {} {}", tsvFile.getName(), e);
+            logger.error("Can't write CSV file {} {}", tsvFile.getName(), e.getMessage());
         }
     }
 }
