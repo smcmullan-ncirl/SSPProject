@@ -13,7 +13,7 @@ public class Measurement {
     public static String toHdr() {
         StringBuffer sb = new StringBuffer()
                 .append(Task.toHdr()).append("\t")
-                .append(TaskParameters.toHdr()).append("\t")
+                .append(Parameters.toHdr()).append("\t")
                 .append("success").append("\t")
                 .append("timestamp").append("\t")
                 .append(DeviceProperties.toHdr()).append("\t")
@@ -23,9 +23,9 @@ public class Measurement {
         return(sb.toString());
     }
 
-    public String toTSV() {
+    public String toTSV() throws NullPointerException {
         StringBuffer sb = new StringBuffer()
-                .append(task.toTSV()).append("\t")
+                .append(task != null ? task.toTSV() : Task.toNullTsv()).append("\t")
                 .append(parameters.toTSV()).append("\t")
                 .append(success).append("\t")
                 .append(timestamp).append("\t")
@@ -53,7 +53,7 @@ public class Measurement {
             StringBuffer sb = new StringBuffer()
                     .append("count").append("\t")
                     .append("filter").append("\t")
-                    .append(Parameters.toHdr()).append("\t")
+                    .append(TaskParameters.toHdr()).append("\t")
                     .append("created").append("\t")
                     .append("start_time").append("\t")
                     .append("interval_sec").append("\t")
@@ -65,7 +65,21 @@ public class Measurement {
             return(sb.toString());
         }
 
-        public String toTSV() {
+        public static String toNullTsv() {
+            StringBuffer sb = new StringBuffer()
+                    .append("\t").append("\t")
+                    .append(TaskParameters.toNullTsv()).append("\t")
+                    .append("\t")
+                    .append("\t")
+                    .append("\t")
+                    .append("\t")
+                    .append("\t")
+                    .append("\t")
+                    .append("\t");
+            return(sb.toString());
+        }
+
+        public String toTSV() throws NullPointerException {
             StringBuffer sb = new StringBuffer()
                     .append(count).append("\t")
                     .append(filter).append("\t")
@@ -111,6 +125,21 @@ public class Measurement {
             return(sb.toString());
         }
 
+        public static String toNullTsv() {
+            StringBuffer sb = new StringBuffer()
+                    .append("\t")
+                    .append("\t")
+                    .append("\t")
+                    .append("\t")
+                    .append("\t")
+                    .append("\t")
+                    .append("\t")
+                    .append("\t")
+                    .append("\t")
+                    .append("\t");
+            return(sb.toString());
+        }
+
         public String toTSV() {
             StringBuffer sb = new StringBuffer()
                     .append(location_update_distance).append("\t")
@@ -149,6 +178,9 @@ public class Measurement {
         public String max_hop_count;
         public String headers;
         public String method;
+        public String dir_up;
+        public String dst_port;
+        public String udp_burst_count;
 
         public static String toHdr() {
             StringBuffer sb = new StringBuffer()
@@ -171,7 +203,10 @@ public class Measurement {
                     .append("url").append("\t")
                     .append("max_hop_count").append("\t")
                     .append("headers").append("\t")
-                    .append("method");
+                    .append("method").append("\t")
+                    .append("dir_up").append("\t")
+                    .append("dst_port").append("\t")
+                    .append("udp_burst_count");
             return(sb.toString());
         }
 
@@ -196,7 +231,10 @@ public class Measurement {
                     .append(url).append("\t")
                     .append(max_hop_count).append("\t")
                     .append(headers).append("\t")
-                    .append(method);
+                    .append(method).append("\t")
+                    .append(dir_up).append("\t")
+                    .append(dst_port).append("\t")
+                    .append(udp_burst_count);
             return(sb.toString());
         }
     }
@@ -232,7 +270,7 @@ public class Measurement {
             return(sb.toString());
         }
 
-        public String toTSV() {
+        public String toTSV() throws NullPointerException {
             StringBuffer sb = new StringBuffer()
                     .append(battery_level).append("\t")
                     .append(cell_info).append("\t")
@@ -254,12 +292,14 @@ public class Measurement {
         public String model;
         public String os;
         public String manufacturer;
+        public String tac;
 
         public static String toHdr() {
             StringBuffer sb = new StringBuffer()
                     .append("model").append("\t")
                     .append("os").append("\t")
-                    .append("manufacturer");
+                    .append("manufacturer").append("\t")
+                    .append("tac");
             return(sb.toString());
         }
 
@@ -267,7 +307,8 @@ public class Measurement {
             StringBuffer sb = new StringBuffer()
                     .append(model).append("\t")
                     .append(os).append("\t")
-                    .append(manufacturer);
+                    .append(manufacturer).append("\t")
+                    .append(tac);
             return(sb.toString());
         }
     }
@@ -307,31 +348,143 @@ public class Measurement {
         public String real_hostname;
         public String address;
         public String error;
+
         public String hop_0_rtt_ms;
         public String hop_1_rtt_ms;
         public String hop_2_rtt_ms;
         public String hop_3_rtt_ms;
+        public String hop_4_rtt_ms;
+        public String hop_5_rtt_ms;
+        public String hop_6_rtt_ms;
         public String hop_7_rtt_ms;
+        public String hop_8_rtt_ms;
+        public String hop_9_rtt_ms;
+        public String hop_10_rtt_ms;
         public String hop_11_rtt_ms;
         public String hop_12_rtt_ms;
         public String hop_13_rtt_ms;
         public String hop_14_rtt_ms;
+        public String hop_15_rtt_ms;
+        public String hop_16_rtt_ms;
+        public String hop_17_rtt_ms;
+        public String hop_18_rtt_ms;
+        public String hop_19_rtt_ms;
+        public String hop_20_rtt_ms;
+        public String hop_21_rtt_ms;
+        public String hop_22_rtt_ms;
+        public String hop_23_rtt_ms;
+        public String hop_24_rtt_ms;
+        public String hop_25_rtt_ms;
+        public String hop_26_rtt_ms;
+        public String hop_27_rtt_ms;
+        public String hop_28_rtt_ms;
+        public String hop_29_rtt_ms;
+        public String hop_30_rtt_ms;
+
         public String code;
         public String body;
+
         public String hop_0_addr_1;
+        public String hop_1_addr_1;
+        public String hop_2_addr_1;
+        public String hop_3_addr_1;
         public String hop_4_addr_1;
+        public String hop_5_addr_1;
+        public String hop_6_addr_1;
         public String hop_7_addr_1;
+        public String hop_8_addr_1;
+        public String hop_9_addr_1;
         public String hop_10_addr_1;
         public String hop_11_addr_1;
+        public String hop_12_addr_1;
+        public String hop_13_addr_1;
+        public String hop_14_addr_1;
         public String hop_15_addr_1;
+        public String hop_16_addr_1;
+        public String hop_17_addr_1;
+        public String hop_18_addr_1;
+        public String hop_19_addr_1;
+        public String hop_20_addr_1;
+        public String hop_21_addr_1;
+        public String hop_22_addr_1;
+        public String hop_23_addr_1;
+        public String hop_24_addr_1;
+        public String hop_25_addr_1;
+        public String hop_26_addr_1;
+        public String hop_27_addr_1;
+        public String hop_28_addr_1;
+        public String hop_29_addr_1;
+        public String hop_30_addr_1;
+
+        public String hop_0_addr_2;
         public String hop_1_addr_2;
+        public String hop_2_addr_2;
+        public String hop_3_addr_2;
+        public String hop_4_addr_2;
+        public String hop_5_addr_2;
+        public String hop_6_addr_2;
+        public String hop_7_addr_2;
+        public String hop_8_addr_2;
+        public String hop_9_addr_2;
+        public String hop_10_addr_2;
         public String hop_11_addr_2;
+        public String hop_12_addr_2;
+        public String hop_13_addr_2;
+        public String hop_14_addr_2;
         public String hop_15_addr_2;
         public String hop_16_addr_2;
+        public String hop_17_addr_2;
+        public String hop_18_addr_2;
+        public String hop_19_addr_2;
+        public String hop_20_addr_2;
+        public String hop_21_addr_2;
+        public String hop_22_addr_2;
+        public String hop_23_addr_2;
+        public String hop_24_addr_2;
+        public String hop_25_addr_2;
+        public String hop_26_addr_2;
+        public String hop_27_addr_2;
+        public String hop_28_addr_2;
+        public String hop_29_addr_2;
+        public String hop_30_addr_2;
+
+        public String hop_0_addr_3;
+        public String hop_1_addr_3;
+        public String hop_2_addr_3;
+        public String hop_3_addr_3;
+        public String hop_4_addr_3;
+        public String hop_5_addr_3;
+        public String hop_6_addr_3;
+        public String hop_7_addr_3;
+        public String hop_8_addr_3;
+        public String hop_9_addr_3;
+        public String hop_10_addr_3;
+        public String hop_11_addr_3;
+        public String hop_12_addr_3;
+        public String hop_13_addr_3;
+        public String hop_14_addr_3;
+        public String hop_15_addr_3;
+        public String hop_16_addr_3;
+        public String hop_17_addr_3;
+        public String hop_18_addr_3;
+        public String hop_19_addr_3;
+        public String hop_20_addr_3;
+        public String hop_21_addr_3;
+        public String hop_22_addr_3;
+        public String hop_23_addr_3;
+        public String hop_24_addr_3;
+        public String hop_25_addr_3;
+        public String hop_26_addr_3;
+        public String hop_27_addr_3;
+        public String hop_28_addr_3;
+        public String hop_29_addr_3;
+        public String hop_30_addr_3;
+
         public String body_len;
         public String headers;
         public String headers_len;
         public String num_hops;
+        public String PRR;
 
         public static String toHdr() {
             StringBuffer sb = new StringBuffer()
@@ -350,31 +503,143 @@ public class Measurement {
                     .append("real_hostname").append("\t")
                     .append("address").append("\t")
                     .append("error").append("\t")
+
                     .append("hop_0_rtt_ms").append("\t")
                     .append("hop_1_rtt_ms").append("\t")
                     .append("hop_2_rtt_ms").append("\t")
                     .append("hop_3_rtt_ms").append("\t")
+                    .append("hop_4_rtt_ms").append("\t")
+                    .append("hop_5_rtt_ms").append("\t")
+                    .append("hop_6_rtt_ms").append("\t")
                     .append("hop_7_rtt_ms").append("\t")
+                    .append("hop_8_rtt_ms").append("\t")
+                    .append("hop_9_rtt_ms").append("\t")
+                    .append("hop_10_rtt_ms").append("\t")
                     .append("hop_11_rtt_ms").append("\t")
                     .append("hop_12_rtt_ms").append("\t")
                     .append("hop_13_rtt_ms").append("\t")
                     .append("hop_14_rtt_ms").append("\t")
+                    .append("hop_15_rtt_ms").append("\t")
+                    .append("hop_16_rtt_ms").append("\t")
+                    .append("hop_17_rtt_ms").append("\t")
+                    .append("hop_18_rtt_ms").append("\t")
+                    .append("hop_19_rtt_ms").append("\t")
+                    .append("hop_20_rtt_ms").append("\t")
+                    .append("hop_21_rtt_ms").append("\t")
+                    .append("hop_22_rtt_ms").append("\t")
+                    .append("hop_23_rtt_ms").append("\t")
+                    .append("hop_24_rtt_ms").append("\t")
+                    .append("hop_25_rtt_ms").append("\t")
+                    .append("hop_26_rtt_ms").append("\t")
+                    .append("hop_27_rtt_ms").append("\t")
+                    .append("hop_28_rtt_ms").append("\t")
+                    .append("hop_29_rtt_ms").append("\t")
+                    .append("hop_30_rtt_ms").append("\t")
+
                     .append("code").append("\t")
                     .append("body").append("\t")
+
                     .append("hop_0_addr_1").append("\t")
+                    .append("hop_1_addr_1").append("\t")
+                    .append("hop_2_addr_1").append("\t")
+                    .append("hop_3_addr_1").append("\t")
                     .append("hop_4_addr_1").append("\t")
+                    .append("hop_5_addr_1").append("\t")
+                    .append("hop_6_addr_1").append("\t")
                     .append("hop_7_addr_1").append("\t")
+                    .append("hop_8_addr_1").append("\t")
+                    .append("hop_9_addr_1").append("\t")
                     .append("hop_10_addr_1").append("\t")
                     .append("hop_11_addr_1").append("\t")
+                    .append("hop_12_addr_1").append("\t")
+                    .append("hop_13_addr_1").append("\t")
+                    .append("hop_14_addr_1").append("\t")
                     .append("hop_15_addr_1").append("\t")
+                    .append("hop_16_addr_1").append("\t")
+                    .append("hop_17_addr_1").append("\t")
+                    .append("hop_18_addr_1").append("\t")
+                    .append("hop_19_addr_1").append("\t")
+                    .append("hop_20_addr_1").append("\t")
+                    .append("hop_21_addr_1").append("\t")
+                    .append("hop_22_addr_1").append("\t")
+                    .append("hop_23_addr_1").append("\t")
+                    .append("hop_24_addr_1").append("\t")
+                    .append("hop_25_addr_1").append("\t")
+                    .append("hop_26_addr_1").append("\t")
+                    .append("hop_27_addr_1").append("\t")
+                    .append("hop_28_addr_1").append("\t")
+                    .append("hop_29_addr_1").append("\t")
+                    .append("hop_30_addr_1").append("\t")
+
+                    .append("hop_0_addr_2").append("\t")
                     .append("hop_1_addr_2").append("\t")
+                    .append("hop_2_addr_2").append("\t")
+                    .append("hop_3_addr_2").append("\t")
+                    .append("hop_4_addr_2").append("\t")
+                    .append("hop_5_addr_2").append("\t")
+                    .append("hop_6_addr_2").append("\t")
+                    .append("hop_7_addr_2").append("\t")
+                    .append("hop_8_addr_2").append("\t")
+                    .append("hop_9_addr_2").append("\t")
+                    .append("hop_10_addr_2").append("\t")
                     .append("hop_11_addr_2").append("\t")
+                    .append("hop_12_addr_2").append("\t")
+                    .append("hop_13_addr_2").append("\t")
+                    .append("hop_14_addr_2").append("\t")
                     .append("hop_15_addr_2").append("\t")
                     .append("hop_16_addr_2").append("\t")
+                    .append("hop_17_addr_2").append("\t")
+                    .append("hop_18_addr_2").append("\t")
+                    .append("hop_19_addr_2").append("\t")
+                    .append("hop_20_addr_2").append("\t")
+                    .append("hop_21_addr_2").append("\t")
+                    .append("hop_22_addr_2").append("\t")
+                    .append("hop_23_addr_2").append("\t")
+                    .append("hop_24_addr_2").append("\t")
+                    .append("hop_25_addr_2").append("\t")
+                    .append("hop_26_addr_2").append("\t")
+                    .append("hop_27_addr_2").append("\t")
+                    .append("hop_28_addr_2").append("\t")
+                    .append("hop_29_addr_2").append("\t")
+                    .append("hop_30_addr_2").append("\t")
+
+                    .append("hop_0_addr_3").append("\t")
+                    .append("hop_1_addr_3").append("\t")
+                    .append("hop_2_addr_3").append("\t")
+                    .append("hop_3_addr_3").append("\t")
+                    .append("hop_4_addr_3").append("\t")
+                    .append("hop_5_addr_3").append("\t")
+                    .append("hop_6_addr_3").append("\t")
+                    .append("hop_7_addr_3").append("\t")
+                    .append("hop_8_addr_3").append("\t")
+                    .append("hop_9_addr_3").append("\t")
+                    .append("hop_10_addr_3").append("\t")
+                    .append("hop_11_addr_3").append("\t")
+                    .append("hop_12_addr_3").append("\t")
+                    .append("hop_13_addr_3").append("\t")
+                    .append("hop_14_addr_3").append("\t")
+                    .append("hop_15_addr_3").append("\t")
+                    .append("hop_16_addr_3").append("\t")
+                    .append("hop_17_addr_3").append("\t")
+                    .append("hop_18_addr_3").append("\t")
+                    .append("hop_19_addr_3").append("\t")
+                    .append("hop_20_addr_3").append("\t")
+                    .append("hop_21_addr_3").append("\t")
+                    .append("hop_22_addr_3").append("\t")
+                    .append("hop_23_addr_3").append("\t")
+                    .append("hop_24_addr_3").append("\t")
+                    .append("hop_25_addr_3").append("\t")
+                    .append("hop_26_addr_3").append("\t")
+                    .append("hop_27_addr_3").append("\t")
+                    .append("hop_28_addr_3").append("\t")
+                    .append("hop_29_addr_3").append("\t")
+                    .append("hop_30_addr_3").append("\t")
+
                     .append("body_len").append("\t")
                     .append("headers").append("\t")
                     .append("headers_len").append("\t")
-                    .append("num_hops");
+                    .append("num_hops").append("\t")
+                    .append("PRR");
             return(sb.toString());
         }
 
@@ -395,31 +660,153 @@ public class Measurement {
                     .append(real_hostname).append("\t")
                     .append(address).append("\t")
                     .append(error).append("\t")
+
                     .append(hop_0_rtt_ms).append("\t")
                     .append(hop_1_rtt_ms).append("\t")
                     .append(hop_2_rtt_ms).append("\t")
                     .append(hop_3_rtt_ms).append("\t")
+                    .append(hop_4_rtt_ms).append("\t")
+                    .append(hop_5_rtt_ms).append("\t")
+                    .append(hop_6_rtt_ms).append("\t")
                     .append(hop_7_rtt_ms).append("\t")
+                    .append(hop_8_rtt_ms).append("\t")
+                    .append(hop_9_rtt_ms).append("\t")
+                    .append(hop_10_rtt_ms).append("\t")
                     .append(hop_11_rtt_ms).append("\t")
                     .append(hop_12_rtt_ms).append("\t")
                     .append(hop_13_rtt_ms).append("\t")
                     .append(hop_14_rtt_ms).append("\t")
+                    .append(hop_15_rtt_ms).append("\t")
+                    .append(hop_16_rtt_ms).append("\t")
+                    .append(hop_17_rtt_ms).append("\t")
+                    .append(hop_18_rtt_ms).append("\t")
+                    .append(hop_19_rtt_ms).append("\t")
+                    .append(hop_20_rtt_ms).append("\t")
+                    .append(hop_21_rtt_ms).append("\t")
+                    .append(hop_22_rtt_ms).append("\t")
+                    .append(hop_23_rtt_ms).append("\t")
+                    .append(hop_24_rtt_ms).append("\t")
+                    .append(hop_25_rtt_ms).append("\t")
+                    .append(hop_26_rtt_ms).append("\t")
+                    .append(hop_27_rtt_ms).append("\t")
+                    .append(hop_28_rtt_ms).append("\t")
+                    .append(hop_29_rtt_ms).append("\t")
+                    .append(hop_30_rtt_ms).append("\t")
+
                     .append(code).append("\t")
                     .append(body).append("\t")
+
                     .append(hop_0_addr_1).append("\t")
+                    .append(hop_1_addr_1).append("\t")
+                    .append(hop_2_addr_1).append("\t")
+                    .append(hop_3_addr_1).append("\t")
                     .append(hop_4_addr_1).append("\t")
+                    .append(hop_5_addr_1).append("\t")
+                    .append(hop_6_addr_1).append("\t")
                     .append(hop_7_addr_1).append("\t")
+                    .append(hop_8_addr_1).append("\t")
+                    .append(hop_9_addr_1).append("\t")
                     .append(hop_10_addr_1).append("\t")
                     .append(hop_11_addr_1).append("\t")
+                    .append(hop_12_addr_1).append("\t")
+                    .append(hop_13_addr_1).append("\t")
+                    .append(hop_14_addr_1).append("\t")
                     .append(hop_15_addr_1).append("\t")
+                    .append(hop_16_addr_1).append("\t")
+                    .append(hop_17_addr_1).append("\t")
+                    .append(hop_18_addr_1).append("\t")
+                    .append(hop_19_addr_1).append("\t")
+                    .append(hop_10_addr_1).append("\t")
+                    .append(hop_11_addr_1).append("\t")
+                    .append(hop_12_addr_1).append("\t")
+                    .append(hop_13_addr_1).append("\t")
+                    .append(hop_14_addr_1).append("\t")
+                    .append(hop_15_addr_1).append("\t")
+                    .append(hop_16_addr_1).append("\t")
+                    .append(hop_17_addr_1).append("\t")
+                    .append(hop_18_addr_1).append("\t")
+                    .append(hop_19_addr_1).append("\t")
+                    .append(hop_20_addr_1).append("\t")
+                    .append(hop_21_addr_1).append("\t")
+                    .append(hop_22_addr_1).append("\t")
+                    .append(hop_23_addr_1).append("\t")
+                    .append(hop_24_addr_1).append("\t")
+                    .append(hop_25_addr_1).append("\t")
+                    .append(hop_26_addr_1).append("\t")
+                    .append(hop_27_addr_1).append("\t")
+                    .append(hop_28_addr_1).append("\t")
+                    .append(hop_29_addr_1).append("\t")
+                    .append(hop_30_addr_1).append("\t")
+
+                    .append(hop_0_addr_2).append("\t")
                     .append(hop_1_addr_2).append("\t")
+                    .append(hop_2_addr_2).append("\t")
+                    .append(hop_3_addr_2).append("\t")
+                    .append(hop_4_addr_2).append("\t")
+                    .append(hop_5_addr_2).append("\t")
+                    .append(hop_6_addr_2).append("\t")
+                    .append(hop_7_addr_2).append("\t")
+                    .append(hop_8_addr_2).append("\t")
+                    .append(hop_9_addr_2).append("\t")
+                    .append(hop_10_addr_2).append("\t")
                     .append(hop_11_addr_2).append("\t")
+                    .append(hop_12_addr_2).append("\t")
+                    .append(hop_13_addr_2).append("\t")
+                    .append(hop_14_addr_2).append("\t")
                     .append(hop_15_addr_2).append("\t")
                     .append(hop_16_addr_2).append("\t")
+                    .append(hop_17_addr_2).append("\t")
+                    .append(hop_18_addr_2).append("\t")
+                    .append(hop_19_addr_2).append("\t")
+                    .append(hop_20_addr_2).append("\t")
+                    .append(hop_21_addr_2).append("\t")
+                    .append(hop_22_addr_2).append("\t")
+                    .append(hop_23_addr_2).append("\t")
+                    .append(hop_24_addr_2).append("\t")
+                    .append(hop_25_addr_2).append("\t")
+                    .append(hop_26_addr_2).append("\t")
+                    .append(hop_27_addr_2).append("\t")
+                    .append(hop_28_addr_2).append("\t")
+                    .append(hop_29_addr_2).append("\t")
+                    .append(hop_30_addr_2).append("\t")
+
+                    .append(hop_0_addr_3).append("\t")
+                    .append(hop_1_addr_3).append("\t")
+                    .append(hop_2_addr_3).append("\t")
+                    .append(hop_3_addr_3).append("\t")
+                    .append(hop_4_addr_3).append("\t")
+                    .append(hop_5_addr_3).append("\t")
+                    .append(hop_6_addr_3).append("\t")
+                    .append(hop_7_addr_3).append("\t")
+                    .append(hop_8_addr_3).append("\t")
+                    .append(hop_9_addr_3).append("\t")
+                    .append(hop_10_addr_3).append("\t")
+                    .append(hop_11_addr_3).append("\t")
+                    .append(hop_12_addr_3).append("\t")
+                    .append(hop_13_addr_3).append("\t")
+                    .append(hop_14_addr_3).append("\t")
+                    .append(hop_15_addr_3).append("\t")
+                    .append(hop_16_addr_3).append("\t")
+                    .append(hop_17_addr_3).append("\t")
+                    .append(hop_18_addr_3).append("\t")
+                    .append(hop_19_addr_3).append("\t")
+                    .append(hop_20_addr_3).append("\t")
+                    .append(hop_21_addr_3).append("\t")
+                    .append(hop_22_addr_3).append("\t")
+                    .append(hop_23_addr_3).append("\t")
+                    .append(hop_24_addr_3).append("\t")
+                    .append(hop_25_addr_3).append("\t")
+                    .append(hop_26_addr_3).append("\t")
+                    .append(hop_27_addr_3).append("\t")
+                    .append(hop_28_addr_3).append("\t")
+                    .append(hop_29_addr_3).append("\t")
+                    .append(hop_30_addr_3).append("\t")
+
                     .append(body_len).append("\t")
                     .append(headers_len).append("\t")
                     .append(headers).append("\t")
-                    .append(num_hops);
+                    .append(num_hops).append("\t")
+                    .append(PRR);
             return(sb.toString());
         }
     }

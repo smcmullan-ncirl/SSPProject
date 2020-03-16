@@ -2,10 +2,7 @@ package ie.ncirl.diaproject.dataimport;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
@@ -215,7 +212,7 @@ public class GCPDataImport {
 
         for (Blob blob : blobs.iterateAll()) {
             String blobName = blob.getName();
-            logger.info("Processing {}", blobName);
+            logger.info("Processing file {}, records {}, filename {}", processedFiles, processedRecords, blobName);
             Path destBlobFilePath = Paths.get(tempFileDir, blobName);
             blob.downloadTo(destBlobFilePath);
 
@@ -323,7 +320,7 @@ public class GCPDataImport {
             pst.setString(2, author);
             pst.executeUpdate();
         } catch (SQLException e) {
-            logger.error("Can't publish record to DB", e);
+            logger.error("Can't publish record to DB : {}", e.getMessage() != null ? e.getMessage() : jsonNode, e);
         }
     }
 
@@ -332,8 +329,9 @@ public class GCPDataImport {
             Measurement measurement = objectMapper.treeToValue(jsonNode, Measurement.class);
             tsvWriter.write(measurement.toTSV());
             tsvWriter.newLine();
-        } catch (IOException e) {
-            logger.error("Can't write CSV file {} {}", tsvFile.getName(), e.getMessage());
+        } catch (Exception e) {
+            logger.error("Can't write to CSV file {} : {}", tsvFile.getName(),
+                    e.getMessage() != null ? e.getMessage() : jsonNode, e);
         }
     }
 }
