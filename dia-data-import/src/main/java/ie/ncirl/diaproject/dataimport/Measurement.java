@@ -181,6 +181,17 @@ public class Measurement {
         public String dir_up;
         public String dst_port;
         public String udp_burst_count;
+        public String pkt_size_up_bytes;
+        public String slow_start_period_ms;
+        public String data_limit_bytes_up;
+        public String uplink_finish_msg;
+        public String port_uplink;
+        public String data_limit_bytes_down;
+        public String down_data_limit_bytes;
+        public String sample_period_ms;
+        public String up_data_limit_bytes;
+        public String duration_period_ms;
+        public String port_downlink;
 
         public static String toHdr() {
             StringBuffer sb = new StringBuffer()
@@ -206,7 +217,18 @@ public class Measurement {
                     .append("method").append("\t")
                     .append("dir_up").append("\t")
                     .append("dst_port").append("\t")
-                    .append("udp_burst_count");
+                    .append("udp_burst_count").append("\t")
+                    .append("pkt_size_up_bytes").append("\t")
+                    .append("slow_start_period_ms").append("\t")
+                    .append("data_limit_bytes_up").append("\t")
+                    .append("uplink_finish_msg").append("\t")
+                    .append("port_uplink").append("\t")
+                    .append("data_limit_bytes_down").append("\t")
+                    .append("down_data_limit_bytes").append("\t")
+                    .append("sample_period_ms").append("\t")
+                    .append("up_data_limit_bytes").append("\t")
+                    .append("duration_period_ms").append("\t")
+                    .append("port_downlink");
             return(sb.toString());
         }
 
@@ -234,7 +256,18 @@ public class Measurement {
                     .append(method).append("\t")
                     .append(dir_up).append("\t")
                     .append(dst_port).append("\t")
-                    .append(udp_burst_count);
+                    .append(udp_burst_count).append("\t")
+                    .append(pkt_size_up_bytes).append("\t")
+                    .append(slow_start_period_ms).append("\t")
+                    .append(data_limit_bytes_up).append("\t")
+                    .append(uplink_finish_msg).append("\t")
+                    .append(port_uplink).append("\t")
+                    .append(data_limit_bytes_down).append("\t")
+                    .append(down_data_limit_bytes).append("\t")
+                    .append(sample_period_ms).append("\t")
+                    .append(up_data_limit_bytes).append("\t")
+                    .append(duration_period_ms).append("\t")
+                    .append(port_downlink);
             return(sb.toString());
         }
     }
@@ -380,6 +413,8 @@ public class Measurement {
         public String hop_28_rtt_ms;
         public String hop_29_rtt_ms;
         public String hop_30_rtt_ms;
+
+        public String hop_0_rtt_ms_1;
 
         public String code;
         public String body;
@@ -535,6 +570,8 @@ public class Measurement {
                     .append("hop_28_rtt_ms").append("\t")
                     .append("hop_29_rtt_ms").append("\t")
                     .append("hop_30_rtt_ms").append("\t")
+
+                    .append("hop_0_rtt_ms_1").append("\t")
 
                     .append("code").append("\t")
                     .append("body").append("\t")
@@ -692,6 +729,8 @@ public class Measurement {
                     .append(hop_28_rtt_ms).append("\t")
                     .append(hop_29_rtt_ms).append("\t")
                     .append(hop_30_rtt_ms).append("\t")
+
+                    .append(hop_0_rtt_ms).append("\t")
 
                     .append(code).append("\t")
                     .append(body).append("\t")
