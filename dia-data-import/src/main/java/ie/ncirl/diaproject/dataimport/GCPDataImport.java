@@ -8,6 +8,7 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
+import ie.ncirl.diaproject.dataimport.measurement.Measurement;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -99,7 +100,7 @@ public class GCPDataImport {
             if (Boolean.parseBoolean(prop.getProperty(TSV_ENABLED, "false")))
                 tsvEnabled = true;
         } catch (IOException e) {
-           logger.error("Unable to load config.properties from classpath");
+            logger.error("Unable to load config.properties from classpath");
         }
     }
 
@@ -138,7 +139,7 @@ public class GCPDataImport {
     private static void closeKafkaConnection() {
         if (producer!= null)
             producer.close();
-            producer = null;
+        producer = null;
     }
 
     private static void initDbConnection() {
