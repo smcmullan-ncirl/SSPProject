@@ -328,8 +328,8 @@ public class GCPDataImport {
     private static void publishRecordToCsv(JsonNode jsonNode) {
         try {
             Measurement measurement = objectMapper.treeToValue(jsonNode, Measurement.class);
-            tsvWriter.write(measurement.toTSV());
-            tsvWriter.newLine();
+            //tsvWriter.write(measurement.toTSV());
+            //tsvWriter.newLine();
         } catch (Exception e) {
             logger.error("Can't write to CSV file {} : {}", tsvFile.getName(),
                     e.getMessage() != null ? e.getMessage() : jsonNode, e);

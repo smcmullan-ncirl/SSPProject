@@ -177,6 +177,62 @@ public class Values {
     public String incrementMobilePktSend;
     public String currentRssi;
     public String MobileBytesSend;
+    public String MobilePktSend;
+    public String incrementMobileBytesSend;
+    public String battery;
+    public String properties;
+    public String contextMeasurementInterval;
+    public String rssi;
+    public String phoneBrand;
+    public String basestationLong;
+    public String status;
+    public String networkCountry;
+    public String networkType;
+    public String mobile_recv;
+    public String phoneType;
+    public String radioVersion;
+    public String networkid;
+    public String scale;
+    public String test;
+    public String serialNumber;
+    public String billingcycle;
+    public String deviceDesign;
+    public String signalStrength;
+    public String temperature;
+    public String echo;
+    public String state;
+    public String localtime;
+    public String src_ip;
+    public String options;
+    public String androidVersion;
+    public String productName;
+    public String networkOperatorId;
+    public String level;
+    public String operatorCode;
+    public String deviceid;
+    public String dst_ip;
+    public String measure;
+    public String softwareVersion;
+    public String dataActivity;
+    public String isPresent;
+    public String operatorName;
+    public String cellId;
+    public String time;
+    public String phoneNumber;
+    public String connectionType;
+    public String plugged;
+    public String datacap;
+    public String cellType;
+    public String health;
+    public String basestationLat;
+    public String voltage;
+    public String boardName;
+    public String mobile_sent;
+    public String jitter;
+    public String total_sent;
+    public String technology;
+    public String dataState;
+    public String phoneModel;
 
     public static String toHdr() {
         StringBuffer sb = new StringBuffer()
@@ -328,7 +384,6 @@ public class Values {
                 .append("hop_28_addr_3").append("\t")
                 .append("hop_29_addr_3").append("\t")
                 .append("hop_30_addr_3").append("\t")
-
                 .append("body_len").append("\t")
                 .append("headers").append("\t")
                 .append("headers_len").append("\t")
@@ -355,7 +410,64 @@ public class Values {
                 .append("MobileBytesRecv").append("\t")
                 .append("incrementMobilePktSend").append("\t")
                 .append("currentRssi").append("\t")
-                .append("MobileBytesSend");
+                .append("MobileBytesSend").append("\t")
+                .append("MobilePktSend").append("\t")
+                .append("incrementMobileBytesSend").append("\t")
+                .append("battery").append("\t")
+                .append("properties").append("\t")
+                .append("contextMeasurementInterval").append("\t")
+                .append("rssi").append("\t")
+                .append("phoneBrand").append("\t")
+                .append("basestationLong").append("\t")
+                .append("status").append("\t")
+                .append("networkCountry").append("\t")
+                .append("networkType").append("\t")
+                .append("mobile_recv").append("\t")
+                .append("phoneType").append("\t")
+                .append("radioVersion").append("\t")
+                .append("networkid").append("\t")
+                .append("scale").append("\t")
+                .append("test").append("\t")
+                .append("serialNumber").append("\t")
+                .append("billingcycle").append("\t")
+                .append("deviceDesign").append("\t")
+                .append("ignalStrength").append("\t")
+                .append("temperature").append("\t")
+                .append("echo").append("\t")
+                .append("state").append("\t")
+                .append("localtime").append("\t")
+                .append("src_ip").append("\t")
+                .append("options").append("\t")
+                .append("androidVersion").append("\t")
+                .append("productName").append("\t")
+                .append("networkOperatorId").append("\t")
+                .append("level").append("\t")
+                .append("operatorCode").append("\t")
+                .append("deviceid").append("\t")
+                .append("dst_ip").append("\t")
+                .append("measure").append("\t")
+                .append("softwareVersion").append("\t")
+                .append("dataActivity").append("\t")
+                .append("isPresent").append("\t")
+                .append("operatorName").append("\t")
+                .append("cellId").append("\t")
+                .append("time").append("\t")
+                .append("phoneNumber").append("\t")
+                .append("connectionType").append("\t")
+                .append("plugged").append("\t")
+                .append("datacap").append("\t")
+                .append("cellType").append("\t")
+                .append("health").append("\t")
+                .append("basestationLat").append("\t")
+                .append("voltage").append("\t")
+                .append("boardName").append("\t")
+                .append("mobile_sent").append("\t")
+                .append("jitter").append("\t")
+                .append("total_sent").append("\t")
+                .append("technology").append("\t")
+                .append("dataState").append("\t")
+                .append("phoneModel");
+
         return(sb.toString());
     }
 
@@ -546,7 +658,63 @@ public class Values {
                 .append(MobileBytesRecv).append("\t")
                 .append(incrementMobilePktSend).append("\t")
                 .append(currentRssi).append("\t")
-                .append(MobileBytesSend);
+                .append(MobileBytesSend).append("\t")
+                .append(MobilePktSend).append("\t")
+                .append(incrementMobileBytesSend).append("\t")
+                .append(battery).append("\t")
+                .append(properties).append("\t")
+                .append(contextMeasurementInterval).append("\t")
+                .append(rssi).append("\t")
+                .append(phoneBrand).append("\t")
+                .append(basestationLong).append("\t")
+                .append(status).append("\t")
+                .append(networkCountry).append("\t")
+                .append(networkType).append("\t")
+                .append(mobile_recv).append("\t")
+                .append(phoneType).append("\t")
+                .append(radioVersion).append("\t")
+                .append(networkid).append("\t")
+                .append(scale).append("\t")
+                .append(test).append("\t")
+                .append(serialNumber).append("\t")
+                .append(billingcycle).append("\t")
+                .append(deviceDesign).append("\t")
+                .append(signalStrength).append("\t")
+                .append(temperature).append("\t")
+                .append(echo).append("\t")
+                .append(state).append("\t")
+                .append(localtime).append("\t")
+                .append(src_ip).append("\t")
+                .append(options).append("\t")
+                .append(androidVersion).append("\t")
+                .append(productName).append("\t")
+                .append(networkOperatorId).append("\t")
+                .append(level).append("\t")
+                .append(operatorCode).append("\t")
+                .append(deviceid).append("\t")
+                .append(dst_ip).append("\t")
+                .append(measure).append("\t")
+                .append(softwareVersion).append("\t")
+                .append(dataActivity).append("\t")
+                .append(isPresent).append("\t")
+                .append(operatorName).append("\t")
+                .append(cellId).append("\t")
+                .append(time).append("\t")
+                .append(phoneNumber).append("\t")
+                .append(connectionType).append("\t")
+                .append(plugged).append("\t")
+                .append(datacap).append("\t")
+                .append(cellType).append("\t")
+                .append(health).append("\t")
+                .append(basestationLat).append("\t")
+                .append(voltage).append("\t")
+                .append(boardName).append("\t")
+                .append(mobile_sent).append("\t")
+                .append(jitter).append("\t")
+                .append(total_sent).append("\t")
+                .append(technology).append("\t")
+                .append(dataState).append("\t")
+                .append(phoneModel);
         return(sb.toString());
     }
 }

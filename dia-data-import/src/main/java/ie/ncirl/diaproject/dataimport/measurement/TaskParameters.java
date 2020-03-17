@@ -16,6 +16,8 @@ public class TaskParameters {
     public String data_limit_mb_down;
     public String data_limit_mb_up;
     public String dir_up;
+    public String direction;
+    public String udp_interval;
 
     public static String toHdr() {
         StringBuffer sb = new StringBuffer()
@@ -33,12 +35,16 @@ public class TaskParameters {
                 .append("duration_period_sec").append("\t")
                 .append("data_limit_mb_down").append("\t")
                 .append("data_limit_mb_up").append("\t")
-                .append("dir_up");
+                .append("dir_up").append("\t")
+                .append("direction").append("\t")
+                .append("udp_interval");
         return(sb.toString());
     }
 
     public static String toNullTsv() {
         StringBuffer sb = new StringBuffer()
+                .append("\t")
+                .append("\t")
                 .append("\t")
                 .append("\t")
                 .append("\t")
@@ -72,7 +78,9 @@ public class TaskParameters {
                 .append(duration_period_sec).append("\t")
                 .append(data_limit_mb_down).append("\t")
                 .append(data_limit_mb_up).append("\t")
-                .append(dir_up);
+                .append(dir_up).append("\t")
+                .append(direction).append("\t")
+                .append(udp_interval);
         return(sb.toString());
     }
 }

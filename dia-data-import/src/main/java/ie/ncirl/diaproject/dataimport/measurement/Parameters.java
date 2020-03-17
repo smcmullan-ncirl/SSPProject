@@ -44,6 +44,16 @@ public class Parameters {
     public String sample_period_sec;
     public String slow_start_period_sec;
     public String myspeedtest;
+    public String device_info;
+    public String network_info;
+    public String battery_info;
+    public String sim_info;
+    public String state_info;
+    public String usage_info;
+    public String ping;
+    public String ping_test;
+    public String options;
+    public String udp_interval;
 
     public static String toHdr() {
         StringBuffer sb = new StringBuffer()
@@ -89,7 +99,17 @@ public class Parameters {
                 .append("data_limit_mb_down").append("\t")
                 .append("sample_period_sec").append("\t")
                 .append("slow_start_period_sec").append("\t")
-                .append("myspeedtest");
+                .append("myspeedtest").append("\t")
+                .append("device_info").append("\t")
+                .append("network_info").append("\t")
+                .append("battery_info").append("\t")
+                .append("sim_info").append("\t")
+                .append("state_info").append("\t")
+                .append("usage_info").append("\t")
+                .append("ping").append("\t")
+                .append("ping_test").append("\t")
+                .append("options").append("\t")
+                .append("udp_interval");
         return(sb.toString());
     }
 
@@ -137,7 +157,17 @@ public class Parameters {
                 .append(data_limit_mb_down).append("\t")
                 .append(sample_period_sec).append("\t")
                 .append(slow_start_period_sec).append("\t")
-                .append(myspeedtest);
+                .append(myspeedtest).append("\t")
+                .append(device_info).append("\t")
+                .append(network_info).append("\t")
+                .append(battery_info).append("\t")
+                .append(sim_info).append("\t")
+                .append(state_info).append("\t")
+                .append(usage_info).append("\t")
+                .append(ping).append("\t")
+                .append(ping_test).append("\t")
+                .append(options).append("\t")
+                .append(udp_interval);
         return(sb.toString());
     }
 }
