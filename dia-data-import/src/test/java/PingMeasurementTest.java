@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+import ie.ncirl.diaproject.dataimport.measurement.ping.PingMeasurement;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -12,7 +13,7 @@ import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-public class MeasurementTest {
+public class PingMeasurementTest {
     private static ObjectMapper objectMapper = null;
     private static File csvFile = null;
 
@@ -31,10 +32,16 @@ public class MeasurementTest {
         assertDoesNotThrow(() -> {
             InputStream measurementFile = getClass().getResourceAsStream("test_measurement.json");
             JsonNode jsonNode = objectMapper.readTree(measurementFile);
-            Measurement measurement = objectMapper.treeToValue(jsonNode, Measurement.class);
+
+            String type = jsonNode.get("type").textValue();
+            assert(type.equals("ping"));
+
+
+            Class measurementClass = PingMeasurement.class;
+            Measurement measurement = (Measurement) objectMapper.treeToValue(jsonNode, measurementClass);
 
             System.out.println(measurement.toHdr());
-            System.out.println(measurement.toTSV());
+            System.out.println(measurement.toTsv());
         });
     }
 

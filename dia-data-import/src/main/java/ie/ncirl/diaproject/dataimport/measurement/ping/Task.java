@@ -1,6 +1,7 @@
-package ie.ncirl.diaproject.dataimport.measurement;
+package ie.ncirl.diaproject.dataimport.measurement.ping;
 
 public class Task {
+
     public String count;
     public String filter;
     public TaskParameters parameters;
@@ -43,11 +44,11 @@ public class Task {
         return(sb.toString());
     }
 
-    public String toTSV() throws NullPointerException {
+    public String toTsv() throws NullPointerException {
         StringBuffer sb = new StringBuffer()
                 .append(count).append("\t")
                 .append(filter).append("\t")
-                .append(parameters.toTSV()).append("\t")
+                .append(parameters.toTsv()).append("\t")
                 .append(created).append("\t")
                 .append(start_time).append("\t")
                 .append(interval_sec).append("\t")
@@ -58,4 +59,5 @@ public class Task {
                 .append(id);
         return(sb.toString());
     }
+
 }

@@ -9,6 +9,31 @@ import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+import ie.ncirl.diaproject.dataimport.measurement.batteryinfo.BatteryInfoMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.context.ContextMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.cronethttp.CronetHttpMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.deviceinfo.DeviceInfoMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.dnslookup.DnsLookupMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.http.HttpMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.multipathhttp.MultipathHttpMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.multipathlatency.MultipathLatencyMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.myspeedtestdnslookup.MySpeedtestDnsLookupMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.myspeedtestping.MySpeedtestPingMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.networkinfo.NetworkInfoMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.pageloadtime.PageLoadTimeMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.pageloadtime2.PageLoadTime2Measurement;
+import ie.ncirl.diaproject.dataimport.measurement.ping.PingMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.pingtest.PingTestMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.quichttp.QuicHttpMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.rrc.RrcMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.sequential.SequentialMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.siminfo.SimInfoMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.stateinfo.StateInfoMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.tcpthroughput.TcpThroughputMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.traceroute.TracerouteMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.udpburst.UdpBurstMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.usageinfo.UsageInfoMeasurement;
+import ie.ncirl.diaproject.dataimport.measurement.video.VideoMeasurement;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -21,6 +46,8 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
@@ -33,17 +60,18 @@ public class GCPDataImport {
     private static final String CONFIG_PROPERTIES = "config.properties";
     private static final String GCP_BUCKET_NAME = "gcp.bucketname";
     private static final String TEMP_FILE_DIR = "tempfile.dir";
+    private static final String FILE_OFFSET = "file.offset";
     private static final String KAFKA_ENABLED = "kafka.enabled";
     private static final String KAFKA_SERVER = "kafka.server";
-    private static final String KAFKA_TOPIC = "kafka.topic";
     private static final String DB_ENABLED = "db.enabled";
     private static final String DB_URL = "db.url";
     private static final String DB_USER = "db.user";
     private static final String DB_PASSWORD = "db.password";
     private static final String TSV_ENABLED = "tsv.enabled";
-    private static final String TSV_FILE = "tsv.file";
+    private static final String TSV_FILE = "tsv.file.prefix";
 
     private static String tempFileDir = null;
+    private static int fileOffset = 0;
 
     private static boolean kafkaEnabled = false;
     private static boolean dbEnabled = false;
@@ -52,7 +80,6 @@ public class GCPDataImport {
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     private static Producer<String, JsonNode> producer = null;
-    private static String topic = null;
 
     private static final String dbQuery = "INSERT INTO authors(id, name) VALUES(?, ?)";
     private static Connection dbConn = null;
@@ -60,27 +87,72 @@ public class GCPDataImport {
     private static ResultSet rs = null;
     private static PreparedStatement pst = null;
 
-    private static File tsvFile = null;
-    private static BufferedWriter tsvWriter = null;
+    private static Map<String, BufferedWriter> tsvWriters = null;
 
+    private static long startTime = 0;
     private static int processedFiles = 0;
     private static int processedRecords = 0;
+
+    private static final String PING = "ping";
+    private static final String TRACEROUTE = "traceroute";
+    private static final String HTTP = "http";
+    private static final String DNS_LOOKUP = "dns_lookup";
+    private static final String UDP_BURST = "udp_burst";
+    private static final String TCPTHROUGHPUT = "tcpthroughput";
+    private static final String CONTEXT = "context";
+    private static final String MY_SPEEDTEST_PING = "myspeedtest_ping";
+    private static final String MY_SPEEDTEST_DNS_LOOKUP = "myspeedtestdns_lookup";
+    private static final String DEVICE_INFO = "device_info";
+    private static final String NETWORK_INFO = "network_info";
+    private static final String BATTERY_INFO = "battery_info";
+    private static final String PING_TEST = "ping_test";
+    private static final String SIM_INFO = "sim_info";
+    private static final String STATE_INFO = "state_info";
+    private static final String USAGE_INFO = "usage_info";
+    private static final String RRC = "rrc";
+    private static final String PAGE_LOAD_TIME = "PageLoadTime";
+    private static final String PAGE_LOAD_TIME_2 = "pageloadtime";
+    private static final String VIDEO = "video";
+    private static final String SEQUENTIAL = "sequential";
+    private static final String QUIC_HTTP = "quic-http";
+    private static final String CRONET_HTTP = "cronet-http";
+    private static final String MULTIPATH_LATENCY = "multipath_latency";
+    private static final String MULTIPATH_HTTP = "multipath_http";
+
+    private static int pingCount = 0;
+    private static int tracerouteCount = 0;
+    private static int httpCount = 0;
+    private static int dnsLookupCount = 0;
+    private static int udpBurstCount = 0;
+    private static int tcpThroughputCount = 0;
+    private static int contextCount = 0;
+    private static int mySpeedtestPingCount = 0;
+    private static int mySpeedtestDnsLookupCount = 0;
+    private static int deviceInfoCount = 0;
+    private static int networkInfoCount = 0;
+    private static int batteryInfoCount = 0;
+    private static int pingTestCount = 0;
+    private static int simInfoCount = 0;
+    private static int stateInfoCount = 0;
+    private static int usageInfoCount = 0;
+    private static int rrcCount = 0;
+    private static int pageLoadTimeCount = 0;
+    private static int pageLoadTime2Count = 0;
+    private static int videoCount = 0;
+    private static int sequentialCount = 0;
+    private static int quicHttpCount = 0;
+    private static int cronetHttpCount = 0;
+    private static int multipathLatencyCount = 0;
+    private static int multipathHttpCount = 0;
 
     public static void main(String[] args) {
         loadProperties();
 
         init();
 
-        long startTime = System.currentTimeMillis();
-
         processGCPBlobs();
 
-        long endTime = System.currentTimeMillis();
-        long processingTime = (endTime - startTime)/1000;
-        long processingRate = processedRecords/processingTime;
-
-        logger.info("Processed {} files, {} records in {} seconds at a rate of {} records/sec",
-                processedFiles, processedRecords, processingTime, processingRate);
+        printStats();
 
         shutdown();
     }
@@ -90,6 +162,8 @@ public class GCPDataImport {
             prop.load(Objects.requireNonNull(GCPDataImport.class.getClassLoader().getResourceAsStream(CONFIG_PROPERTIES)));
 
             tempFileDir = prop.getProperty(TEMP_FILE_DIR, "/tmp");
+
+            fileOffset = Integer.parseInt(prop.getProperty(FILE_OFFSET, "0"));
 
             if (Boolean.parseBoolean(prop.getProperty(KAFKA_ENABLED, "false")))
                 kafkaEnabled = true;
@@ -105,6 +179,8 @@ public class GCPDataImport {
     }
 
     private static void init() {
+        startTime = System.currentTimeMillis();
+
         if (kafkaEnabled)
             initKafkaConnection();
 
@@ -112,7 +188,42 @@ public class GCPDataImport {
             initDbConnection();
 
         if (tsvEnabled)
-            initTsvFile();
+            initTsvFiles();
+    }
+
+    private static void printStats() {
+        long endTime = System.currentTimeMillis();
+        long processingTime = (endTime - startTime)/1000;
+        long processingRate = processedRecords/processingTime;
+
+        logger.info("Processed {} files, {} records in {} seconds at a rate of {} records/sec",
+                processedFiles, processedRecords, processingTime, processingRate);
+
+        logger.info("{} : {}", PING, pingCount);
+        logger.info("{} : {}", TRACEROUTE, tracerouteCount);
+        logger.info("{} : {}", HTTP, httpCount);
+        logger.info("{} : {}", DNS_LOOKUP, dnsLookupCount);
+        logger.info("{} : {}", UDP_BURST, udpBurstCount);
+        logger.info("{} : {}", TCPTHROUGHPUT, tcpThroughputCount);
+        logger.info("{} : {}", CONTEXT, contextCount);
+        logger.info("{} : {}", MY_SPEEDTEST_PING, mySpeedtestPingCount);
+        logger.info("{} : {}", MY_SPEEDTEST_DNS_LOOKUP, mySpeedtestDnsLookupCount);
+        logger.info("{} : {}", DEVICE_INFO, deviceInfoCount);
+        logger.info("{} : {}", NETWORK_INFO, networkInfoCount);
+        logger.info("{} : {}", BATTERY_INFO, batteryInfoCount);
+        logger.info("{} : {}", PING_TEST, pingTestCount);
+        logger.info("{} : {}", SIM_INFO, simInfoCount);
+        logger.info("{} : {}", STATE_INFO, stateInfoCount);
+        logger.info("{} : {}", USAGE_INFO, usageInfoCount);
+        logger.info("{} : {}", RRC, rrcCount);
+        logger.info("{} : {}", PAGE_LOAD_TIME, pageLoadTimeCount);
+        logger.info("{} : {}", PAGE_LOAD_TIME_2, pageLoadTime2Count);
+        logger.info("{} : {}", VIDEO, videoCount);
+        logger.info("{} : {}", SEQUENTIAL, sequentialCount);
+        logger.info("{} : {}", QUIC_HTTP, quicHttpCount);
+        logger.info("{} : {}", CRONET_HTTP, cronetHttpCount);
+        logger.info("{} : {}", MULTIPATH_LATENCY, multipathLatencyCount);
+        logger.info("{} : {}", MULTIPATH_HTTP, multipathHttpCount);
     }
 
     private static void shutdown() {
@@ -123,7 +234,7 @@ public class GCPDataImport {
             closeKafkaConnection();
 
         if (tsvEnabled)
-            closeTsvFile();
+            closeTsvFiles();
     }
 
     private static void initKafkaConnection() {
@@ -133,7 +244,6 @@ public class GCPDataImport {
         producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
         producer = new KafkaProducer<>(producerProps);
-        topic = prop.getProperty(KAFKA_TOPIC);
     }
 
     private static void closeKafkaConnection() {
@@ -185,25 +295,18 @@ public class GCPDataImport {
         }
     }
 
-    private static void initTsvFile() {
-        tsvFile = new File(prop.getProperty(TSV_FILE, "/tmp/output.tsv"));
-        try {
-            tsvWriter = new BufferedWriter(new FileWriter(tsvFile));
-            tsvWriter.write(Measurement.toHdr());
-            tsvWriter.newLine();
-        } catch (IOException e) {
-            logger.error("Can't open TSV writer", e);
-        }
+    private static void initTsvFiles() {
+        tsvWriters = new HashMap<>();
     }
 
-    private static void closeTsvFile() {
-        if (tsvWriter != null) {
+    private static void closeTsvFiles() {
+        tsvWriters.forEach((topic, writer) -> {
             try {
-                tsvWriter.close();
+                writer.close();
             } catch (IOException e) {
-                logger.error("Can't close CSV writer", e);
+                logger.error("Can't close TSV writer for topic {}", topic, e);
             }
-        }
+        });
     }
     private static void processGCPBlobs() {
         Storage storage = StorageOptions.getDefaultInstance().getService();
@@ -214,15 +317,18 @@ public class GCPDataImport {
         for (Blob blob : blobs.iterateAll()) {
             String blobName = blob.getName();
             logger.info("Processing file {}, records {}, filename {}", processedFiles, processedRecords, blobName);
-            Path destBlobFilePath = Paths.get(tempFileDir, blobName);
-            blob.downloadTo(destBlobFilePath);
 
-            File zipFile = destBlobFilePath.toFile();
+            if(processedFiles >= fileOffset) {
+                Path destBlobFilePath = Paths.get(tempFileDir, blobName);
+                blob.downloadTo(destBlobFilePath);
 
-            processZipFile(zipFile);
+                File zipFile = destBlobFilePath.toFile();
 
-            if (!zipFile.delete()) {
-                logger.warn("Could not delete zip file {}", zipFile.getName());
+                processZipFile(zipFile);
+
+                if (!zipFile.delete()) {
+                    logger.warn("Could not delete zip file {}", zipFile.getName());
+                }
             }
 
             processedFiles++;
@@ -281,17 +387,21 @@ public class GCPDataImport {
     }
 
     private static void publishRecord(JsonNode jsonNode) {
-        if (kafkaEnabled)
-            publishRecordToKafka(jsonNode);
+        String topic = jsonNode.get("type").textValue();
 
-        if (dbEnabled)
-            publishRecordToDb(jsonNode);
+        if (Boolean.parseBoolean(prop.getProperty(topic, "false"))) {
+            if (kafkaEnabled)
+                publishRecordToKafka(topic, jsonNode);
 
-        if (tsvEnabled)
-            publishRecordToCsv(jsonNode);
+            if (dbEnabled)
+                publishRecordToDb(topic, jsonNode);
+
+            if (tsvEnabled)
+                publishRecordToTsv(topic, jsonNode);
+        }
     }
 
-    private static void publishRecordToKafka(JsonNode jsonNode) {
+    private static void publishRecordToKafka(String topic, JsonNode jsonNode) {
         // Publish record to Kafka
         ProducerRecord<String, JsonNode> rec = new ProducerRecord<>(topic, jsonNode);
 
@@ -312,7 +422,7 @@ public class GCPDataImport {
         }
     }
 
-    private static void publishRecordToDb(JsonNode jsonNode) {
+    private static void publishRecordToDb(String topic, JsonNode jsonNode) {
         int id = 0;
         String author = "";
 
@@ -321,18 +431,143 @@ public class GCPDataImport {
             pst.setString(2, author);
             pst.executeUpdate();
         } catch (SQLException e) {
-            logger.error("Can't publish record to DB : {}", e.getMessage() != null ? e.getMessage() : jsonNode, e);
+            logger.error("Can't publish record to DB : {}",
+                    e.getMessage() != null ? e.getMessage() : jsonNode, e);
         }
     }
 
-    private static void publishRecordToCsv(JsonNode jsonNode) {
+    private static void publishRecordToTsv(String topic, JsonNode jsonNode) {
         try {
-            Measurement measurement = objectMapper.treeToValue(jsonNode, Measurement.class);
-            //tsvWriter.write(measurement.toTSV());
-            //tsvWriter.newLine();
+            Measurement measurement = null;
+            Class measurementClass = null;
+
+            switch (topic) {
+                case PING:
+                    pingCount++;
+                    measurementClass = PingMeasurement.class;
+                    break;
+                case TRACEROUTE:
+                    tracerouteCount++;
+                    measurementClass = TracerouteMeasurement.class;
+                    break;
+                case HTTP:
+                    httpCount++;
+                    measurementClass = HttpMeasurement.class;
+                    break;
+                case DNS_LOOKUP:
+                    dnsLookupCount++;
+                    measurementClass = DnsLookupMeasurement.class;
+                    break;
+                case UDP_BURST:
+                    udpBurstCount++;
+                    measurementClass = UdpBurstMeasurement.class;
+                    break;
+                case TCPTHROUGHPUT:
+                    tcpThroughputCount++;
+                    measurementClass = TcpThroughputMeasurement.class;
+                    break;
+                case CONTEXT:
+                    contextCount++;
+                    measurementClass = ContextMeasurement.class;
+                    break;
+                case MY_SPEEDTEST_PING:
+                    mySpeedtestPingCount++;
+                    measurementClass = MySpeedtestPingMeasurement.class;
+                    break;
+                case MY_SPEEDTEST_DNS_LOOKUP:
+                    mySpeedtestDnsLookupCount++;
+                    measurementClass = MySpeedtestDnsLookupMeasurement.class;
+                    break;
+                case DEVICE_INFO:
+                    deviceInfoCount++;
+                    measurementClass = DeviceInfoMeasurement.class;
+                    break;
+                case NETWORK_INFO:
+                    networkInfoCount++;
+                    measurementClass = NetworkInfoMeasurement.class;
+                    break;
+                case BATTERY_INFO:
+                    batteryInfoCount++;
+                    measurementClass = BatteryInfoMeasurement.class;
+                    break;
+                case PING_TEST:
+                    pingTestCount++;
+                    measurementClass = PingTestMeasurement.class;
+                    break;
+                case SIM_INFO:
+                    simInfoCount++;
+                    measurementClass = SimInfoMeasurement.class;
+                    break;
+                case STATE_INFO:
+                    stateInfoCount++;
+                    measurementClass = StateInfoMeasurement.class;
+                    break;
+                case USAGE_INFO:
+                    usageInfoCount++;
+                    measurementClass = UsageInfoMeasurement.class;
+                    break;
+                case RRC:
+                    rrcCount++;
+                    measurementClass = RrcMeasurement.class;
+                    break;
+                case PAGE_LOAD_TIME:
+                    pageLoadTimeCount++;
+                    measurementClass = PageLoadTimeMeasurement.class;
+                    break;
+                case PAGE_LOAD_TIME_2:
+                    pageLoadTime2Count++;
+                    measurementClass = PageLoadTime2Measurement.class;
+                    break;
+                case VIDEO:
+                    videoCount++;
+                    measurementClass = VideoMeasurement.class;
+                    break;
+                case SEQUENTIAL:
+                    sequentialCount++;
+                    measurementClass = SequentialMeasurement.class;
+                    break;
+                case QUIC_HTTP:
+                    quicHttpCount++;
+                    measurementClass = QuicHttpMeasurement.class;
+                    break;
+                case CRONET_HTTP:
+                    cronetHttpCount++;
+                    measurementClass = CronetHttpMeasurement.class;
+                    break;
+                case MULTIPATH_LATENCY:
+                    multipathLatencyCount++;
+                    measurementClass = MultipathLatencyMeasurement.class;
+                    break;
+                case MULTIPATH_HTTP:
+                    multipathHttpCount++;
+                    measurementClass = MultipathHttpMeasurement.class;
+                    break;
+                default:
+                    throw new Exception("Unsupported Topic: " + topic);
+            }
+
+            measurement = (Measurement) objectMapper.treeToValue(jsonNode, measurementClass);
+
+            BufferedWriter tsvWriter = tsvWriters.get(topic);
+
+            if (tsvWriter == null) {
+                String filename = prop.getProperty(TSV_FILE, "") + topic;
+                File tsvFile = new File(filename);
+                tsvWriter = new BufferedWriter(new FileWriter(tsvFile));
+                tsvWriter.write(measurement.toHdr());
+                tsvWriter.newLine();
+                tsvWriters.put(topic, tsvWriter);
+            }
+
+            tsvWriter.write(measurement.toTsv());
+            tsvWriter.newLine();
         } catch (Exception e) {
-            logger.error("Can't write to CSV file {} : {}", tsvFile.getName(),
+            printStats();
+
+            logger.error("Can't write to TSV file for topic {} : {}", topic,
                     e.getMessage() != null ? e.getMessage() : jsonNode, e);
+
+            System.exit(-1);
         }
     }
 }
