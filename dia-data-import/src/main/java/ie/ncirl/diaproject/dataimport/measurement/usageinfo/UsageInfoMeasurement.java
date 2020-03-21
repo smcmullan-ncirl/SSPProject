@@ -9,7 +9,7 @@ public class UsageInfoMeasurement extends Measurement {
     }
 
     @Override
-    public String toCsv(String sep) {
+    public String toCsv(String sep, String quote) {
         throw new UnsupportedOperationException("Not implemented");
     }
 }

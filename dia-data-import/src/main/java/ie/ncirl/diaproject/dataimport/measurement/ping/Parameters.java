@@ -51,7 +51,7 @@ public class Parameters {
         return(sb.toString());
     }
 
-    public String toCsv(String sep) {
+    public String toCsv(String sep, String quote) {
         StringBuffer sb = new StringBuffer()
                 .append(count).append(sep)
                 .append(target).append(sep)

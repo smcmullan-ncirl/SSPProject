@@ -20,14 +20,14 @@ public class DeviceInfo {
         return(sb.toString());
     }
 
-    public String toCsv(String sep) {
+    public String toCsv(String sep, String quote) {
         StringBuffer sb = new StringBuffer()
-                .append(model).append(sep)
-                .append(os).append(sep)
-                .append(manufacturer).append(sep)
-                .append(tac).append(sep)
-                .append(id).append(sep)
-                .append(user);
+                .append(quote).append(model).append(quote).append(sep)
+                .append(quote).append(os).append(quote).append(sep)
+                .append(quote).append(manufacturer).append(quote).append(sep)
+                .append(quote).append(tac).append(quote).append(sep)
+                .append(quote).append(id).append(quote).append(sep)
+                .append(quote).append(user).append(quote);
         return(sb.toString());
     }
 

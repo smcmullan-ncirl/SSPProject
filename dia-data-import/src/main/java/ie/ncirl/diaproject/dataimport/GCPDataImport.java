@@ -67,15 +67,16 @@ public class GCPDataImport {
     private static final String DB_URL = "db.url";
     private static final String DB_USER = "db.user";
     private static final String DB_PASSWORD = "db.password";
-    private static final String TSV_ENABLED = "tsv.enabled";
-    private static final String TSV_FILE = "tsv.file.prefix";
+    private static final String DB_SCHEMA = "db.schema";
+    private static final String CSV_ENABLED = "csv.enabled";
+    private static final String CSV_FILE = "csv.file.prefix";
 
     private static String tempFileDir = null;
     private static int fileOffset = 0;
 
     private static boolean kafkaEnabled = false;
     private static boolean dbEnabled = false;
-    private static boolean tsvEnabled = false;
+    private static boolean csvEnabled = false;
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -84,7 +85,6 @@ public class GCPDataImport {
     private static Connection dbConn = null;
     private static Statement st = null;
     private static ResultSet rs = null;
-    private static PreparedStatement pst = null;
 
     private static Map<String, BufferedWriter> tsvWriters = null;
 
@@ -170,8 +170,8 @@ public class GCPDataImport {
             if (Boolean.parseBoolean(prop.getProperty(DB_ENABLED, "false")))
                 dbEnabled = true;
 
-            if (Boolean.parseBoolean(prop.getProperty(TSV_ENABLED, "false")))
-                tsvEnabled = true;
+            if (Boolean.parseBoolean(prop.getProperty(CSV_ENABLED, "false")))
+                csvEnabled = true;
         } catch (IOException e) {
             logger.error("Unable to load config.properties from classpath");
         }
@@ -186,7 +186,7 @@ public class GCPDataImport {
         if (dbEnabled)
             initDbConnection();
 
-        if (tsvEnabled)
+        if (csvEnabled)
             initTsvFiles();
     }
 
@@ -232,7 +232,7 @@ public class GCPDataImport {
         if (kafkaEnabled)
             closeKafkaConnection();
 
-        if (tsvEnabled)
+        if (csvEnabled)
             closeTsvFiles();
     }
 
@@ -257,13 +257,15 @@ public class GCPDataImport {
                     prop.getProperty(DB_URL),
                     prop.getProperty(DB_USER),
                     prop.getProperty(DB_PASSWORD));
+            dbConn.setSchema(prop.getProperty(DB_SCHEMA));
 
             st = dbConn.createStatement();
-            rs = st.executeQuery("SELECT VERSION()");
 
+            rs = st.executeQuery("SELECT VERSION()");
             if (rs.next()) {
                 logger.info("Connected to db version {}", rs.getString(1));
             }
+            rs.close();
         } catch (SQLException e) {
             logger.error("Cannot connect to db", e);
         }
@@ -271,19 +273,9 @@ public class GCPDataImport {
 
     private static void closeDbConnection() {
         try {
-            if (rs != null && !rs.isClosed()) {
-                rs.close();
-                rs = null;
-            }
-
             if (st != null && !st.isClosed()) {
                 st.close();
                 st = null;
-            }
-
-            if (pst != null && !pst.isClosed()) {
-                pst.close();
-                pst = null;
             }
 
             if  (dbConn != null && !dbConn.isClosed()) {
@@ -396,7 +388,7 @@ public class GCPDataImport {
             if (dbEnabled)
                 publishRecordToDb(topic, jsonNode);
 
-            if (tsvEnabled)
+            if (csvEnabled)
                 publishRecordtoCsv(topic, jsonNode);
         }
     }
@@ -423,138 +415,32 @@ public class GCPDataImport {
     }
 
     private static void publishRecordToDb(String topic, JsonNode jsonNode) {
-        String dbQuery = "INSERT INTO " + topic + "_measurement (" + ") VALUES(?, ?)";
-
         try {
-            pst = dbConn.prepareStatement(dbQuery);
-            int id = 0;
-            String author = "";
+            Measurement measurement = getMeasurement(topic, jsonNode);
 
-            pst.setInt(1, id);
-            pst.setString(2, author);
-            pst.executeUpdate();
-        } catch (SQLException e) {
-            logger.error("Can't publish record to DB : {}",
+            String dbQuery =
+                    "INSERT INTO " + topic + "_measurement ("
+                            + measurement.toHdr(Measurement.COMMA)
+                            + ") VALUES(" + measurement.toCsv(Measurement.COMMA, Measurement.SINGLE_QUOTE) + ")";
+
+            logger.info(dbQuery);
+
+            st.executeQuery(dbQuery);
+        } catch (Exception e) {
+            logger.error("Can't publish record to DB for topic {} : {}", topic,
                     e.getMessage() != null ? e.getMessage() : jsonNode, e);
+            System.exit(-1);
         }
     }
 
     private static void publishRecordtoCsv(String topic, JsonNode jsonNode) {
         try {
-            Measurement measurement = null;
-            Class measurementClass = null;
-
-            switch (topic) {
-                case PING:
-                    pingCount++;
-                    measurementClass = PingMeasurement.class;
-                    break;
-                case TRACEROUTE:
-                    tracerouteCount++;
-                    measurementClass = TracerouteMeasurement.class;
-                    break;
-                case HTTP:
-                    httpCount++;
-                    measurementClass = HttpMeasurement.class;
-                    break;
-                case DNS_LOOKUP:
-                    dnsLookupCount++;
-                    measurementClass = DnsLookupMeasurement.class;
-                    break;
-                case UDP_BURST:
-                    udpBurstCount++;
-                    measurementClass = UdpBurstMeasurement.class;
-                    break;
-                case TCPTHROUGHPUT:
-                    tcpThroughputCount++;
-                    measurementClass = TcpThroughputMeasurement.class;
-                    break;
-                case CONTEXT:
-                    contextCount++;
-                    measurementClass = ContextMeasurement.class;
-                    break;
-                case MY_SPEEDTEST_PING:
-                    mySpeedtestPingCount++;
-                    measurementClass = MySpeedtestPingMeasurement.class;
-                    break;
-                case MY_SPEEDTEST_DNS_LOOKUP:
-                    mySpeedtestDnsLookupCount++;
-                    measurementClass = MySpeedtestDnsLookupMeasurement.class;
-                    break;
-                case DEVICE_INFO:
-                    deviceInfoCount++;
-                    measurementClass = DeviceInfoMeasurement.class;
-                    break;
-                case NETWORK_INFO:
-                    networkInfoCount++;
-                    measurementClass = NetworkInfoMeasurement.class;
-                    break;
-                case BATTERY_INFO:
-                    batteryInfoCount++;
-                    measurementClass = BatteryInfoMeasurement.class;
-                    break;
-                case PING_TEST:
-                    pingTestCount++;
-                    measurementClass = PingTestMeasurement.class;
-                    break;
-                case SIM_INFO:
-                    simInfoCount++;
-                    measurementClass = SimInfoMeasurement.class;
-                    break;
-                case STATE_INFO:
-                    stateInfoCount++;
-                    measurementClass = StateInfoMeasurement.class;
-                    break;
-                case USAGE_INFO:
-                    usageInfoCount++;
-                    measurementClass = UsageInfoMeasurement.class;
-                    break;
-                case RRC:
-                    rrcCount++;
-                    measurementClass = RrcMeasurement.class;
-                    break;
-                case PAGE_LOAD_TIME:
-                    pageLoadTimeCount++;
-                    measurementClass = PageLoadTimeMeasurement.class;
-                    break;
-                case PAGE_LOAD_TIME_2:
-                    pageLoadTime2Count++;
-                    measurementClass = PageLoadTime2Measurement.class;
-                    break;
-                case VIDEO:
-                    videoCount++;
-                    measurementClass = VideoMeasurement.class;
-                    break;
-                case SEQUENTIAL:
-                    sequentialCount++;
-                    measurementClass = SequentialMeasurement.class;
-                    break;
-                case QUIC_HTTP:
-                    quicHttpCount++;
-                    measurementClass = QuicHttpMeasurement.class;
-                    break;
-                case CRONET_HTTP:
-                    cronetHttpCount++;
-                    measurementClass = CronetHttpMeasurement.class;
-                    break;
-                case MULTIPATH_LATENCY:
-                    multipathLatencyCount++;
-                    measurementClass = MultipathLatencyMeasurement.class;
-                    break;
-                case MULTIPATH_HTTP:
-                    multipathHttpCount++;
-                    measurementClass = MultipathHttpMeasurement.class;
-                    break;
-                default:
-                    throw new Exception("Unsupported Topic: " + topic);
-            }
-
-            measurement = (Measurement) objectMapper.treeToValue(jsonNode, measurementClass);
+            Measurement measurement = getMeasurement(topic, jsonNode);
 
             BufferedWriter tsvWriter = tsvWriters.get(topic);
 
             if (tsvWriter == null) {
-                String filename = prop.getProperty(TSV_FILE, "") + topic;
+                String filename = prop.getProperty(CSV_FILE, "") + topic;
                 File tsvFile = new File(filename);
                 tsvWriter = new BufferedWriter(new FileWriter(tsvFile));
                 tsvWriter.write(measurement.toHdr(Measurement.TAB));
@@ -562,15 +448,124 @@ public class GCPDataImport {
                 tsvWriters.put(topic, tsvWriter);
             }
 
-            tsvWriter.write(measurement.toCsv(Measurement.TAB));
+            tsvWriter.write(measurement.toCsv(Measurement.TAB, Measurement.NO_QUOTE));
             tsvWriter.newLine();
         } catch (Exception e) {
-            printStats();
-
             logger.error("Can't write to TSV file for topic {} : {}", topic,
                     e.getMessage() != null ? e.getMessage() : jsonNode, e);
-
-            System.exit(-1);
         }
+    }
+
+    private static Measurement getMeasurement(String topic, JsonNode jsonNode) throws Exception {
+        Measurement measurement = null;
+        Class measurementClass = null;
+
+        switch (topic) {
+            case PING:
+                pingCount++;
+                measurementClass = PingMeasurement.class;
+                break;
+            case TRACEROUTE:
+                tracerouteCount++;
+                measurementClass = TracerouteMeasurement.class;
+                break;
+            case HTTP:
+                httpCount++;
+                measurementClass = HttpMeasurement.class;
+                break;
+            case DNS_LOOKUP:
+                dnsLookupCount++;
+                measurementClass = DnsLookupMeasurement.class;
+                break;
+            case UDP_BURST:
+                udpBurstCount++;
+                measurementClass = UdpBurstMeasurement.class;
+                break;
+            case TCPTHROUGHPUT:
+                tcpThroughputCount++;
+                measurementClass = TcpThroughputMeasurement.class;
+                break;
+            case CONTEXT:
+                contextCount++;
+                measurementClass = ContextMeasurement.class;
+                break;
+            case MY_SPEEDTEST_PING:
+                mySpeedtestPingCount++;
+                measurementClass = MySpeedtestPingMeasurement.class;
+                break;
+            case MY_SPEEDTEST_DNS_LOOKUP:
+                mySpeedtestDnsLookupCount++;
+                measurementClass = MySpeedtestDnsLookupMeasurement.class;
+                break;
+            case DEVICE_INFO:
+                deviceInfoCount++;
+                measurementClass = DeviceInfoMeasurement.class;
+                break;
+            case NETWORK_INFO:
+                networkInfoCount++;
+                measurementClass = NetworkInfoMeasurement.class;
+                break;
+            case BATTERY_INFO:
+                batteryInfoCount++;
+                measurementClass = BatteryInfoMeasurement.class;
+                break;
+            case PING_TEST:
+                pingTestCount++;
+                measurementClass = PingTestMeasurement.class;
+                break;
+            case SIM_INFO:
+                simInfoCount++;
+                measurementClass = SimInfoMeasurement.class;
+                break;
+            case STATE_INFO:
+                stateInfoCount++;
+                measurementClass = StateInfoMeasurement.class;
+                break;
+            case USAGE_INFO:
+                usageInfoCount++;
+                measurementClass = UsageInfoMeasurement.class;
+                break;
+            case RRC:
+                rrcCount++;
+                measurementClass = RrcMeasurement.class;
+                break;
+            case PAGE_LOAD_TIME:
+                pageLoadTimeCount++;
+                measurementClass = PageLoadTimeMeasurement.class;
+                break;
+            case PAGE_LOAD_TIME_2:
+                pageLoadTime2Count++;
+                measurementClass = PageLoadTime2Measurement.class;
+                break;
+            case VIDEO:
+                videoCount++;
+                measurementClass = VideoMeasurement.class;
+                break;
+            case SEQUENTIAL:
+                sequentialCount++;
+                measurementClass = SequentialMeasurement.class;
+                break;
+            case QUIC_HTTP:
+                quicHttpCount++;
+                measurementClass = QuicHttpMeasurement.class;
+                break;
+            case CRONET_HTTP:
+                cronetHttpCount++;
+                measurementClass = CronetHttpMeasurement.class;
+                break;
+            case MULTIPATH_LATENCY:
+                multipathLatencyCount++;
+                measurementClass = MultipathLatencyMeasurement.class;
+                break;
+            case MULTIPATH_HTTP:
+                multipathHttpCount++;
+                measurementClass = MultipathHttpMeasurement.class;
+                break;
+            default:
+                throw new Exception("Unsupported Topic: " + topic);
+        }
+
+        measurement = (Measurement) objectMapper.treeToValue(jsonNode, measurementClass);
+        return measurement;
     }
 }

@@ -43,7 +43,7 @@ public class TaskParameters {
         return(sb.toString());
     }
 
-    public String toCsv(String sep) {
+    public String toCsv(String sep, String quote) {
         StringBuffer sb = new StringBuffer()
                 .append(location_update_distance).append(sep)
                 .append(target).append(sep)

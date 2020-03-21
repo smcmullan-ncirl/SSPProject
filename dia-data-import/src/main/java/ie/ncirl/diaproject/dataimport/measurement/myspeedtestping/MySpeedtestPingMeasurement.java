@@ -9,7 +9,7 @@ public class MySpeedtestPingMeasurement extends ie.ncirl.diaproject.dataimport.m
     }
 
     @Override
-    public String toCsv(String sep) {
+    public String toCsv(String sep, String quote) {
         throw new UnsupportedOperationException("Not implemented");
     }
 }

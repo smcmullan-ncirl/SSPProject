@@ -49,7 +49,7 @@ public class Values {
         return(sb.toString());
     }
 
-    public String toCsv(String sep) {
+    public String toCsv(String sep, String quote) {
         StringBuffer sb = new StringBuffer()
                 .append(packets_sent).append(sep)
                 .append(packet_loss).append(sep)

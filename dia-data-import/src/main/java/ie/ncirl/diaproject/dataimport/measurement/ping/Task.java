@@ -44,11 +44,11 @@ public class Task {
         return(sb.toString());
     }
 
-    public String toCsv(String sep) throws NullPointerException {
+    public String toCsv(String sep, String quote) throws NullPointerException {
         StringBuffer sb = new StringBuffer()
                 .append(count).append(sep)
                 .append(filter).append(sep)
-                .append(parameters.toCsv(sep)).append(sep)
+                .append(parameters.toCsv(sep, quote)).append(sep)
                 .append(created).append(sep)
                 .append(start_time).append(sep)
                 .append(interval_sec).append(sep)

@@ -28,14 +28,14 @@ public class PingMeasurement extends Measurement {
     }
 
     @Override
-    public String toCsv(String sep) throws NullPointerException {
+    public String toCsv(String sep, String quote) throws NullPointerException {
         StringBuffer sb = new StringBuffer()
-                .append(task != null ? task.toCsv(sep) : Task.toNullTsv(sep)).append(sep)
-                .append(parameters.toCsv(sep)).append(sep)
+                .append(task != null ? task.toCsv(sep, quote) : Task.toNullTsv(sep)).append(sep)
+                .append(parameters.toCsv(sep, quote)).append(sep)
                 .append(success).append(sep)
                 .append(timestamp).append(sep)
-                .append(device_properties.toCsv(sep)).append(sep)
-                .append(values.toCsv(sep)).append(sep)
+                .append(device_properties.toCsv(sep, quote)).append(sep)
+                .append(values.toCsv(sep, quote)).append(sep)
                 .append(type).append(sep)
                 .append(id);
         return(sb.toString());

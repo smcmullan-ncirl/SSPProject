@@ -12,7 +12,7 @@ public class Location {
         return(sb.toString());
     }
 
-    public String toCsv(String sep) {
+    public String toCsv(String sep, String quote) {
         StringBuffer sb = new StringBuffer()
                 .append(latitude).append(sep)
                 .append(longitude);

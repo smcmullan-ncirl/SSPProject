@@ -52,16 +52,16 @@ public class DeviceProperties {
         return(sb.toString());
     }
 
-    public String toCsv(String sep) throws NullPointerException {
+    public String toCsv(String sep, String quote) throws NullPointerException {
         StringBuffer sb = new StringBuffer()
                 .append(battery_level).append(sep)
                 .append(cell_info).append(sep)
                 .append(timestamp).append(sep)
                 .append(network_type).append(sep)
                 .append(os_version).append(sep)
-                .append(device_info.toCsv(sep)).append(sep)
+                .append(device_info.toCsv(sep, quote)).append(sep)
                 .append(carrier).append(sep)
-                .append(location.toCsv(sep)).append(sep)
+                .append(location.toCsv(sep, quote)).append(sep)
                 .append(rssi).append(sep)
                 .append(app_version).append(sep)
                 .append(location_type).append(sep)
