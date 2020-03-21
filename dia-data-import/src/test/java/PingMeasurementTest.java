@@ -40,8 +40,8 @@ public class PingMeasurementTest {
             Class measurementClass = PingMeasurement.class;
             Measurement measurement = (Measurement) objectMapper.treeToValue(jsonNode, measurementClass);
 
-            System.out.println(measurement.toHdr());
-            System.out.println(measurement.toTsv());
+            System.out.println(measurement.toHdr(Measurement.TAB));
+            System.out.println(measurement.toCsv(Measurement.TAB));
         });
     }
 

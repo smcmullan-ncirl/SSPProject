@@ -9,24 +9,24 @@ public class DeviceInfo {
     public String id;
     public String user;
 
-    public static String toHdr() {
+    public static String toHdr(String sep) {
         StringBuffer sb = new StringBuffer()
-                .append("di_model").append("\t")
-                .append("di_os").append("\t")
-                .append("di_manufacturer").append("\t")
-                .append("di_tac").append("\t")
-                .append("di_id").append("\t")
+                .append("di_model").append(sep)
+                .append("di_os").append(sep)
+                .append("di_manufacturer").append(sep)
+                .append("di_tac").append(sep)
+                .append("di_id").append(sep)
                 .append("di_user");
         return(sb.toString());
     }
 
-    public String toTsv() {
+    public String toCsv(String sep) {
         StringBuffer sb = new StringBuffer()
-                .append(model).append("\t")
-                .append(os).append("\t")
-                .append(manufacturer).append("\t")
-                .append(tac).append("\t")
-                .append(id).append("\t")
+                .append(model).append(sep)
+                .append(os).append(sep)
+                .append(manufacturer).append(sep)
+                .append(tac).append(sep)
+                .append(id).append(sep)
                 .append(user);
         return(sb.toString());
     }

@@ -4,12 +4,12 @@ import ie.ncirl.diaproject.dataimport.measurement.Measurement;
 
 public class PingTestMeasurement extends Measurement {
     @Override
-    public String toHdr() {
+    public String toHdr(String sep) {
         throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
-    public String toTsv() {
+    public String toCsv(String sep) {
         throw new UnsupportedOperationException("Not implemented");
     }
 }

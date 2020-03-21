@@ -14,29 +14,29 @@ public class PingMeasurement extends Measurement {
     public String id;
 
     @Override
-    public String toHdr() {
+    public String toHdr(String sep) {
         StringBuffer sb = new StringBuffer()
-                .append(Task.toHdr()).append("\t")
-                .append(Parameters.toHdr()).append("\t")
-                .append("m_success").append("\t")
-                .append("m_timestamp").append("\t")
-                .append(DeviceProperties.toHdr()).append("\t")
-                .append(Values.toHdr()).append("\t")
-                .append("m_type").append("\t")
+                .append(Task.toHdr(sep)).append(sep)
+                .append(Parameters.toHdr(sep)).append(sep)
+                .append("m_success").append(sep)
+                .append("m_timestamp").append(sep)
+                .append(DeviceProperties.toHdr(sep)).append(sep)
+                .append(Values.toHdr(sep)).append(sep)
+                .append("m_type").append(sep)
                 .append("m_id");
         return(sb.toString());
     }
 
     @Override
-    public String toTsv() throws NullPointerException {
+    public String toCsv(String sep) throws NullPointerException {
         StringBuffer sb = new StringBuffer()
-                .append(task != null ? task.toTsv() : Task.toNullTsv()).append("\t")
-                .append(parameters.toTsv()).append("\t")
-                .append(success).append("\t")
-                .append(timestamp).append("\t")
-                .append(device_properties.toTsv()).append("\t")
-                .append(values.toTsv()).append("\t")
-                .append(type).append("\t")
+                .append(task != null ? task.toCsv(sep) : Task.toNullTsv(sep)).append(sep)
+                .append(parameters.toCsv(sep)).append(sep)
+                .append(success).append(sep)
+                .append(timestamp).append(sep)
+                .append(device_properties.toCsv(sep)).append(sep)
+                .append(values.toCsv(sep)).append(sep)
+                .append(type).append(sep)
                 .append(id);
         return(sb.toString());
     }

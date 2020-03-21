@@ -81,7 +81,6 @@ public class GCPDataImport {
 
     private static Producer<String, JsonNode> producer = null;
 
-    private static final String dbQuery = "INSERT INTO authors(id, name) VALUES(?, ?)";
     private static Connection dbConn = null;
     private static Statement st = null;
     private static ResultSet rs = null;
@@ -255,8 +254,9 @@ public class GCPDataImport {
     private static void initDbConnection() {
         try {
             dbConn = DriverManager.getConnection(
-                    prop.getProperty(DB_URL), prop.getProperty(DB_USER), prop.getProperty(DB_PASSWORD));
-            pst = dbConn.prepareStatement(dbQuery);
+                    prop.getProperty(DB_URL),
+                    prop.getProperty(DB_USER),
+                    prop.getProperty(DB_PASSWORD));
 
             st = dbConn.createStatement();
             rs = st.executeQuery("SELECT VERSION()");
@@ -397,7 +397,7 @@ public class GCPDataImport {
                 publishRecordToDb(topic, jsonNode);
 
             if (tsvEnabled)
-                publishRecordToTsv(topic, jsonNode);
+                publishRecordtoCsv(topic, jsonNode);
         }
     }
 
@@ -423,10 +423,13 @@ public class GCPDataImport {
     }
 
     private static void publishRecordToDb(String topic, JsonNode jsonNode) {
-        int id = 0;
-        String author = "";
+        String dbQuery = "INSERT INTO " + topic + "_measurement (" + ") VALUES(?, ?)";
 
         try {
+            pst = dbConn.prepareStatement(dbQuery);
+            int id = 0;
+            String author = "";
+
             pst.setInt(1, id);
             pst.setString(2, author);
             pst.executeUpdate();
@@ -436,7 +439,7 @@ public class GCPDataImport {
         }
     }
 
-    private static void publishRecordToTsv(String topic, JsonNode jsonNode) {
+    private static void publishRecordtoCsv(String topic, JsonNode jsonNode) {
         try {
             Measurement measurement = null;
             Class measurementClass = null;
@@ -554,12 +557,12 @@ public class GCPDataImport {
                 String filename = prop.getProperty(TSV_FILE, "") + topic;
                 File tsvFile = new File(filename);
                 tsvWriter = new BufferedWriter(new FileWriter(tsvFile));
-                tsvWriter.write(measurement.toHdr());
+                tsvWriter.write(measurement.toHdr(Measurement.TAB));
                 tsvWriter.newLine();
                 tsvWriters.put(topic, tsvWriter);
             }
 
-            tsvWriter.write(measurement.toTsv());
+            tsvWriter.write(measurement.toCsv(Measurement.TAB));
             tsvWriter.newLine();
         } catch (Exception e) {
             printStats();

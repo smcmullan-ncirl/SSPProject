@@ -13,47 +13,47 @@ public class TaskParameters {
     public String profile_4_freq;
     public String profile_unlimited;
 
-    public static String toHdr() {
+    public static String toHdr(String sep) {
         StringBuffer sb = new StringBuffer()
-                .append("tp_location_update_distance").append("\t")
-                .append("tp_target").append("\t")
-                .append("tp_trigger_location_update").append("\t")
-                .append("tp_packet_size_byte").append("\t")
-                .append("tp_ping_timeout_sec").append("\t")
-                .append("tp_profile_1_freq").append("\t")
-                .append("tp_profile_2_freq").append("\t")
-                .append("tp_profile_3_freq").append("\t")
-                .append("tp_profile_4_freq").append("\t")
+                .append("tp_location_update_distance").append(sep)
+                .append("tp_target").append(sep)
+                .append("tp_trigger_location_update").append(sep)
+                .append("tp_packet_size_byte").append(sep)
+                .append("tp_ping_timeout_sec").append(sep)
+                .append("tp_profile_1_freq").append(sep)
+                .append("tp_profile_2_freq").append(sep)
+                .append("tp_profile_3_freq").append(sep)
+                .append("tp_profile_4_freq").append(sep)
                 .append("tp_profile_unlimited");
         return(sb.toString());
     }
 
-    public static String toNullTsv() {
+    public static String toNullTsv(String sep) {
         StringBuffer sb = new StringBuffer()
-                .append("\t")
-                .append("\t")
-                .append("\t")
-                .append("\t")
-                .append("\t")
-                .append("\t")
-                .append("\t")
-                .append("\t")
-                .append("\t")
-                .append("\t");
+                .append(sep)
+                .append(sep)
+                .append(sep)
+                .append(sep)
+                .append(sep)
+                .append(sep)
+                .append(sep)
+                .append(sep)
+                .append(sep)
+                .append(sep);
         return(sb.toString());
     }
 
-    public String toTsv() {
+    public String toCsv(String sep) {
         StringBuffer sb = new StringBuffer()
-                .append(location_update_distance).append("\t")
-                .append(target).append("\t")
-                .append(trigger_location_update).append("\t")
-                .append(packet_size_byte).append("\t")
-                .append(ping_timeout_sec).append("\t")
-                .append(profile_1_freq).append("\t")
-                .append(profile_2_freq).append("\t")
-                .append(profile_3_freq).append("\t")
-                .append(profile_4_freq).append("\t")
+                .append(location_update_distance).append(sep)
+                .append(target).append(sep)
+                .append(trigger_location_update).append(sep)
+                .append(packet_size_byte).append(sep)
+                .append(ping_timeout_sec).append(sep)
+                .append(profile_1_freq).append(sep)
+                .append(profile_2_freq).append(sep)
+                .append(profile_3_freq).append(sep)
+                .append(profile_4_freq).append(sep)
                 .append(profile_unlimited);
         return(sb.toString());
     }

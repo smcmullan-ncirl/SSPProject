@@ -5,16 +5,16 @@ public class Location {
     public String latitude;
     public String longitude;
 
-    public static String toHdr() {
+    public static String toHdr(String sep) {
         StringBuffer sb = new StringBuffer()
-                .append("loc_latitude").append("\t")
+                .append("loc_latitude").append(sep)
                 .append("loc_longitude");
         return(sb.toString());
     }
 
-    public String toTsv() {
+    public String toCsv(String sep) {
         StringBuffer sb = new StringBuffer()
-                .append(latitude).append("\t")
+                .append(latitude).append(sep)
                 .append(longitude);
         return(sb.toString());
     }
