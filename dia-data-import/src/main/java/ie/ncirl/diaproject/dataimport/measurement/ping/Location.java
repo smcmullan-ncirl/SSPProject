@@ -7,8 +7,8 @@ public class Location {
 
     public static String toHdr() {
         StringBuffer sb = new StringBuffer()
-                .append("latitude").append("\t")
-                .append("longitude");
+                .append("loc_latitude").append("\t")
+                .append("loc_longitude");
         return(sb.toString());
     }
 

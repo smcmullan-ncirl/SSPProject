@@ -16,17 +16,17 @@ public class Task {
 
     public static String toHdr() {
         StringBuffer sb = new StringBuffer()
-                .append("count").append("\t")
-                .append("filter").append("\t")
+                .append("t_count").append("\t")
+                .append("t_filter").append("\t")
                 .append(TaskParameters.toHdr()).append("\t")
-                .append("created").append("\t")
-                .append("start_time").append("\t")
-                .append("interval_sec").append("\t")
-                .append("priority").append("\t")
-                .append("tag").append("\t")
-                .append("end_time").append("\t")
-                .append("type").append("\t")
-                .append("id");
+                .append("t_created").append("\t")
+                .append("t_start_time").append("\t")
+                .append("t_interval_sec").append("\t")
+                .append("t_priority").append("\t")
+                .append("t_tag").append("\t")
+                .append("t_end_time").append("\t")
+                .append("t_type").append("\t")
+                .append("t_id");
         return(sb.toString());
     }
 

@@ -15,16 +15,16 @@ public class TaskParameters {
 
     public static String toHdr() {
         StringBuffer sb = new StringBuffer()
-                .append("location_update_distance").append("\t")
-                .append("target").append("\t")
-                .append("trigger_location_update").append("\t")
-                .append("packet_size_byte").append("\t")
-                .append("ping_timeout_sec").append("\t")
-                .append("profile_1_freq").append("\t")
-                .append("profile_2_freq").append("\t")
-                .append("profile_3_freq").append("\t")
-                .append("profile_4_freq").append("\t")
-                .append("profile_unlimited");
+                .append("tp_location_update_distance").append("\t")
+                .append("tp_target").append("\t")
+                .append("tp_trigger_location_update").append("\t")
+                .append("tp_packet_size_byte").append("\t")
+                .append("tp_ping_timeout_sec").append("\t")
+                .append("tp_profile_1_freq").append("\t")
+                .append("tp_profile_2_freq").append("\t")
+                .append("tp_profile_3_freq").append("\t")
+                .append("tp_profile_4_freq").append("\t")
+                .append("tp_profile_unlimited");
         return(sb.toString());
     }
 

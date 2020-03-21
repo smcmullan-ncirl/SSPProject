@@ -18,12 +18,12 @@ public class PingMeasurement extends Measurement {
         StringBuffer sb = new StringBuffer()
                 .append(Task.toHdr()).append("\t")
                 .append(Parameters.toHdr()).append("\t")
-                .append("success").append("\t")
-                .append("timestamp").append("\t")
+                .append("m_success").append("\t")
+                .append("m_timestamp").append("\t")
                 .append(DeviceProperties.toHdr()).append("\t")
                 .append(Values.toHdr()).append("\t")
-                .append("type").append("\t")
-                .append("id");
+                .append("m_type").append("\t")
+                .append("m_id");
         return(sb.toString());
     }
 
