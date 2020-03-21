@@ -30,7 +30,7 @@ public class PingMeasurement extends Measurement {
     @Override
     public String toCsv(String sep, String quote) throws NullPointerException {
         StringBuffer sb = new StringBuffer()
-                .append(task != null ? task.toCsv(sep, quote) : Task.toNullTsv(sep)).append(sep)
+                .append(task != null ? task.toCsv(sep, quote) : Task.toNullCsv(sep)).append(sep)
                 .append(parameters.toCsv(sep, quote)).append(sep)
                 .append(success).append(sep)
                 .append(timestamp).append(sep)

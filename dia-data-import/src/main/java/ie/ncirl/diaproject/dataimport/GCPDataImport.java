@@ -86,7 +86,7 @@ public class GCPDataImport {
     private static Statement st = null;
     private static ResultSet rs = null;
 
-    private static Map<String, BufferedWriter> tsvWriters = null;
+    private static Map<String, BufferedWriter> csvWriters = null;
 
     private static long startTime = 0;
     private static int processedFiles = 0;
@@ -187,7 +187,7 @@ public class GCPDataImport {
             initDbConnection();
 
         if (csvEnabled)
-            initTsvFiles();
+            initCsvFiles();
     }
 
     private static void printStats() {
@@ -233,7 +233,7 @@ public class GCPDataImport {
             closeKafkaConnection();
 
         if (csvEnabled)
-            closeTsvFiles();
+            closeCsvFiles();
     }
 
     private static void initKafkaConnection() {
@@ -287,16 +287,16 @@ public class GCPDataImport {
         }
     }
 
-    private static void initTsvFiles() {
-        tsvWriters = new HashMap<>();
+    private static void initCsvFiles() {
+        csvWriters = new HashMap<>();
     }
 
-    private static void closeTsvFiles() {
-        tsvWriters.forEach((topic, writer) -> {
+    private static void closeCsvFiles() {
+        csvWriters.forEach((topic, writer) -> {
             try {
                 writer.close();
             } catch (IOException e) {
-                logger.error("Can't close TSV writer for topic {}", topic, e);
+                logger.error("Can't close CSV writer for topic {}", topic, e);
             }
         });
     }
@@ -437,21 +437,21 @@ public class GCPDataImport {
         try {
             Measurement measurement = getMeasurement(topic, jsonNode);
 
-            BufferedWriter tsvWriter = tsvWriters.get(topic);
+            BufferedWriter csvWriter = csvWriters.get(topic);
 
-            if (tsvWriter == null) {
+            if (csvWriter == null) {
                 String filename = prop.getProperty(CSV_FILE, "") + topic;
-                File tsvFile = new File(filename);
-                tsvWriter = new BufferedWriter(new FileWriter(tsvFile));
-                tsvWriter.write(measurement.toHdr(Measurement.TAB));
-                tsvWriter.newLine();
-                tsvWriters.put(topic, tsvWriter);
+                File csvFile = new File(filename);
+                csvWriter = new BufferedWriter(new FileWriter(csvFile));
+                csvWriter.write(measurement.toHdr(Measurement.TAB));
+                csvWriter.newLine();
+                csvWriters.put(topic, csvWriter);
             }
 
-            tsvWriter.write(measurement.toCsv(Measurement.TAB, Measurement.NO_QUOTE));
-            tsvWriter.newLine();
+            csvWriter.write(measurement.toCsv(Measurement.TAB, Measurement.NO_QUOTE));
+            csvWriter.newLine();
         } catch (Exception e) {
-            logger.error("Can't write to TSV file for topic {} : {}", topic,
+            logger.error("Can't write to CSV file for topic {} : {}", topic,
                     e.getMessage() != null ? e.getMessage() : jsonNode, e);
         }
     }

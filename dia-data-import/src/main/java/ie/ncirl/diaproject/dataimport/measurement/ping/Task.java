@@ -30,10 +30,10 @@ public class Task {
         return(sb.toString());
     }
 
-    public static String toNullTsv(String sep) {
+    public static String toNullCsv(String sep) {
         StringBuffer sb = new StringBuffer()
                 .append(sep).append(sep)
-                .append(TaskParameters.toNullTsv(sep)).append(sep)
+                .append(TaskParameters.toNullCsv(sep)).append(sep)
                 .append(sep)
                 .append(sep)
                 .append(sep)
