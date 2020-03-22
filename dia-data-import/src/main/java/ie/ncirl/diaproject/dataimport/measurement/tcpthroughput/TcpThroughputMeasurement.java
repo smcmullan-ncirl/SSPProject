@@ -1,8 +1,12 @@
 package ie.ncirl.diaproject.dataimport.measurement.tcpthroughput;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TcpThroughputMeasurement extends Measurement {
+    private static Logger logger = LoggerFactory.getLogger(TcpThroughputMeasurement.class);
+
     @Override
     public String toHdr(String sep) {
         throw new UnsupportedOperationException("Not implemented");

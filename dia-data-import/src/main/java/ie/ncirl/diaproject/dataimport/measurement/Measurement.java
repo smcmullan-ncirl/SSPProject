@@ -1,6 +1,11 @@
 package ie.ncirl.diaproject.dataimport.measurement;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 abstract public class Measurement {
+    private static Logger logger = LoggerFactory.getLogger(Measurement.class);
+
     public static final String NULL = null;
     public static final String NO_NULL = "";
 
@@ -20,6 +25,10 @@ abstract public class Measurement {
         if(field == null) {
             sb.append(field).append(sep);
         } else {
+            if(field.contains(quote)) {
+                field = escapeQuoteChars(field, quote);
+            }
+
             sb.append(quote).append(field).append(quote).append(sep);
         }
         return sb;
@@ -27,11 +36,24 @@ abstract public class Measurement {
 
     public static StringBuffer quote(StringBuffer sb, String field, String quote) {
         if(field == null) {
-            sb.append(field);
+            sb.append((String) null);
         } else {
+            if(field.contains(quote)) {
+                field = escapeQuoteChars(field, quote);
+            }
+
             sb.append(quote).append(field).append(quote);
         }
         return sb;
+    }
+
+    private static String escapeQuoteChars(String field, String quote) {
+        if(quote.equals(SINGLE_QUOTE)) {
+            field = field.replaceAll("'", "''");
+        } else if(quote.equals(DOUBLE_QUOTE)) {
+            field = field.replaceAll("\"", "\"\"");
+        }
+        return field;
     }
 
     public static StringBuffer separate(StringBuffer sb, String field, String sep) {

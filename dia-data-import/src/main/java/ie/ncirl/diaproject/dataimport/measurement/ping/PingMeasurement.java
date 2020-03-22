@@ -1,8 +1,11 @@
 package ie.ncirl.diaproject.dataimport.measurement.ping;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PingMeasurement extends Measurement {
+    private static Logger logger = LoggerFactory.getLogger(PingMeasurement.class);
 
     public Task task;
     public Parameters parameters;

@@ -1,8 +1,11 @@
 package ie.ncirl.diaproject.dataimport.measurement.ping;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DeviceInfo extends Measurement {
+    private static Logger logger = LoggerFactory.getLogger(DeviceInfo.class);
 
     public String model;
     public String os;

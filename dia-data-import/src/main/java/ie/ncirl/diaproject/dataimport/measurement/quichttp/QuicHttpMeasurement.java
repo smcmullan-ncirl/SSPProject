@@ -1,8 +1,12 @@
 package ie.ncirl.diaproject.dataimport.measurement.quichttp;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QuicHttpMeasurement extends Measurement {
+    private static Logger logger = LoggerFactory.getLogger(QuicHttpMeasurement.class);
+
     @Override
     public String toHdr(String sep) {
         throw new UnsupportedOperationException("Not implemented");

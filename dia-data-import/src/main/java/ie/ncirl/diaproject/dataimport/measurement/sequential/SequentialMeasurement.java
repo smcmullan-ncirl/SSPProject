@@ -1,8 +1,12 @@
 package ie.ncirl.diaproject.dataimport.measurement.sequential;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SequentialMeasurement extends Measurement {
+    private static Logger logger = LoggerFactory.getLogger(SequentialMeasurement.class);
+
     @Override
     public String toHdr(String sep) {
         throw new UnsupportedOperationException("Not implemented");

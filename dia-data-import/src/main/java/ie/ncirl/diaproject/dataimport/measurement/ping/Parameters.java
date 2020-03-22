@@ -1,8 +1,12 @@
 package ie.ncirl.diaproject.dataimport.measurement.ping;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Parameters extends Measurement {
+    private static Logger logger = LoggerFactory.getLogger(Parameters.class);
+
     public String count;
     public String target;
     public String parameters;
