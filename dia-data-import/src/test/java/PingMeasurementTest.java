@@ -41,7 +41,7 @@ public class PingMeasurementTest {
             Measurement measurement = (Measurement) objectMapper.treeToValue(jsonNode, measurementClass);
 
             System.out.println(measurement.toHdr(Measurement.TAB));
-            System.out.println(measurement.toCsv(Measurement.NO_QUOTE, Measurement.TAB));
+            System.out.println(measurement.toCsv(Measurement.NO_NULL, Measurement.NO_QUOTE, Measurement.TAB));
         });
     }
 

@@ -55,7 +55,7 @@ public class Parameters extends Measurement {
     }
 
     @Override
-    public String toCsv(String quote, String sep) {
+    public String toCsv(String nullValue, String quote, String sep) {
         StringBuffer sb = new StringBuffer();
         quoteAndSeparate(sb, count, quote, sep);
         quoteAndSeparate(sb, target, quote, sep);
@@ -83,30 +83,30 @@ public class Parameters extends Measurement {
     }
 
     @Override
-    public String toNullCsv(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append(sep) // count
-                .append(sep) // target
-                .append(sep) // parameters
-                .append(sep) // start_time
-                .append(sep) // interval_sec
-                .append(sep) // ping_timeout_sec
-                .append(sep) // priority
-                .append(sep) // packet_size_byte
-                .append(sep) // ping_exe
-                .append(sep) // key
-                .append(sep) // type
-                .append(sep) // end_time
-                .append(sep) // myspeedtest
-                .append(sep) // ping
-                .append(sep) // options
-                .append(sep) // context_interval_sec
-                .append(sep) // ping_time_to_live
-                .append(sep) // ping_icmp_interval_sec
-                .append(sep) // sensitive
-                .append(sep) // ping_method
-                .append(sep) // use_https
-                .append(NO_SEP); // port
+    public String toNullCsv(String nullValue, String sep) {
+        StringBuffer sb = new StringBuffer();
+        separate(sb, nullValue, sep); // count
+        separate(sb, nullValue, sep); // target
+        separate(sb, nullValue, sep); // parameters
+        separate(sb, nullValue, sep); // start_time
+        separate(sb, nullValue, sep); // interval_sec
+        separate(sb, nullValue, sep); // ping_timeout_sec
+        separate(sb, nullValue, sep); // priority
+        separate(sb, nullValue, sep); // packet_size_byte
+        separate(sb, nullValue, sep); // ping_exe
+        separate(sb, nullValue, sep); // key
+        separate(sb, nullValue, sep); // type
+        separate(sb, nullValue, sep); // end_time
+        separate(sb, nullValue, sep); // myspeedtest
+        separate(sb, nullValue, sep); // ping
+        separate(sb, nullValue, sep); // options
+        separate(sb, nullValue, sep); // context_interval_sec
+        separate(sb, nullValue, sep); // ping_time_to_live
+        separate(sb, nullValue, sep); // ping_icmp_interval_sec
+        separate(sb, nullValue, sep); // sensitive
+        separate(sb, nullValue, sep); // ping_method
+        separate(sb, nullValue, sep); // use_https
+        separate(sb, nullValue, NO_SEP); // port
         return(sb.toString());
     }
 }

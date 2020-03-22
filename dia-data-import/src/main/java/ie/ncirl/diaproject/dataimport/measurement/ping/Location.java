@@ -16,7 +16,7 @@ public class Location extends Measurement {
     }
 
     @Override
-    public String toCsv(String quote, String sep) {
+    public String toCsv(String nullValue, String quote, String sep) {
         StringBuffer sb = new StringBuffer();
         quoteAndSeparate(sb, latitude, quote, sep);
         quoteAndSeparate(sb, longitude, quote, NO_SEP);
@@ -24,10 +24,10 @@ public class Location extends Measurement {
     }
 
     @Override
-    public String toNullCsv(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append(sep) // latitude
-                .append(NO_SEP); // longitude
+    public String toNullCsv(String nullValue, String sep) {
+        StringBuffer sb = new StringBuffer();
+        separate(sb, nullValue, sep); // latitude
+        separate(sb, nullValue, NO_SEP); // longitude
         return(sb.toString());
     }
 }

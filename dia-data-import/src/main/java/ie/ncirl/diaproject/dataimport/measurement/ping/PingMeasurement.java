@@ -28,27 +28,27 @@ public class PingMeasurement extends Measurement {
     }
 
     @Override
-    public String toCsv(String quote, String sep) throws NullPointerException {
+    public String toCsv(String nullValue, String quote, String sep) throws NullPointerException {
         StringBuffer sb = new StringBuffer();
 
         separate(sb, task != null
-                ? task.toCsv(quote, sep)
-                : (new Task()).toNullCsv(sep), sep);
+                ? task.toCsv(nullValue, quote, sep)
+                : (new Task()).toNullCsv(nullValue, sep), sep);
 
         separate(sb, parameters != null
-                ? parameters.toCsv(quote, sep)
-                : (new Parameters()).toNullCsv(sep), sep);
+                ? parameters.toCsv(nullValue, quote, sep)
+                : (new Parameters()).toNullCsv(nullValue, sep), sep);
 
         quoteAndSeparate(sb, success, quote, sep);
         quoteAndSeparate(sb, timestamp, quote, sep);
 
         separate(sb, device_properties != null
-                ? device_properties.toCsv(quote, sep)
-                : (new DeviceProperties()).toNullCsv(sep), sep);
+                ? device_properties.toCsv(nullValue, quote, sep)
+                : (new DeviceProperties()).toNullCsv(nullValue, sep), sep);
 
         separate(sb, values != null
-                ? values.toCsv(quote, sep)
-                : (new Values()).toNullCsv(sep), sep);
+                ? values.toCsv(nullValue, quote, sep)
+                : (new Values()).toNullCsv(nullValue, sep), sep);
 
         quoteAndSeparate(sb, type, quote, sep);
         quoteAndSeparate(sb, id, quote, NO_SEP);
@@ -56,16 +56,16 @@ public class PingMeasurement extends Measurement {
     }
 
     @Override
-    public String toNullCsv(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append((new Task()).toNullCsv(sep)).append(sep) // task
-                .append((new TaskParameters()).toNullCsv(sep)).append(sep) // parameters
-                .append(sep) // success
-                .append(sep) // timestamp
-                .append((new DeviceProperties()).toNullCsv(sep)).append(sep) // device_properties
-                .append(sep) // values
-                .append(sep) // type
-                .append(NO_SEP); // id
+    public String toNullCsv(String nullValue, String sep) {
+        StringBuffer sb = new StringBuffer();
+        separate(sb, (new Task()).toNullCsv(nullValue, sep), sep).append(sep); // task
+        separate(sb, (new TaskParameters()).toNullCsv(nullValue, sep), sep).append(sep); // parameters
+        separate(sb, nullValue, sep); // success
+        separate(sb, nullValue, sep); // timestamp
+        separate(sb, (new DeviceProperties()).toNullCsv(nullValue, sep), sep).append(sep); // device_properties
+        separate(sb, nullValue, sep); // values
+        separate(sb, nullValue, sep); // type
+        separate(sb, nullValue, NO_SEP); // id
         return(sb.toString());
     }
 }

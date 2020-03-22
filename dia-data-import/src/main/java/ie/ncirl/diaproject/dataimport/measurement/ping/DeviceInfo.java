@@ -24,7 +24,7 @@ public class DeviceInfo extends Measurement {
     }
 
     @Override
-    public String toCsv(String quote, String sep) {
+    public String toCsv(String nullValue, String quote, String sep) {
         StringBuffer sb = new StringBuffer();
         quoteAndSeparate(sb, model, quote, sep);
         quoteAndSeparate(sb, os, quote, sep);
@@ -37,14 +37,14 @@ public class DeviceInfo extends Measurement {
     }
 
     @Override
-    public String toNullCsv(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append(sep) // model
-                .append(sep) // os
-                .append(sep) // manufacturer
-                .append(sep) // tac
-                .append(sep) // id
-                .append(NO_SEP); // user
+    public String toNullCsv(String nullValue, String sep) {
+        StringBuffer sb = new StringBuffer();
+        separate(sb, nullValue, sep); // model
+        separate(sb, nullValue, sep); // os
+        separate(sb, nullValue, sep); // manufacturer
+        separate(sb, nullValue, sep); // tac
+        separate(sb, nullValue, sep); // id
+        separate(sb, nullValue, NO_SEP); // user
         return(sb.toString());
     }
 }

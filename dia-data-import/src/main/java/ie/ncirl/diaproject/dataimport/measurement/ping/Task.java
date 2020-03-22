@@ -34,14 +34,14 @@ public class Task extends Measurement {
     }
 
     @Override
-    public String toCsv(String quote, String sep) throws NullPointerException {
+    public String toCsv(String nullValue, String quote, String sep) throws NullPointerException {
         StringBuffer sb = new StringBuffer();
         quoteAndSeparate(sb, count, quote, sep);
         quoteAndSeparate(sb, filter, quote, sep);
 
         separate(sb, parameters != null
-                        ? parameters.toCsv(quote, sep)
-                        : (new TaskParameters()).toNullCsv(sep), sep);
+                        ? parameters.toCsv(nullValue, quote, sep)
+                        : (new TaskParameters()).toNullCsv(nullValue, sep), sep);
 
         quoteAndSeparate(sb, created, quote, sep);
         quoteAndSeparate(sb, start_time, quote, sep);
@@ -55,19 +55,19 @@ public class Task extends Measurement {
     }
 
     @Override
-    public String toNullCsv(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append(sep).append(sep) // count
-                .append(sep) // filter
-                .append((new TaskParameters()).toNullCsv(sep)).append(sep) // parameters
-                .append(sep) // created
-                .append(sep) // start_time
-                .append(sep) // interval_sec
-                .append(sep) // priority
-                .append(sep) // tag
-                .append(sep) // end_time
-                .append(sep) // type
-                .append(NO_SEP); // id
+    public String toNullCsv(String nullValue, String sep) {
+        StringBuffer sb = new StringBuffer();
+        separate(sb, nullValue, sep); // count
+        separate(sb, nullValue, sep); // filter
+        separate(sb, (new TaskParameters()).toNullCsv(nullValue, sep), sep).append(sep); // parameters
+        separate(sb, nullValue, sep); // created
+        separate(sb, nullValue, sep); // start_time
+        separate(sb, nullValue, sep); // interval_sec
+        separate(sb, nullValue, sep); // priority
+        separate(sb, nullValue, sep); // tag
+        separate(sb, nullValue, sep); // end_time
+        separate(sb, nullValue, sep); // type
+        separate(sb, nullValue, NO_SEP); // id
         return(sb.toString());
     }
 }

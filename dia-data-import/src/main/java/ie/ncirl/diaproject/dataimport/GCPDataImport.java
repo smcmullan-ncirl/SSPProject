@@ -415,18 +415,20 @@ public class GCPDataImport {
     }
 
     private static void publishRecordToDb(String topic, JsonNode jsonNode) {
+        String dbQuery = "";
+
         try {
             Measurement measurement = getMeasurement(topic, jsonNode);
 
-            String dbQuery =
+            dbQuery =
                     "INSERT INTO " + topic + "_measurement ("
                             + measurement.toHdr(Measurement.COMMA)
-                            + ") VALUES(" + measurement.toCsv(Measurement.SINGLE_QUOTE, Measurement.COMMA) + ")";
-
-            logger.debug(dbQuery);
+                            + ") VALUES("
+                            + measurement.toCsv(Measurement.NULL, Measurement.SINGLE_QUOTE, Measurement.COMMA) + ")";
 
             st.executeUpdate(dbQuery);
         } catch (Exception e) {
+            logger.info(dbQuery);
             logger.error("Can't publish record to DB for topic {} : {}", topic,
                     e.getMessage() != null ? e.getMessage() : jsonNode, e);
             System.exit(-1);
@@ -448,7 +450,7 @@ public class GCPDataImport {
                 csvWriters.put(topic, csvWriter);
             }
 
-            csvWriter.write(measurement.toCsv(Measurement.NO_QUOTE, Measurement.TAB));
+            csvWriter.write(measurement.toCsv(Measurement.NO_NULL, Measurement.NO_QUOTE, Measurement.TAB));
             csvWriter.newLine();
         } catch (Exception e) {
             logger.error("Can't write to CSV file for topic {} : {}", topic,

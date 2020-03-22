@@ -53,7 +53,7 @@ public class Values extends Measurement {
     }
 
     @Override
-    public String toCsv(String quote, String sep) {
+    public String toCsv(String nullValue, String quote, String sep) {
         StringBuffer sb = new StringBuffer();
         quoteAndSeparate(sb, packets_sent, quote, sep);
         quoteAndSeparate(sb, packet_loss, quote, sep);
@@ -80,28 +80,28 @@ public class Values extends Measurement {
     }
 
     @Override
-    public String toNullCsv(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append(sep) // packets_sent
-                .append(sep) // packet_loss
-                .append(sep) // mean_rtt_ms
-                .append(sep) // CalledByLocation
-                .append(sep) // MeasurementLatitude
-                .append(sep) // max_rtt_ms
-                .append(sep) // target_ip
-                .append(sep) // stddev_rtt_ms
-                .append(sep) // min_rtt_ms
-                .append(sep) // MeasurementLongitude
-                .append(sep) // filtered_mean_rtt_ms
-                .append(sep) // error
-                .append(sep) // ping_method
-                .append(sep) // battery
-                .append(sep) // src_ip
-                .append(sep) // dst_ip
-                .append(sep) // measure
-                .append(sep) // time
-                .append(sep) // context_result
-                .append(NO_SEP); // mptcp_config
+    public String toNullCsv(String nullValue, String sep) {
+        StringBuffer sb = new StringBuffer();
+        separate(sb, nullValue, sep); // packets_sent
+        separate(sb, nullValue, sep); // packet_loss
+        separate(sb, nullValue, sep); // mean_rtt_ms
+        separate(sb, nullValue, sep); // CalledByLocation
+        separate(sb, nullValue, sep); // MeasurementLatitude
+        separate(sb, nullValue, sep); // max_rtt_ms
+        separate(sb, nullValue, sep); // target_ip
+        separate(sb, nullValue, sep); // stddev_rtt_ms
+        separate(sb, nullValue, sep); // min_rtt_ms
+        separate(sb, nullValue, sep); // MeasurementLongitude
+        separate(sb, nullValue, sep); // filtered_mean_rtt_ms
+        separate(sb, nullValue, sep); // error
+        separate(sb, nullValue, sep); // ping_method
+        separate(sb, nullValue, sep); // battery
+        separate(sb, nullValue, sep); // src_ip
+        separate(sb, nullValue, sep); // dst_ip
+        separate(sb, nullValue, sep); // measure
+        separate(sb, nullValue, sep); // time
+        separate(sb, nullValue, sep); // context_result
+        separate(sb, nullValue, NO_SEP); // mptcp_config
         return(sb.toString());
     }
 }

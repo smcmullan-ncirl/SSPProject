@@ -1,17 +1,20 @@
 package ie.ncirl.diaproject.dataimport.measurement;
 
 abstract public class Measurement {
-    public static final String TAB = "\t";
-    public static final String COMMA = ",";
-    public static final String NO_SEP = "";
+    public static final String NULL = null;
+    public static final String NO_NULL = "";
 
     public static final String DOUBLE_QUOTE = "\"";
     public static final String SINGLE_QUOTE = "'";
     public static final String NO_QUOTE = "";
 
+    public static final String TAB = "\t";
+    public static final String COMMA = ",";
+    public static final String NO_SEP = "";
+
     abstract public String toHdr(String sep) throws UnsupportedOperationException;
-    abstract public String toCsv(String quote, String sep) throws UnsupportedOperationException;
-    abstract public String toNullCsv(String sep) throws UnsupportedOperationException;
+    abstract public String toCsv(String nullValue, String quote, String sep) throws UnsupportedOperationException;
+    abstract public String toNullCsv(String nullValue, String sep) throws UnsupportedOperationException;
 
     public static StringBuffer quoteAndSeparate(StringBuffer sb, String field, String quote, String sep) {
         if(field == null) {

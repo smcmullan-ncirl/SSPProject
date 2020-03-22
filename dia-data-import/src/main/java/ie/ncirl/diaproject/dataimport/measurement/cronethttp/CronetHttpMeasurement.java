@@ -9,12 +9,12 @@ public class CronetHttpMeasurement extends Measurement {
     }
 
     @Override
-    public String toCsv(String quote, String sep) {
+    public String toCsv(String nullValue, String quote, String sep) {
         throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
-    public String toNullCsv(String sep) {
+    public String toNullCsv(String nullValue, String sep) {
         throw new UnsupportedOperationException("Not implemented");
     }
 }

@@ -32,7 +32,7 @@ public class TaskParameters extends Measurement {
     }
 
     @Override
-    public String toCsv(String quote, String sep) {
+    public String toCsv(String nullValue, String quote, String sep) {
         StringBuffer sb = new StringBuffer();
         quoteAndSeparate(sb, location_update_distance, quote, sep);
         quoteAndSeparate(sb, target, quote, sep);
@@ -48,18 +48,18 @@ public class TaskParameters extends Measurement {
     }
 
     @Override
-    public String toNullCsv(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append(sep) // location_update_distance
-                .append(sep) // target
-                .append(sep) // trigger_location_update
-                .append(sep) // packet_size_byte
-                .append(sep) // ping_timeout_sec
-                .append(sep) // profile_1_freq
-                .append(sep) // profile_2_freq
-                .append(sep) // profile_3_freq
-                .append(sep) // profile_4_freq
-                .append(NO_SEP); // profile_unlimited
+    public String toNullCsv(String nullValue, String sep) {
+        StringBuffer sb = new StringBuffer();
+        separate(sb, nullValue, sep); // location_update_distance
+        separate(sb, nullValue, sep); // target
+        separate(sb, nullValue, sep); // trigger_location_update
+        separate(sb, nullValue, sep); // packet_size_byte
+        separate(sb, nullValue, sep); // ping_timeout_sec
+        separate(sb, nullValue, sep); // profile_1_freq
+        separate(sb, nullValue, sep); // profile_2_freq
+        separate(sb, nullValue, sep); // profile_3_freq
+        separate(sb, nullValue, sep); // profile_4_freq
+        separate(sb, nullValue, NO_SEP); // profile_unlimited
         return(sb.toString());
     }
 }

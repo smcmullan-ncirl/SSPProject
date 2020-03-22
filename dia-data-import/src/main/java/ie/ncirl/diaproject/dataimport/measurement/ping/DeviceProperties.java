@@ -56,7 +56,7 @@ public class DeviceProperties extends Measurement {
     }
 
     @Override
-    public String toCsv(String quote, String sep) throws NullPointerException {
+    public String toCsv(String nullValue, String quote, String sep) throws NullPointerException {
         StringBuffer sb = new StringBuffer();
         quoteAndSeparate(sb, battery_level, quote, sep);
         quoteAndSeparate(sb, cell_info, quote, sep);
@@ -65,14 +65,14 @@ public class DeviceProperties extends Measurement {
         quoteAndSeparate(sb, os_version, quote, sep);
 
         separate(sb, device_info != null
-                ? device_info.toCsv(quote, sep)
-                : (new DeviceInfo()).toNullCsv(sep), sep);
+                ? device_info.toCsv(nullValue, quote, sep)
+                : (new DeviceInfo()).toNullCsv(nullValue, sep), sep);
 
         quoteAndSeparate(sb, carrier, quote, sep);
 
         separate(sb, location != null
-                ? location.toCsv(quote, sep)
-                : (new Location()).toNullCsv(sep), sep);
+                ? location.toCsv(nullValue, quote, sep)
+                : (new Location()).toNullCsv(nullValue, sep), sep);
 
         quoteAndSeparate(sb, rssi, quote, sep);
         quoteAndSeparate(sb, app_version, quote, sep);
@@ -91,29 +91,29 @@ public class DeviceProperties extends Measurement {
     }
 
     @Override
-    public String toNullCsv(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append(sep) // battery_level
-                .append(sep) // cell_info
-                .append(sep) // timestamp
-                .append(sep) // network_type
-                .append(sep) // os_version
-                .append((new DeviceInfo()).toNullCsv(sep)).append(sep) // device_info
-                .append(sep) // carrier
-                .append((new Location()).toNullCsv(sep)).append(sep) // location
-                .append(sep) // rssi
-                .append(sep) // app_version
-                .append(sep) // location_type
-                .append(sep) // is_battery_charging
-                .append(sep) // host_apps
-                .append(sep) // registration_id
-                .append(sep) // mobilyzer_version
-                .append(sep) // request_app
-                .append(sep) // ssid
-                .append(sep) // bssid
-                .append(sep) // cell_rssi
-                .append(sep) // wifi_ip_address
-                .append(NO_SEP); // country_code
+    public String toNullCsv(String nullValue, String sep) {
+        StringBuffer sb = new StringBuffer();
+        separate(sb, nullValue, sep); // battery_level
+        separate(sb, nullValue, sep); // cell_info
+        separate(sb, nullValue, sep); // timestamp
+        separate(sb, nullValue, sep); // network_type
+        separate(sb, nullValue, sep); // os_version
+        separate(sb, (new DeviceInfo()).toNullCsv(nullValue, sep), sep).append(sep); // device_info
+        separate(sb, nullValue, sep); // carrier
+        separate(sb, (new Location()).toNullCsv(nullValue, sep), sep).append(sep); // location
+        separate(sb, nullValue, sep); // rssi
+        separate(sb, nullValue, sep); // app_version
+        separate(sb, nullValue, sep); // location_type
+        separate(sb, nullValue, sep); // is_battery_charging
+        separate(sb, nullValue, sep); // host_apps
+        separate(sb, nullValue, sep); // registration_id
+        separate(sb, nullValue, sep); // mobilyzer_version
+        separate(sb, nullValue, sep); // request_app
+        separate(sb, nullValue, sep); // ssid
+        separate(sb, nullValue, sep); // bssid
+        separate(sb, nullValue, sep); // cell_rssi
+        separate(sb, nullValue, sep); // wifi_ip_address
+        separate(sb, nullValue, NO_SEP); // country_code
         return(sb.toString());
     }
 }
