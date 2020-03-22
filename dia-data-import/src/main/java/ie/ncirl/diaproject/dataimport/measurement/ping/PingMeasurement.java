@@ -58,11 +58,11 @@ public class PingMeasurement extends Measurement {
     @Override
     public String toNullCsv(String nullValue, String sep) {
         StringBuffer sb = new StringBuffer();
-        separate(sb, (new Task()).toNullCsv(nullValue, sep), sep).append(sep); // task
-        separate(sb, (new TaskParameters()).toNullCsv(nullValue, sep), sep).append(sep); // parameters
+        separate(sb, (new Task()).toNullCsv(nullValue, sep), sep); // task
+        separate(sb, (new TaskParameters()).toNullCsv(nullValue, sep), sep); // parameters
         separate(sb, nullValue, sep); // success
         separate(sb, nullValue, sep); // timestamp
-        separate(sb, (new DeviceProperties()).toNullCsv(nullValue, sep), sep).append(sep); // device_properties
+        separate(sb, (new DeviceProperties()).toNullCsv(nullValue, sep), sep); // device_properties
         separate(sb, nullValue, sep); // values
         separate(sb, nullValue, sep); // type
         separate(sb, nullValue, NO_SEP); // id

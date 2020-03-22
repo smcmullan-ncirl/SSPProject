@@ -98,9 +98,9 @@ public class DeviceProperties extends Measurement {
         separate(sb, nullValue, sep); // timestamp
         separate(sb, nullValue, sep); // network_type
         separate(sb, nullValue, sep); // os_version
-        separate(sb, (new DeviceInfo()).toNullCsv(nullValue, sep), sep).append(sep); // device_info
+        separate(sb, (new DeviceInfo()).toNullCsv(nullValue, sep), sep); // device_info
         separate(sb, nullValue, sep); // carrier
-        separate(sb, (new Location()).toNullCsv(nullValue, sep), sep).append(sep); // location
+        separate(sb, (new Location()).toNullCsv(nullValue, sep), sep); // location
         separate(sb, nullValue, sep); // rssi
         separate(sb, nullValue, sep); // app_version
         separate(sb, nullValue, sep); // location_type

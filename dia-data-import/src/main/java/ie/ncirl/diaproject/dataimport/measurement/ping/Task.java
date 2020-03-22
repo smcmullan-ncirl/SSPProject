@@ -59,7 +59,7 @@ public class Task extends Measurement {
         StringBuffer sb = new StringBuffer();
         separate(sb, nullValue, sep); // count
         separate(sb, nullValue, sep); // filter
-        separate(sb, (new TaskParameters()).toNullCsv(nullValue, sep), sep).append(sep); // parameters
+        separate(sb, (new TaskParameters()).toNullCsv(nullValue, sep), sep); // parameters
         separate(sb, nullValue, sep); // created
         separate(sb, nullValue, sep); // start_time
         separate(sb, nullValue, sep); // interval_sec
