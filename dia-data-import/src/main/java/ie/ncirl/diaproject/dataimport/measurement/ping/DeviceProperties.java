@@ -1,8 +1,10 @@
 package ie.ncirl.diaproject.dataimport.measurement.ping;
 
+import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+
 import java.util.Arrays;
 
-public class DeviceProperties {
+public class DeviceProperties extends Measurement {
 
     public String battery_level;
     public String cell_info;
@@ -26,56 +28,92 @@ public class DeviceProperties {
     public String wifi_ip_address;
     public String country_code;
 
-    public static String toHdr(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append("dp_battery_level").append(sep)
-                .append("dp_cell_info").append(sep)
-                .append("dp_timestamp").append(sep)
-                .append("dp_network_type").append(sep)
-                .append("dp_os_version").append(sep)
-                .append(DeviceInfo.toHdr(sep)).append(sep)
-                .append("dp_carrier").append(sep)
-                .append(Location.toHdr(sep)).append(sep)
-                .append("dp_rssi").append(sep)
-                .append("dp_app_version").append(sep)
-                .append("dp_location_type").append(sep)
-                .append("dp_is_battery_charging").append(sep)
-                .append("dp_host_apps").append(sep)
-                .append("dp_registration_id").append(sep)
-                .append("dp_mobilyzer_version").append(sep)
-                .append("dp_request_app").append(sep)
-                .append("dp_ssid").append(sep)
-                .append("dp_bssid").append(sep)
-                .append("dp_cell_rssi").append(sep)
-                .append("dp_wifi_ip_address").append(sep)
-                .append("dp_country_code");
+    @Override
+    public String toHdr(String sep) {
+        StringBuffer sb = new StringBuffer();
+        separate(sb, "dp_battery_level", sep);
+        separate(sb, "dp_cell_info", sep);
+        separate(sb, "dp_timestamp", sep);
+        separate(sb, "dp_network_type", sep);
+        separate(sb, "dp_os_version", sep);
+        separate(sb, (new DeviceInfo()).toHdr(sep), sep);
+        separate(sb, "dp_carrier", sep);
+        separate(sb, (new Location()).toHdr(sep), sep);
+        separate(sb, "dp_rssi", sep);
+        separate(sb, "dp_app_version", sep);
+        separate(sb, "dp_location_type", sep);
+        separate(sb, "dp_is_battery_charging", sep);
+        separate(sb, "dp_host_apps", sep);
+        separate(sb, "dp_registration_id", sep);
+        separate(sb, "dp_mobilyzer_version", sep);
+        separate(sb, "dp_request_app", sep);
+        separate(sb, "dp_ssid", sep);
+        separate(sb, "dp_bssid", sep);
+        separate(sb, "dp_cell_rssi", sep);
+        separate(sb, "dp_wifi_ip_address", sep);
+        separate(sb, "dp_country_code", NO_SEP);
         return(sb.toString());
     }
 
-    public String toCsv(String sep, String quote) throws NullPointerException {
-        StringBuffer sb = new StringBuffer()
-                .append(battery_level).append(sep)
-                .append(cell_info).append(sep)
-                .append(timestamp).append(sep)
-                .append(network_type).append(sep)
-                .append(os_version).append(sep)
-                .append(device_info.toCsv(sep, quote)).append(sep)
-                .append(carrier).append(sep)
-                .append(location.toCsv(sep, quote)).append(sep)
-                .append(rssi).append(sep)
-                .append(app_version).append(sep)
-                .append(location_type).append(sep)
-                .append(is_battery_charging).append(sep)
-                .append(Arrays.toString(host_apps)).append(sep)
-                .append(registration_id).append(sep)
-                .append(mobilyzer_version).append(sep)
-                .append(request_app).append(sep)
-                .append(ssid).append(sep)
-                .append(bssid).append(sep)
-                .append(cell_rssi).append(sep)
-                .append(wifi_ip_address).append(sep)
-                .append(country_code);
+    @Override
+    public String toCsv(String quote, String sep) throws NullPointerException {
+        StringBuffer sb = new StringBuffer();
+        quoteAndSeparate(sb, battery_level, quote, sep);
+        quoteAndSeparate(sb, cell_info, quote, sep);
+        quoteAndSeparate(sb, timestamp, quote, sep);
+        quoteAndSeparate(sb, network_type, quote, sep);
+        quoteAndSeparate(sb, os_version, quote, sep);
+
+        separate(sb, device_info != null
+                ? device_info.toCsv(quote, sep)
+                : (new DeviceInfo()).toNullCsv(sep), sep);
+
+        quoteAndSeparate(sb, carrier, quote, sep);
+
+        separate(sb, location != null
+                ? location.toCsv(quote, sep)
+                : (new Location()).toNullCsv(sep), sep);
+
+        quoteAndSeparate(sb, rssi, quote, sep);
+        quoteAndSeparate(sb, app_version, quote, sep);
+        quoteAndSeparate(sb, location_type, quote, sep);
+        quoteAndSeparate(sb, is_battery_charging, quote, sep);
+        quoteAndSeparate(sb, Arrays.toString(host_apps), quote, sep);
+        quoteAndSeparate(sb, registration_id, quote, sep);
+        quoteAndSeparate(sb, mobilyzer_version, quote, sep);
+        quoteAndSeparate(sb, request_app, quote, sep);
+        quoteAndSeparate(sb, ssid, quote, sep);
+        quoteAndSeparate(sb, bssid, quote, sep);
+        quoteAndSeparate(sb, cell_rssi, quote, sep);
+        quoteAndSeparate(sb, wifi_ip_address, quote, sep);
+        quoteAndSeparate(sb, country_code, quote, NO_SEP);
         return(sb.toString());
     }
 
+    @Override
+    public String toNullCsv(String sep) {
+        StringBuffer sb = new StringBuffer()
+                .append(sep) // battery_level
+                .append(sep) // cell_info
+                .append(sep) // timestamp
+                .append(sep) // network_type
+                .append(sep) // os_version
+                .append((new DeviceInfo()).toNullCsv(sep)).append(sep) // device_info
+                .append(sep) // carrier
+                .append((new Location()).toNullCsv(sep)).append(sep) // location
+                .append(sep) // rssi
+                .append(sep) // app_version
+                .append(sep) // location_type
+                .append(sep) // is_battery_charging
+                .append(sep) // host_apps
+                .append(sep) // registration_id
+                .append(sep) // mobilyzer_version
+                .append(sep) // request_app
+                .append(sep) // ssid
+                .append(sep) // bssid
+                .append(sep) // cell_rssi
+                .append(sep) // wifi_ip_address
+                .append(NO_SEP); // country_code
+        return(sb.toString());
+    }
 }

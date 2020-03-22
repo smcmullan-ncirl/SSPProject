@@ -1,6 +1,8 @@
 package ie.ncirl.diaproject.dataimport.measurement.ping;
 
-public class DeviceInfo {
+import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+
+public class DeviceInfo extends Measurement {
 
     public String model;
     public String os;
@@ -9,26 +11,40 @@ public class DeviceInfo {
     public String id;
     public String user;
 
-    public static String toHdr(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append("di_model").append(sep)
-                .append("di_os").append(sep)
-                .append("di_manufacturer").append(sep)
-                .append("di_tac").append(sep)
-                .append("di_id").append(sep)
-                .append("di_user");
+    @Override
+    public String toHdr(String sep) {
+        StringBuffer sb = new StringBuffer();
+        separate(sb, "di_model", sep);
+        separate(sb, "di_os", sep);
+        separate(sb, "di_manufacturer", sep);
+        separate(sb, "di_tac", sep);
+        separate(sb, "di_id", sep);
+        separate(sb, "di_user", NO_SEP);
         return(sb.toString());
     }
 
-    public String toCsv(String sep, String quote) {
-        StringBuffer sb = new StringBuffer()
-                .append(quote).append(model).append(quote).append(sep)
-                .append(quote).append(os).append(quote).append(sep)
-                .append(quote).append(manufacturer).append(quote).append(sep)
-                .append(quote).append(tac).append(quote).append(sep)
-                .append(quote).append(id).append(quote).append(sep)
-                .append(quote).append(user).append(quote);
+    @Override
+    public String toCsv(String quote, String sep) {
+        StringBuffer sb = new StringBuffer();
+        quoteAndSeparate(sb, model, quote, sep);
+        quoteAndSeparate(sb, os, quote, sep);
+        quoteAndSeparate(sb, manufacturer, quote, sep);
+        quoteAndSeparate(sb, tac, quote, sep);
+        quoteAndSeparate(sb, id, quote, sep);
+        quoteAndSeparate(sb, user, quote, NO_SEP);
+
         return(sb.toString());
     }
 
+    @Override
+    public String toNullCsv(String sep) {
+        StringBuffer sb = new StringBuffer()
+                .append(sep) // model
+                .append(sep) // os
+                .append(sep) // manufacturer
+                .append(sep) // tac
+                .append(sep) // id
+                .append(NO_SEP); // user
+        return(sb.toString());
+    }
 }

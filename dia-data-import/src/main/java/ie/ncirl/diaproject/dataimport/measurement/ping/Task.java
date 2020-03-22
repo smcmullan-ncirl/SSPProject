@@ -1,6 +1,8 @@
 package ie.ncirl.diaproject.dataimport.measurement.ping;
 
-public class Task {
+import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+
+public class Task extends Measurement {
 
     public String count;
     public String filter;
@@ -14,50 +16,58 @@ public class Task {
     public String type;
     public String id;
 
-    public static String toHdr(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append("t_count").append(sep)
-                .append("t_filter").append(sep)
-                .append(TaskParameters.toHdr(sep)).append(sep)
-                .append("t_created").append(sep)
-                .append("t_start_time").append(sep)
-                .append("t_interval_sec").append(sep)
-                .append("t_priority").append(sep)
-                .append("t_tag").append(sep)
-                .append("t_end_time").append(sep)
-                .append("t_type").append(sep)
-                .append("t_id");
+    @Override
+    public String toHdr(String sep) {
+        StringBuffer sb = new StringBuffer();
+        separate(sb, "t_count", sep);
+        separate(sb, "t_filter", sep);
+        separate(sb, (new TaskParameters()).toHdr(sep), sep);
+        separate(sb, "t_created", sep);
+        separate(sb, "t_start_time", sep);
+        separate(sb, "t_interval_sec", sep);
+        separate(sb, "t_priority", sep);
+        separate(sb, "t_tag", sep);
+        separate(sb, "t_end_time", sep);
+        separate(sb, "t_type", sep);
+        separate(sb, "t_id", NO_SEP);
         return(sb.toString());
     }
 
-    public static String toNullCsv(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append(sep).append(sep)
-                .append(TaskParameters.toNullCsv(sep)).append(sep)
-                .append(sep)
-                .append(sep)
-                .append(sep)
-                .append(sep)
-                .append(sep)
-                .append(sep)
-                .append(sep);
+    @Override
+    public String toCsv(String quote, String sep) throws NullPointerException {
+        StringBuffer sb = new StringBuffer();
+        quoteAndSeparate(sb, count, quote, sep);
+        quoteAndSeparate(sb, filter, quote, sep);
+
+        separate(sb, parameters != null
+                        ? parameters.toCsv(quote, sep)
+                        : (new TaskParameters()).toNullCsv(sep), sep);
+
+        quoteAndSeparate(sb, created, quote, sep);
+        quoteAndSeparate(sb, start_time, quote, sep);
+        quoteAndSeparate(sb, interval_sec, quote, sep);
+        quoteAndSeparate(sb, priority, quote, sep);
+        quoteAndSeparate(sb, tag, quote, sep);
+        quoteAndSeparate(sb, end_time, quote, sep);
+        quoteAndSeparate(sb, type, quote, sep);
+        quoteAndSeparate(sb, id, quote, NO_SEP);
         return(sb.toString());
     }
 
-    public String toCsv(String sep, String quote) throws NullPointerException {
+    @Override
+    public String toNullCsv(String sep) {
         StringBuffer sb = new StringBuffer()
-                .append(count).append(sep)
-                .append(filter).append(sep)
-                .append(parameters.toCsv(sep, quote)).append(sep)
-                .append(created).append(sep)
-                .append(start_time).append(sep)
-                .append(interval_sec).append(sep)
-                .append(priority).append(sep)
-                .append(tag).append(sep)
-                .append(end_time).append(sep)
-                .append(type).append(sep)
-                .append(id);
+                .append(sep).append(sep) // count
+                .append(sep) // filter
+                .append((new TaskParameters()).toNullCsv(sep)).append(sep) // parameters
+                .append(sep) // created
+                .append(sep) // start_time
+                .append(sep) // interval_sec
+                .append(sep) // priority
+                .append(sep) // tag
+                .append(sep) // end_time
+                .append(sep) // type
+                .append(NO_SEP); // id
         return(sb.toString());
     }
-
 }

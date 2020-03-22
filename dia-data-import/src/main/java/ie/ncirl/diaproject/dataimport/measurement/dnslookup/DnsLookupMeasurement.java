@@ -9,7 +9,12 @@ public class DnsLookupMeasurement extends Measurement {
     }
 
     @Override
-    public String toCsv(String sep, String quote) {
+    public String toCsv(String quote, String sep) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public String toNullCsv(String sep) {
         throw new UnsupportedOperationException("Not implemented");
     }
 }

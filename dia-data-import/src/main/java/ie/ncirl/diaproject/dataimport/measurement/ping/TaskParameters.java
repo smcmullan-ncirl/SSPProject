@@ -1,6 +1,8 @@
 package ie.ncirl.diaproject.dataimport.measurement.ping;
 
-public class TaskParameters {
+import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+
+public class TaskParameters extends Measurement {
 
     public String location_update_distance;
     public String target;
@@ -13,49 +15,51 @@ public class TaskParameters {
     public String profile_4_freq;
     public String profile_unlimited;
 
-    public static String toHdr(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append("tp_location_update_distance").append(sep)
-                .append("tp_target").append(sep)
-                .append("tp_trigger_location_update").append(sep)
-                .append("tp_packet_size_byte").append(sep)
-                .append("tp_ping_timeout_sec").append(sep)
-                .append("tp_profile_1_freq").append(sep)
-                .append("tp_profile_2_freq").append(sep)
-                .append("tp_profile_3_freq").append(sep)
-                .append("tp_profile_4_freq").append(sep)
-                .append("tp_profile_unlimited");
+    @Override
+    public String toHdr(String sep) {
+        StringBuffer sb = new StringBuffer();
+        separate(sb, "tp_location_update_distance", sep);
+        separate(sb, "tp_target", sep);
+        separate(sb, "tp_trigger_location_update", sep);
+        separate(sb, "tp_packet_size_byte", sep);
+        separate(sb, "tp_ping_timeout_sec", sep);
+        separate(sb, "tp_profile_1_freq", sep);
+        separate(sb, "tp_profile_2_freq", sep);
+        separate(sb, "tp_profile_3_freq", sep);
+        separate(sb, "tp_profile_4_freq", sep);
+        separate(sb, "tp_profile_unlimited", NO_SEP);
         return(sb.toString());
     }
 
-    public static String toNullCsv(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append(sep)
-                .append(sep)
-                .append(sep)
-                .append(sep)
-                .append(sep)
-                .append(sep)
-                .append(sep)
-                .append(sep)
-                .append(sep)
-                .append(sep);
+    @Override
+    public String toCsv(String quote, String sep) {
+        StringBuffer sb = new StringBuffer();
+        quoteAndSeparate(sb, location_update_distance, quote, sep);
+        quoteAndSeparate(sb, target, quote, sep);
+        quoteAndSeparate(sb, trigger_location_update, quote, sep);
+        quoteAndSeparate(sb, packet_size_byte, quote, sep);
+        quoteAndSeparate(sb, ping_timeout_sec, quote, sep);
+        quoteAndSeparate(sb, profile_1_freq, quote, sep);
+        quoteAndSeparate(sb, profile_2_freq, quote, sep);
+        quoteAndSeparate(sb, profile_3_freq, quote, sep);
+        quoteAndSeparate(sb, profile_4_freq, quote, sep);
+        quoteAndSeparate(sb, profile_unlimited, quote, NO_SEP);
         return(sb.toString());
     }
 
-    public String toCsv(String sep, String quote) {
+    @Override
+    public String toNullCsv(String sep) {
         StringBuffer sb = new StringBuffer()
-                .append(location_update_distance).append(sep)
-                .append(target).append(sep)
-                .append(trigger_location_update).append(sep)
-                .append(packet_size_byte).append(sep)
-                .append(ping_timeout_sec).append(sep)
-                .append(profile_1_freq).append(sep)
-                .append(profile_2_freq).append(sep)
-                .append(profile_3_freq).append(sep)
-                .append(profile_4_freq).append(sep)
-                .append(profile_unlimited);
+                .append(sep) // location_update_distance
+                .append(sep) // target
+                .append(sep) // trigger_location_update
+                .append(sep) // packet_size_byte
+                .append(sep) // ping_timeout_sec
+                .append(sep) // profile_1_freq
+                .append(sep) // profile_2_freq
+                .append(sep) // profile_3_freq
+                .append(sep) // profile_4_freq
+                .append(NO_SEP); // profile_unlimited
         return(sb.toString());
     }
-
 }

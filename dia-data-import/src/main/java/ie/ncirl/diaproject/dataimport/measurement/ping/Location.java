@@ -1,22 +1,33 @@
 package ie.ncirl.diaproject.dataimport.measurement.ping;
 
-public class Location {
+import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+
+public class Location extends Measurement {
 
     public String latitude;
     public String longitude;
 
-    public static String toHdr(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append("loc_latitude").append(sep)
-                .append("loc_longitude");
+    @Override
+    public String toHdr(String sep) {
+        StringBuffer sb = new StringBuffer();
+        separate(sb, "loc_latitude", sep);
+        separate(sb, "loc_longitude", NO_SEP);
         return(sb.toString());
     }
 
-    public String toCsv(String sep, String quote) {
-        StringBuffer sb = new StringBuffer()
-                .append(latitude).append(sep)
-                .append(longitude);
+    @Override
+    public String toCsv(String quote, String sep) {
+        StringBuffer sb = new StringBuffer();
+        quoteAndSeparate(sb, latitude, quote, sep);
+        quoteAndSeparate(sb, longitude, quote, NO_SEP);
         return(sb.toString());
     }
 
+    @Override
+    public String toNullCsv(String sep) {
+        StringBuffer sb = new StringBuffer()
+                .append(sep) // latitude
+                .append(NO_SEP); // longitude
+        return(sb.toString());
+    }
 }

@@ -1,6 +1,8 @@
 package ie.ncirl.diaproject.dataimport.measurement.ping;
 
-public class Values {
+import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+
+public class Values extends Measurement {
 
     public String packets_sent;
     public String packet_loss;
@@ -23,56 +25,83 @@ public class Values {
     public String context_results;
     public String mptcp_config;
 
-    public static String toHdr(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append("v_packets_sent").append(sep)
-                .append("v_packet_loss").append(sep)
-                .append("v_mean_rtt_ms").append(sep)
-                .append("v_CalledByLocation").append(sep)
-                .append("v_MeasurementLatitude").append(sep)
-                .append("v_max_rtt_ms").append(sep)
-                .append("v_target_ip").append(sep)
-                .append("v_stddev_rtt_ms").append(sep)
-                .append("v_min_rtt_ms").append(sep)
-                .append("v_MeasurementLongitude").append(sep)
-                .append("v_filtered_mean_rtt_ms").append(sep)
-                .append("v_error").append(sep)
-                .append("v_ping_method").append(sep)
-                .append("v_battery").append(sep)
-                .append("v_src_ip").append(sep)
-                .append("v_dst_ip").append(sep)
-                .append("v_measure").append(sep)
-                .append("v_time").append(sep)
-                .append("v_context_results").append(sep)
-                .append("v_mptcp_config");
+    @Override
+    public String toHdr(String sep) {
+        StringBuffer sb = new StringBuffer();
+        separate(sb, "v_packets_sent", sep);
+        separate(sb, "v_packet_loss", sep);
+        separate(sb, "v_mean_rtt_ms", sep);
+        separate(sb, "v_CalledByLocation", sep);
+        separate(sb, "v_MeasurementLatitude", sep);
+        separate(sb, "v_max_rtt_ms", sep);
+        separate(sb, "v_target_ip", sep);
+        separate(sb, "v_stddev_rtt_ms", sep);
+        separate(sb, "v_min_rtt_ms", sep);
+        separate(sb, "v_MeasurementLongitude", sep);
+        separate(sb, "v_filtered_mean_rtt_ms", sep);
+        separate(sb, "v_error", sep);
+        separate(sb, "v_ping_method", sep);
+        separate(sb, "v_battery", sep);
+        separate(sb, "v_src_ip", sep);
+        separate(sb, "v_dst_ip", sep);
+        separate(sb, "v_measure", sep);
+        separate(sb, "v_time", sep);
+        separate(sb, "v_context_results", sep);
+        separate(sb, "v_mptcp_config", NO_SEP);
 
         return(sb.toString());
     }
 
-    public String toCsv(String sep, String quote) {
-        StringBuffer sb = new StringBuffer()
-                .append(packets_sent).append(sep)
-                .append(packet_loss).append(sep)
-                .append(mean_rtt_ms).append(sep)
-                .append(CalledByLocation).append(sep)
-                .append(MeasurementLatitude).append(sep)
-                .append(max_rtt_ms).append(sep)
-                .append(target_ip).append(sep)
-                .append(stddev_rtt_ms).append(sep)
-                .append(min_rtt_ms).append(sep)
-                .append(MeasurementLongitude).append(sep)
-                .append(filtered_mean_rtt_ms).append(sep)
-                .append(error).append(sep)
-                .append(ping_method).append(sep)
-                .append(battery).append(sep)
-                .append(src_ip).append(sep)
-                .append(dst_ip).append(sep)
-                .append(measure).append(sep)
-                .append(time).append(sep)
-                .append(context_results).append(sep)
-                .append(mptcp_config);
+    @Override
+    public String toCsv(String quote, String sep) {
+        StringBuffer sb = new StringBuffer();
+        quoteAndSeparate(sb, packets_sent, quote, sep);
+        quoteAndSeparate(sb, packet_loss, quote, sep);
+        quoteAndSeparate(sb, mean_rtt_ms, quote, sep);
+        quoteAndSeparate(sb, CalledByLocation, quote, sep);
+        quoteAndSeparate(sb, MeasurementLatitude, quote, sep);
+        quoteAndSeparate(sb, max_rtt_ms, quote, sep);
+        quoteAndSeparate(sb, target_ip, quote, sep);
+        quoteAndSeparate(sb, stddev_rtt_ms, quote, sep);
+        quoteAndSeparate(sb, min_rtt_ms, quote, sep);
+        quoteAndSeparate(sb, MeasurementLongitude, quote, sep);
+        quoteAndSeparate(sb, filtered_mean_rtt_ms, quote, sep);
+        quoteAndSeparate(sb, error, quote, sep);
+        quoteAndSeparate(sb, ping_method, quote, sep);
+        quoteAndSeparate(sb, battery, quote, sep);
+        quoteAndSeparate(sb, src_ip, quote, sep);
+        quoteAndSeparate(sb, dst_ip, quote, sep);
+        quoteAndSeparate(sb, measure, quote, sep);
+        quoteAndSeparate(sb, time, quote, sep);
+        quoteAndSeparate(sb, context_results, quote, sep);
+        quoteAndSeparate(sb, mptcp_config, quote, NO_SEP);
 
         return(sb.toString());
     }
 
+    @Override
+    public String toNullCsv(String sep) {
+        StringBuffer sb = new StringBuffer()
+                .append(sep) // packets_sent
+                .append(sep) // packet_loss
+                .append(sep) // mean_rtt_ms
+                .append(sep) // CalledByLocation
+                .append(sep) // MeasurementLatitude
+                .append(sep) // max_rtt_ms
+                .append(sep) // target_ip
+                .append(sep) // stddev_rtt_ms
+                .append(sep) // min_rtt_ms
+                .append(sep) // MeasurementLongitude
+                .append(sep) // filtered_mean_rtt_ms
+                .append(sep) // error
+                .append(sep) // ping_method
+                .append(sep) // battery
+                .append(sep) // src_ip
+                .append(sep) // dst_ip
+                .append(sep) // measure
+                .append(sep) // time
+                .append(sep) // context_result
+                .append(NO_SEP); // mptcp_config
+        return(sb.toString());
+    }
 }

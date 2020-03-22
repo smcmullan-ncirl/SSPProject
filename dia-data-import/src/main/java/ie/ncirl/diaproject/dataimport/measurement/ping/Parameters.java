@@ -1,6 +1,8 @@
 package ie.ncirl.diaproject.dataimport.measurement.ping;
 
-public class Parameters {
+import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+
+public class Parameters extends Measurement {
     public String count;
     public String target;
     public String parameters;
@@ -24,58 +26,87 @@ public class Parameters {
     public String use_https;
     public String port;
 
-    public static String toHdr(String sep) {
-        StringBuffer sb = new StringBuffer()
-                .append("p_count").append(sep)
-                .append("p_target").append(sep)
-                .append("p_parameters").append(sep)
-                .append("p_start_time").append(sep)
-                .append("p_interval_sec").append(sep)
-                .append("p_ping_timeout_sec").append(sep)
-                .append("p_priority").append(sep)
-                .append("p_packet_size_byte").append(sep)
-                .append("p_ping_exe").append(sep)
-                .append("p_key").append(sep)
-                .append("p_type").append(sep)
-                .append("p_end_time").append(sep)
-                .append("p_myspeedtest").append(sep)
-                .append("p_ping").append(sep)
-                .append("p_options").append(sep)
-                .append("p_context_interval_sec").append(sep)
-                .append("p_ping_time_to_live").append(sep)
-                .append("p_ping_icmp_interval_sec").append(sep)
-                .append("p_sensitive").append(sep)
-                .append("p_ping_method").append(sep)
-                .append("p_use_https").append(sep)
-                .append("p_port");
+    @Override
+    public String toHdr(String sep) {
+        StringBuffer sb = new StringBuffer();
+        separate(sb, "p_count", sep);
+        separate(sb, "p_target", sep);
+        separate(sb, "p_parameters", sep);
+        separate(sb, "p_start_time", sep);
+        separate(sb, "p_interval_sec", sep);
+        separate(sb, "p_ping_timeout_sec", sep);
+        separate(sb, "p_priority", sep);
+        separate(sb, "p_packet_size_byte", sep);
+        separate(sb, "p_ping_exe", sep);
+        separate(sb, "p_key", sep);
+        separate(sb, "p_type", sep);
+        separate(sb, "p_end_time", sep);
+        separate(sb, "p_myspeedtest", sep);
+        separate(sb, "p_ping", sep);
+        separate(sb, "p_options", sep);
+        separate(sb, "p_context_interval_sec", sep);
+        separate(sb, "p_ping_time_to_live", sep);
+        separate(sb, "p_ping_icmp_interval_sec", sep);
+        separate(sb, "p_sensitive", sep);
+        separate(sb, "p_ping_method", sep);
+        separate(sb, "p_use_https", sep);
+        separate(sb, "p_port", NO_SEP);
         return(sb.toString());
     }
 
-    public String toCsv(String sep, String quote) {
-        StringBuffer sb = new StringBuffer()
-                .append(count).append(sep)
-                .append(target).append(sep)
-                .append(parameters).append(sep)
-                .append(start_time).append(sep)
-                .append(interval_sec).append(sep)
-                .append(ping_timeout_sec).append(sep)
-                .append(priority).append(sep)
-                .append(packet_size_byte).append(sep)
-                .append(ping_exe).append(sep)
-                .append(key).append(sep)
-                .append(type).append(sep)
-                .append(end_time).append(sep)
-                .append(myspeedtest).append(sep)
-                .append(ping).append(sep)
-                .append(options).append(sep)
-                .append(context_interval_sec).append(sep)
-                .append(ping_time_to_live).append(sep)
-                .append(ping_icmp_interval_sec).append(sep)
-                .append(sensitive).append(sep)
-                .append(ping_method).append(sep)
-                .append(use_https).append(sep)
-                .append(port);
+    @Override
+    public String toCsv(String quote, String sep) {
+        StringBuffer sb = new StringBuffer();
+        quoteAndSeparate(sb, count, quote, sep);
+        quoteAndSeparate(sb, target, quote, sep);
+        quoteAndSeparate(sb, parameters, quote, sep);
+        quoteAndSeparate(sb, start_time, quote, sep);
+        quoteAndSeparate(sb, interval_sec, quote, sep);
+        quoteAndSeparate(sb, ping_timeout_sec, quote, sep);
+        quoteAndSeparate(sb, priority, quote, sep);
+        quoteAndSeparate(sb, packet_size_byte, quote, sep);
+        quoteAndSeparate(sb, ping_exe, quote, sep);
+        quoteAndSeparate(sb, key, quote, sep);
+        quoteAndSeparate(sb, type, quote, sep);
+        quoteAndSeparate(sb, end_time, quote, sep);
+        quoteAndSeparate(sb, myspeedtest, quote, sep);
+        quoteAndSeparate(sb, ping, quote, sep);
+        quoteAndSeparate(sb, options, quote, sep);
+        quoteAndSeparate(sb, context_interval_sec, quote, sep);
+        quoteAndSeparate(sb, ping_time_to_live, quote, sep);
+        quoteAndSeparate(sb, ping_icmp_interval_sec, quote, sep);
+        quoteAndSeparate(sb, sensitive, quote, sep);
+        quoteAndSeparate(sb, ping_method, quote, sep);
+        quoteAndSeparate(sb, use_https, quote, sep);
+        quoteAndSeparate(sb, port, quote, NO_SEP);
         return(sb.toString());
     }
 
+    @Override
+    public String toNullCsv(String sep) {
+        StringBuffer sb = new StringBuffer()
+                .append(sep) // count
+                .append(sep) // target
+                .append(sep) // parameters
+                .append(sep) // start_time
+                .append(sep) // interval_sec
+                .append(sep) // ping_timeout_sec
+                .append(sep) // priority
+                .append(sep) // packet_size_byte
+                .append(sep) // ping_exe
+                .append(sep) // key
+                .append(sep) // type
+                .append(sep) // end_time
+                .append(sep) // myspeedtest
+                .append(sep) // ping
+                .append(sep) // options
+                .append(sep) // context_interval_sec
+                .append(sep) // ping_time_to_live
+                .append(sep) // ping_icmp_interval_sec
+                .append(sep) // sensitive
+                .append(sep) // ping_method
+                .append(sep) // use_https
+                .append(NO_SEP); // port
+        return(sb.toString());
+    }
 }
