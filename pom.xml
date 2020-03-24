@@ -16,5 +16,6 @@
 
     <modules>
         <module>dia-data-import</module>
+        <module>dia-spark-app</module>
     </modules>
 </project>
