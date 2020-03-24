@@ -1,2 +1,3 @@
 # Project exclude paths
 /dia-data-import/target/
+/dia-spark-app/target/
