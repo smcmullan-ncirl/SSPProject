@@ -60,7 +60,8 @@ public class GCPDataImport {
     private static final String CONFIG_PROPERTIES = "config.properties";
     private static final String GCP_BUCKET_NAME = "gcp.bucketname";
     private static final String TEMP_FILE_DIR = "tempfile.dir";
-    private static final String FILE_OFFSET = "file.offset";
+    private static final String FILE_OFFSET_MIN = "file.offset.min";
+    private static final String FILE_OFFSET_MAX = "file.offset.max";
     private static final String KAFKA_ENABLED = "kafka.enabled";
     private static final String KAFKA_SERVER = "kafka.server";
     private static final String DB_ENABLED = "db.enabled";
@@ -72,7 +73,9 @@ public class GCPDataImport {
     private static final String CSV_FILE = "csv.file.prefix";
 
     private static String tempFileDir = null;
-    private static int fileOffset = 0;
+
+    private static int fileOffsetMin = 0;
+    private static int fileOffsetMax = -1;
 
     private static boolean kafkaEnabled = false;
     private static boolean dbEnabled = false;
@@ -162,7 +165,8 @@ public class GCPDataImport {
 
             tempFileDir = prop.getProperty(TEMP_FILE_DIR, "/tmp");
 
-            fileOffset = Integer.parseInt(prop.getProperty(FILE_OFFSET, "0"));
+            fileOffsetMin = Integer.parseInt(prop.getProperty(FILE_OFFSET_MIN, "0"));
+            fileOffsetMax = Integer.parseInt(prop.getProperty(FILE_OFFSET_MAX, "-1"));
 
             if (Boolean.parseBoolean(prop.getProperty(KAFKA_ENABLED, "false")))
                 kafkaEnabled = true;
@@ -308,9 +312,10 @@ public class GCPDataImport {
 
         for (Blob blob : blobs.iterateAll()) {
             String blobName = blob.getName();
-            logger.info("Processing file {}, records {}, filename {}", processedFiles, processedRecords, blobName);
 
-            if(processedFiles >= fileOffset) {
+            if(processedFiles >= fileOffsetMin && (fileOffsetMax == -1 || processedFiles < fileOffsetMax) ) {
+                logger.info("Processing file {}, records {}, filename {}", processedFiles, processedRecords, blobName);
+
                 Path destBlobFilePath = Paths.get(tempFileDir, blobName);
                 blob.downloadTo(destBlobFilePath);
 
@@ -321,6 +326,8 @@ public class GCPDataImport {
                 if (!zipFile.delete()) {
                     logger.warn("Could not delete zip file {}", zipFile.getName());
                 }
+            } else {
+                logger.info("Skipping file {}, records {}, filename {}", processedFiles, processedRecords, blobName);
             }
 
             processedFiles++;
@@ -390,6 +397,8 @@ public class GCPDataImport {
 
             if (csvEnabled)
                 publishRecordtoCsv(topic, jsonNode);
+
+            incrementTopicCounters(topic);
         }
     }
 
@@ -464,103 +473,78 @@ public class GCPDataImport {
 
         switch (topic) {
             case PING:
-                pingCount++;
                 measurementClass = PingMeasurement.class;
                 break;
             case TRACEROUTE:
-                tracerouteCount++;
                 measurementClass = TracerouteMeasurement.class;
                 break;
             case HTTP:
-                httpCount++;
                 measurementClass = HttpMeasurement.class;
                 break;
             case DNS_LOOKUP:
-                dnsLookupCount++;
                 measurementClass = DnsLookupMeasurement.class;
                 break;
             case UDP_BURST:
-                udpBurstCount++;
                 measurementClass = UdpBurstMeasurement.class;
                 break;
             case TCPTHROUGHPUT:
-                tcpThroughputCount++;
                 measurementClass = TcpThroughputMeasurement.class;
                 break;
             case CONTEXT:
-                contextCount++;
                 measurementClass = ContextMeasurement.class;
                 break;
             case MY_SPEEDTEST_PING:
-                mySpeedtestPingCount++;
                 measurementClass = MySpeedtestPingMeasurement.class;
                 break;
             case MY_SPEEDTEST_DNS_LOOKUP:
-                mySpeedtestDnsLookupCount++;
                 measurementClass = MySpeedtestDnsLookupMeasurement.class;
                 break;
             case DEVICE_INFO:
-                deviceInfoCount++;
                 measurementClass = DeviceInfoMeasurement.class;
                 break;
             case NETWORK_INFO:
-                networkInfoCount++;
                 measurementClass = NetworkInfoMeasurement.class;
                 break;
             case BATTERY_INFO:
-                batteryInfoCount++;
                 measurementClass = BatteryInfoMeasurement.class;
                 break;
             case PING_TEST:
-                pingTestCount++;
                 measurementClass = PingTestMeasurement.class;
                 break;
             case SIM_INFO:
-                simInfoCount++;
                 measurementClass = SimInfoMeasurement.class;
                 break;
             case STATE_INFO:
-                stateInfoCount++;
                 measurementClass = StateInfoMeasurement.class;
                 break;
             case USAGE_INFO:
-                usageInfoCount++;
                 measurementClass = UsageInfoMeasurement.class;
                 break;
             case RRC:
-                rrcCount++;
                 measurementClass = RrcMeasurement.class;
                 break;
             case PAGE_LOAD_TIME:
-                pageLoadTimeCount++;
                 measurementClass = PageLoadTimeMeasurement.class;
                 break;
             case PAGE_LOAD_TIME_2:
-                pageLoadTime2Count++;
                 measurementClass = PageLoadTime2Measurement.class;
                 break;
             case VIDEO:
-                videoCount++;
                 measurementClass = VideoMeasurement.class;
                 break;
             case SEQUENTIAL:
-                sequentialCount++;
                 measurementClass = SequentialMeasurement.class;
                 break;
             case QUIC_HTTP:
-                quicHttpCount++;
                 measurementClass = QuicHttpMeasurement.class;
                 break;
             case CRONET_HTTP:
-                cronetHttpCount++;
                 measurementClass = CronetHttpMeasurement.class;
                 break;
             case MULTIPATH_LATENCY:
-                multipathLatencyCount++;
                 measurementClass = MultipathLatencyMeasurement.class;
                 break;
             case MULTIPATH_HTTP:
-                multipathHttpCount++;
                 measurementClass = MultipathHttpMeasurement.class;
                 break;
             default:
@@ -569,5 +553,87 @@ public class GCPDataImport {
 
         measurement = (Measurement) objectMapper.treeToValue(jsonNode, measurementClass);
         return measurement;
+    }
+
+    private static void incrementTopicCounters(String topic) {
+        switch (topic) {
+            case PING:
+                pingCount++;
+                break;
+            case TRACEROUTE:
+                tracerouteCount++;
+                break;
+            case HTTP:
+                httpCount++;
+                break;
+            case DNS_LOOKUP:
+                dnsLookupCount++;
+                break;
+            case UDP_BURST:
+                udpBurstCount++;
+                break;
+            case TCPTHROUGHPUT:
+                tcpThroughputCount++;
+                break;
+            case CONTEXT:
+                contextCount++;
+                break;
+            case MY_SPEEDTEST_PING:
+                mySpeedtestPingCount++;
+                break;
+            case MY_SPEEDTEST_DNS_LOOKUP:
+                mySpeedtestDnsLookupCount++;
+                break;
+            case DEVICE_INFO:
+                deviceInfoCount++;
+                break;
+            case NETWORK_INFO:
+                networkInfoCount++;;
+                break;
+            case BATTERY_INFO:
+                batteryInfoCount++;
+                break;
+            case PING_TEST:
+                pingTestCount++;;
+                break;
+            case SIM_INFO:
+                simInfoCount++;
+                break;
+            case STATE_INFO:
+                stateInfoCount++;
+                break;
+            case USAGE_INFO:
+                usageInfoCount++;
+                break;
+            case RRC:
+                rrcCount++;
+                break;
+            case PAGE_LOAD_TIME:
+                pageLoadTimeCount++;
+                break;
+            case PAGE_LOAD_TIME_2:
+                pageLoadTime2Count++;;
+                break;
+            case VIDEO:
+                videoCount++;;
+                break;
+            case SEQUENTIAL:
+                sequentialCount++;;
+                break;
+            case QUIC_HTTP:
+                quicHttpCount++;
+                break;
+            case CRONET_HTTP:
+                cronetHttpCount++;;
+                break;
+            case MULTIPATH_LATENCY:
+                multipathLatencyCount++;
+                break;
+            case MULTIPATH_HTTP:
+                multipathHttpCount++;
+                break;
+            default:
+                logger.error("Unsupported Topic: ", topic);
+        }
     }
 }
