@@ -25,3 +25,5 @@ docker-compose exec kafka kafka-topics.sh --create --replication-factor 1 --part
 docker-compose exec kafka kafka-topics.sh --create --replication-factor 1 --partitions 1 --bootstrap-server localhost:9092 --topic cronet-http
 docker-compose exec kafka kafka-topics.sh --create --replication-factor 1 --partitions 1 --bootstrap-server localhost:9092 --topic multipath_latency
 docker-compose exec kafka kafka-topics.sh --create --replication-factor 1 --partitions 1 --bootstrap-server localhost:9092 --topic multipath_http
+
+docker-compose exec kafka kafka-topics.sh --list --bootstrap-server localhost:9092
