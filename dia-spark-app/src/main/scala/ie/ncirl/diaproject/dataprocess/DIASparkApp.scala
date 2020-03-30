@@ -1,14 +1,28 @@
 package ie.ncirl.diaproject.dataprocess
 
+import java.util.{Objects, Properties}
+
 import ie.ncirl.diaproject.dataprocess.measurement.PingMeasurement
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.slf4j.LoggerFactory
+
+class DIASparkApp {
+}
 
 object DIASparkApp {
+  private val logger = LoggerFactory.getLogger(classOf[DIASparkApp])
+
   def main(args: Array[String]): Unit = {
+    val properties: Properties = new Properties()
+    properties.load(Objects.requireNonNull(getClass.getResourceAsStream("/config.properties")))
+
+    val kafkaServer = properties.getProperty("kafka.server")
+    val kafkaTopics = properties.getProperty("kafka.topics")
+
     val conf: SparkConf = new SparkConf()
       .setMaster("local[*]")
       .setAppName("DIASparkApp")
@@ -22,8 +36,8 @@ object DIASparkApp {
     val df = spark
       .read
       .format("kafka")
-      .option("kafka.bootstrap.servers", "localhost:9092")
-      .option("subscribe", "ping")
+      .option("kafka.bootstrap.servers", kafkaServer)
+      .option("subscribe", kafkaTopics)
       .option("startingOffsets", "earliest")
       .load()
       .selectExpr("CAST(value AS STRING) AS jsonString")
