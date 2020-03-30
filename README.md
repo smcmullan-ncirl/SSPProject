@@ -79,3 +79,9 @@ or
 ## Shutdown Instructions
 
     docker-compose exec kafka kafka-topics.sh --delete --bootstrap-server localhost:9092 --topic my-topic
+
+
+## Links
+    https://spark.apache.org/docs/latest/structured-streaming-kafka-integration.html
+    https://spark.apache.org/docs/latest/streaming-kafka-0-10-integration.html
+    https://docs.databricks.com/spark/latest/dataframes-datasets/complex-nested-data.html
