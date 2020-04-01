@@ -1,3 +1,5 @@
+package ie.ncirl.diaproject.dataimport;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
@@ -36,9 +38,7 @@ public class PingMeasurementTest {
             String type = jsonNode.get("type").textValue();
             assert(type.equals("ping"));
 
-
-            Class measurementClass = PingMeasurement.class;
-            Measurement measurement = (Measurement) objectMapper.treeToValue(jsonNode, measurementClass);
+            Measurement measurement = objectMapper.treeToValue(jsonNode, PingMeasurement.class);
 
             System.out.println(measurement.toHdr(Measurement.TAB));
             System.out.println(measurement.toCsv(Measurement.NO_NULL, Measurement.NO_QUOTE, Measurement.TAB));

@@ -92,7 +92,7 @@ object DIASparkApp {
 
           val measurementDF = rawDF.select(from_json($"jsonString", schema=measurementSchema) as "measurement")
 
-          val explodedMeasurementDF = JSONUtils.flattenDataframe(measurementDF)
+          val explodedMeasurementDF = JSONUtils.flattenDataFrame(measurementDF)
 
           explodedMeasurementDF.show(false)
 

@@ -5,7 +5,7 @@ import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types.{ArrayType, StructType}
 
 object JSONUtils {
-  def flattenDataframe(df: DataFrame): DataFrame = {
+  def flattenDataFrame(df: DataFrame): DataFrame = {
     val fields = df.schema.fields
     val fieldNames = fields.map(x => x.name)
 
@@ -18,13 +18,13 @@ object JSONUtils {
           val fieldNamesExcludingArray = fieldNames.filter(_ != fieldName)
           val fieldNamesAndExplode = fieldNamesExcludingArray ++ Array(s"explode_outer($fieldName) as $fieldName")
           val explodedDf = df.selectExpr(fieldNamesAndExplode: _*)
-          return flattenDataframe(explodedDf)
+          return flattenDataFrame(explodedDf)
         case structType: StructType =>
           val childFieldNames = structType.fieldNames.map(childName => fieldName + "." + childName)
           val newFieldNames = fieldNames.filter(_ != fieldName) ++ childFieldNames
           val renamedCols = newFieldNames.map(x => col(x.toString).as(x.toString.replace(".", "_")))
           val explodeDf = df.select(renamedCols: _*)
-          return flattenDataframe(explodeDf)
+          return flattenDataFrame(explodeDf)
         case _ => // no nesting here
       }
     }
