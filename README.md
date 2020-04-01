@@ -18,7 +18,33 @@ https://www.measurementlab.net/tests/mobiperf/
 
 ## Datasets
 
-16806 files, 8564395 records
+Processed 16809 files, 8564395 records in 9741 seconds at a rate of 879 records/sec
+
+    ping : 3066411
+    traceroute : 369750
+    http : 819611
+    dns_lookup : 1009149
+    udp_burst : 13307
+    tcpthroughput : 266445
+    context : 291
+    myspeedtest_ping : 1
+    myspeedtestdns_lookup : 2
+    device_info : 2681
+    network_info : 2661
+    battery_info : 2657
+    ping_test : 3
+    sim_info : 2651
+    state_info : 2650
+    usage_info : 2644
+    rrc : 10846
+    PageLoadTime : 1
+    pageloadtime : 14169
+    video : 3679
+    sequential : 5163
+    quic-http : 402207
+    cronet-http : 401105
+    multipath_latency : 2163380
+    multipath_http : 2931
 
 https://console.cloud.google.com/storage/browser/openmobiledata_public
 

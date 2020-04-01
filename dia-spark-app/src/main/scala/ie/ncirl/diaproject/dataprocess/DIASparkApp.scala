@@ -2,7 +2,7 @@ package ie.ncirl.diaproject.dataprocess
 
 import java.util.{Objects, Properties}
 
-import ie.ncirl.diaproject.dataprocess.measurement.PingMeasurement
+import ie.ncirl.diaproject.dataprocess.measurement.{Measurement, PingMeasurement}
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.functions._
@@ -33,7 +33,7 @@ object DIASparkApp {
       .config(conf)
       .getOrCreate
 
-    val df = spark
+    val rawDF = spark
       .read
       .format("kafka")
       .option("kafka.bootstrap.servers", kafkaServer)
@@ -42,49 +42,66 @@ object DIASparkApp {
       .load()
       .selectExpr("CAST(value AS STRING) AS jsonString")
 
-    df.show(false)
+    rawDF.show(false)
 
     import spark.implicits._
 
-    val measurementSchema = ScalaReflection.schemaFor[PingMeasurement].dataType.asInstanceOf[StructType]
+    var measurementSchema = ScalaReflection.schemaFor[Measurement].dataType.asInstanceOf[StructType]
 
-    val df2 = df.select(from_json($"jsonString", schema=measurementSchema) as "measurement")
+    val jsonDF = rawDF.select(from_json($"jsonString", schema=measurementSchema) as "measurement")
 
-    df2.show(false)
+    jsonDF.show(false)
 
-    val df3 = flattenDataframe(df2)
+    val typesDF = jsonDF.select("type").distinct
 
-    df3.show(false)
+    typesDF.foreach {
+      row => row.toSeq.foreach {
+        col => {
+          logger.info(s"Processing $col")
 
-    df3.write.csv("output.csv")
+          var measurementSchema: StructType = null
+          col match {
+            case "ping" => measurementSchema =
+              ScalaReflection.schemaFor[PingMeasurement].dataType.asInstanceOf[StructType]
+            case "traceroute" =>
+            case "http" =>
+            case "dns_lookup" =>
+            case "udp_burst" =>
+            case "tcpthroughput" =>
+            case "context" =>
+            case "myspeedtest_ping" =>
+            case "myspeedtestdns_lookup" =>
+            case "device_info" =>
+            case "network_info" =>
+            case "battery_info" =>
+            case "ping_test" =>
+            case "sim_info" =>
+            case "state_info" =>
+            case "usage_info" =>
+            case "rrc" =>
+            case "PageLoadTime" =>
+            case "pageloadtime" =>
+            case "video" =>
+            case "sequential" =>
+            case "quic-http" =>
+            case "cronet-http" =>
+            case "multipath_latency" =>
+            case "multipath_http" =>
+            case _ =>
+          }
+
+          val measurementDF = rawDF.select(from_json($"jsonString", schema=measurementSchema) as "measurement")
+
+          val explodedMeasurementDF = JSONUtils.flattenDataframe(measurementDF)
+
+          explodedMeasurementDF.show(false)
+
+          explodedMeasurementDF.write.csv(s"${col}_output.csv")
+        }
+      }
+    }
 
     spark.close
   }
 
-  def flattenDataframe(df: DataFrame): DataFrame = {
-    val fields = df.schema.fields
-    val fieldNames = fields.map(x => x.name)
-
-    for (i <- 0 to fields.length - 1) {
-      val field = fields(i)
-      val fieldType = field.dataType
-      val fieldName = field.name
-      fieldType match {
-        case _: ArrayType =>
-          val fieldNamesExcludingArray = fieldNames.filter(_ != fieldName)
-          val fieldNamesAndExplode = fieldNamesExcludingArray ++ Array(s"explode_outer($fieldName) as $fieldName")
-          val explodedDf = df.selectExpr(fieldNamesAndExplode: _*)
-          return flattenDataframe(explodedDf)
-        case structType: StructType =>
-          val childFieldNames = structType.fieldNames.map(childName => fieldName + "." + childName)
-          val newFieldNames = fieldNames.filter(_ != fieldName) ++ childFieldNames
-          val renamedCols = newFieldNames.map(x => (col(x.toString()).as(x.toString().replace(".", "_"))))
-          val explodeDf = df.select(renamedCols: _*)
-          return flattenDataframe(explodeDf)
-        case _ => // no nesting here
-      }
-    }
-
-    df
-  }
 }
