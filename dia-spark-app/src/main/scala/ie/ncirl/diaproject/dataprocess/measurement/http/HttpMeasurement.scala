@@ -31,7 +31,12 @@ case class TaskParameters
 (
   url: String,
   headers: String,
-  method: String
+  method: String,
+  profile_1_freq: String,
+  profile_2_freq: String,
+  profile_3_freq: String,
+  profile_4_freq: String,
+  profile_unlimited: String
 )
 
 case class Parameters
@@ -47,7 +52,8 @@ case class Parameters
   end_time: String,
   key: String,
   `type`: String,
-  method: String
+  method: String,
+  context_interval_sec: String
 )
 
 case class DeviceProperties
@@ -63,7 +69,13 @@ case class DeviceProperties
   rssi: String,
   app_version: String,
   location_type: String,
-  is_battery_charging: String
+  is_battery_charging: String,
+  host_apps: Array[String],
+  registration_id: String,
+  mobilyzer_version: String,
+  request_app: String,
+  ssid: String,
+  bssid: String
 )
 
 case class DeviceInfo
@@ -71,7 +83,9 @@ case class DeviceInfo
   model: String,
   os: String,
   manufacturer: String,
-  tac: String
+  tac: String,
+  user: String,
+  id: String
 )
 
 case class Location
@@ -91,6 +105,15 @@ case class Values
   MeasurementLatitude: String,
   headers: String,
   headers_len: String,
-  error: String
+  error: String,
+  MobilePktRecv: String,
+  currentBatteryLevel: String,
+  MobileBytesRecv: String,
+  contextTimestamp: String,
+  MobileBytesSend: String,
+  currentRssi: String,
+  MobilePktSend: String,
+  contextMeasurementInterval: String,
+  context_results: String
 )
 

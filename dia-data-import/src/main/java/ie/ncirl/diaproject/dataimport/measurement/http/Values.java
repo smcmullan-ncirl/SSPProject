@@ -17,6 +17,15 @@ public class Values extends Measurement {
     public String headers;
     public String headers_len;
     public String error;
+    public String MobilePktRecv;
+    public String currentBatteryLevel;
+    public String MobileBytesRecv;
+    public String contextTimestamp;
+    public String MobileBytesSend;
+    public String currentRssi;
+    public String MobilePktSend;
+    public String contextMeasurementInterval;
+    public String context_results;
 
     @Override
     public String toHdr(String sep) {
@@ -30,7 +39,16 @@ public class Values extends Measurement {
         separate(sb, "v_MeasurementLatitude", sep);
         separate(sb, "v_headers", sep);
         separate(sb, "v_headers_len", sep);
-        separate(sb, "v_error", NO_SEP);
+        separate(sb, "v_error", sep);
+        separate(sb, "v_MobilePktRecv", sep);
+        separate(sb, "v_currentBatteryLevel", sep);
+        separate(sb, "v_MobileBytesRecv", sep);
+        separate(sb, "v_contextTimestamp", sep);
+        separate(sb, "v_MobileBytesSend", sep);
+        separate(sb, "v_currentRssi", sep);
+        separate(sb, "v_MobilePktSend", sep);
+        separate(sb, "v_contextMeasurementInterval", sep);
+        separate(sb, "v_context_results", NO_SEP);
         return(sb.toString());
     }
 
@@ -46,8 +64,16 @@ public class Values extends Measurement {
         quoteAndSeparate(sb, MeasurementLatitude, quote, sep);
         quoteAndSeparate(sb, headers, quote, sep);
         quoteAndSeparate(sb, headers_len, quote, sep);
-        quoteAndSeparate(sb, error, quote, NO_SEP);
-
+        quoteAndSeparate(sb, error, quote, sep);
+        quoteAndSeparate(sb, MobilePktRecv, quote, sep);
+        quoteAndSeparate(sb, currentBatteryLevel, quote, sep);
+        quoteAndSeparate(sb, MobileBytesRecv, quote, sep);
+        quoteAndSeparate(sb, contextTimestamp, quote, sep);
+        quoteAndSeparate(sb, MobileBytesSend, quote, sep);
+        quoteAndSeparate(sb, currentRssi, quote, sep);
+        quoteAndSeparate(sb, MobilePktSend, quote, sep);
+        quoteAndSeparate(sb, contextMeasurementInterval, quote, sep);
+        quoteAndSeparate(sb, context_results, quote, NO_SEP);
         return(sb.toString());
     }
 
@@ -63,7 +89,16 @@ public class Values extends Measurement {
         separate(sb, nullValue, sep); // MeasurementLatitude
         separate(sb, nullValue, sep); // headers
         separate(sb, nullValue, sep); // headers_len
-        separate(sb, nullValue, NO_SEP); // error
+        separate(sb, nullValue, sep); // error
+        separate(sb, nullValue, sep); // MobilePktRecv
+        separate(sb, nullValue, sep); // currentBatteryLevel
+        separate(sb, nullValue, sep); // MobileBytesRecv
+        separate(sb, nullValue, sep); // contextTimestamp
+        separate(sb, nullValue, sep); // MobileBytesSend
+        separate(sb, nullValue, sep); // currentRssi
+        separate(sb, nullValue, sep); // MobilePktSend
+        separate(sb, nullValue, sep); // contextMeasurementInterval
+        separate(sb, nullValue, NO_SEP); // context_results
         return(sb.toString());
     }
 }

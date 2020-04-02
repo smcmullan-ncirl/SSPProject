@@ -19,6 +19,7 @@ public class Parameters extends Measurement {
     public String key;
     public String type;
     public String method;
+    public String context_interval_sec;
 
     @Override
     public String toHdr(String sep) {
@@ -35,6 +36,7 @@ public class Parameters extends Measurement {
         separate(sb, "p_key", sep);
         separate(sb, "p_type", sep);
         separate(sb, "p_method", NO_SEP);
+        separate(sb, "p_context_interval_sec", NO_SEP);
         return(sb.toString());
     }
 
@@ -52,7 +54,8 @@ public class Parameters extends Measurement {
         quoteAndSeparate(sb, end_time, quote, sep);
         quoteAndSeparate(sb, key, quote, sep);
         quoteAndSeparate(sb, type, quote, sep);
-        quoteAndSeparate(sb, method, quote, NO_SEP);
+        quoteAndSeparate(sb, method, quote, sep);
+        quoteAndSeparate(sb, context_interval_sec, quote, NO_SEP);
         return(sb.toString());
     }
 
@@ -70,7 +73,8 @@ public class Parameters extends Measurement {
         separate(sb, nullValue, sep); // end_time
         separate(sb, nullValue, sep); // key
         separate(sb, nullValue, sep); // type
-        separate(sb, nullValue, NO_SEP); // method
+        separate(sb, nullValue, sep); // method
+        separate(sb, nullValue, NO_SEP); // context_interval_sec
         return(sb.toString());
     }
 }

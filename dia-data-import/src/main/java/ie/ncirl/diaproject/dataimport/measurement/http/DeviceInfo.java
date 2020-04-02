@@ -11,6 +11,8 @@ public class DeviceInfo extends Measurement {
     public String os;
     public String manufacturer;
     public String tac;
+    public String user;
+    public String id;
 
     @Override
     public String toHdr(String sep) {
@@ -18,7 +20,9 @@ public class DeviceInfo extends Measurement {
         separate(sb, "di_model", sep);
         separate(sb, "di_os", sep);
         separate(sb, "di_manufacturer", sep);
-        separate(sb, "di_tac", NO_SEP);
+        separate(sb, "di_tac", sep);
+        separate(sb, "di_user", sep);
+        separate(sb, "di_is", NO_SEP);
         return(sb.toString());
     }
 
@@ -28,7 +32,9 @@ public class DeviceInfo extends Measurement {
         quoteAndSeparate(sb, model, quote, sep);
         quoteAndSeparate(sb, os, quote, sep);
         quoteAndSeparate(sb, manufacturer, quote, sep);
-        quoteAndSeparate(sb, tac, quote, NO_SEP);
+        quoteAndSeparate(sb, tac, quote, sep);
+        quoteAndSeparate(sb, user, quote, sep);
+        quoteAndSeparate(sb, id, quote, NO_SEP);
         return(sb.toString());
     }
 
@@ -38,7 +44,9 @@ public class DeviceInfo extends Measurement {
         separate(sb, nullValue, sep); // model
         separate(sb, nullValue, sep); // os
         separate(sb, nullValue, sep); // manufacturer
-        separate(sb, nullValue, NO_SEP); // tac
+        separate(sb, nullValue, sep); // tac
+        separate(sb, nullValue, sep); // user
+        separate(sb, nullValue, NO_SEP); // id
         return(sb.toString());
     }
 }

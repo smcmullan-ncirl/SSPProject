@@ -4,6 +4,8 @@ import ie.ncirl.diaproject.dataimport.measurement.Measurement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+
 public class DeviceProperties extends Measurement {
     private static Logger logger = LoggerFactory.getLogger(DeviceProperties.class);
 
@@ -19,6 +21,12 @@ public class DeviceProperties extends Measurement {
     public String app_version;
     public String location_type;
     public String is_battery_charging;
+    public String[] host_apps;
+    public String registration_id;
+    public String mobilyzer_version;
+    public String request_app;
+    public String ssid;
+    public String bssid;
 
     @Override
     public String toHdr(String sep) {
@@ -34,7 +42,13 @@ public class DeviceProperties extends Measurement {
         separate(sb, "dp_rssi", sep);
         separate(sb, "dp_app_version", sep);
         separate(sb, "dp_location_type", sep);
-        separate(sb, "dp_is_battery_charging", NO_SEP);
+        separate(sb, "dp_is_battery_charging", sep);
+        separate(sb, "dp_host_apps", sep);
+        separate(sb, "dp_registration_id", sep);
+        separate(sb, "dp_mobilyzer_version", sep);
+        separate(sb, "dp_request_app", sep);
+        separate(sb, "dp_ssid", sep);
+        separate(sb, "dp_bssid", NO_SEP);
         return(sb.toString());
     }
 
@@ -60,7 +74,13 @@ public class DeviceProperties extends Measurement {
         quoteAndSeparate(sb, rssi, quote, sep);
         quoteAndSeparate(sb, app_version, quote, sep);
         quoteAndSeparate(sb, location_type, quote, sep);
-        quoteAndSeparate(sb, is_battery_charging, quote, NO_SEP);
+        quoteAndSeparate(sb, is_battery_charging, quote, sep);
+        quoteAndSeparate(sb, Arrays.toString(host_apps), quote, sep);
+        quoteAndSeparate(sb, registration_id, quote, sep);
+        quoteAndSeparate(sb, mobilyzer_version, quote, sep);
+        quoteAndSeparate(sb, request_app, quote, sep);
+        quoteAndSeparate(sb, ssid, quote, sep);
+        quoteAndSeparate(sb, bssid, quote, NO_SEP);
         return(sb.toString());
     }
 
@@ -78,7 +98,13 @@ public class DeviceProperties extends Measurement {
         separate(sb, nullValue, sep); // rssi
         separate(sb, nullValue, sep); // app_version
         separate(sb, nullValue, sep); // location_type
-        separate(sb, nullValue, NO_SEP); // is_battery_charging
+        separate(sb, nullValue, sep); // is_battery_charging
+        separate(sb, nullValue, sep); // host_apps
+        separate(sb, nullValue, sep); // registration_id
+        separate(sb, nullValue, sep); // mobilyzer_version
+        separate(sb, nullValue, sep); // request_app
+        separate(sb, nullValue, sep); // ssid
+        separate(sb, nullValue, NO_SEP); // bssid
         return(sb.toString());
     }
 }
