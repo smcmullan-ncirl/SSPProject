@@ -70,7 +70,8 @@ case class DeviceInfo
 (
   model: String,
   os: String,
-  manufacturer: String
+  manufacturer: String,
+  tac: String
 )
 
 case class Location

@@ -87,7 +87,6 @@ public class GCPDataImport {
 
     private static Connection dbConn = null;
     private static Statement st = null;
-    private static ResultSet rs = null;
 
     private static Map<String, BufferedWriter> csvWriters = null;
 
@@ -265,7 +264,7 @@ public class GCPDataImport {
 
             st = dbConn.createStatement();
 
-            rs = st.executeQuery("SELECT VERSION()");
+            ResultSet rs = st.executeQuery("SELECT VERSION()");
             if (rs.next()) {
                 logger.info("Connected to db version {}", rs.getString(1));
             }
@@ -464,12 +463,13 @@ public class GCPDataImport {
         } catch (Exception e) {
             logger.error("Can't write to CSV file for topic {} : {}", topic,
                     e.getMessage() != null ? e.getMessage() : jsonNode, e);
+            System.exit(-1);
         }
     }
 
     private static Measurement getMeasurement(String topic, JsonNode jsonNode) throws Exception {
-        Measurement measurement = null;
-        Class measurementClass = null;
+        Measurement measurement;
+        Class measurementClass;
 
         switch (topic) {
             case PING:
@@ -588,13 +588,13 @@ public class GCPDataImport {
                 deviceInfoCount++;
                 break;
             case NETWORK_INFO:
-                networkInfoCount++;;
+                networkInfoCount++;
                 break;
             case BATTERY_INFO:
                 batteryInfoCount++;
                 break;
             case PING_TEST:
-                pingTestCount++;;
+                pingTestCount++;
                 break;
             case SIM_INFO:
                 simInfoCount++;
@@ -612,19 +612,19 @@ public class GCPDataImport {
                 pageLoadTimeCount++;
                 break;
             case PAGE_LOAD_TIME_2:
-                pageLoadTime2Count++;;
+                pageLoadTime2Count++;
                 break;
             case VIDEO:
-                videoCount++;;
+                videoCount++;
                 break;
             case SEQUENTIAL:
-                sequentialCount++;;
+                sequentialCount++;
                 break;
             case QUIC_HTTP:
                 quicHttpCount++;
                 break;
             case CRONET_HTTP:
-                cronetHttpCount++;;
+                cronetHttpCount++;
                 break;
             case MULTIPATH_LATENCY:
                 multipathLatencyCount++;
@@ -633,7 +633,7 @@ public class GCPDataImport {
                 multipathHttpCount++;
                 break;
             default:
-                logger.error("Unsupported Topic: ", topic);
+                logger.error("Unsupported Topic: {}", topic);
         }
     }
 }

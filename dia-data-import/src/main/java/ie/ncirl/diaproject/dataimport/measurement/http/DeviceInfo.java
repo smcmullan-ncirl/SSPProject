@@ -10,13 +10,15 @@ public class DeviceInfo extends Measurement {
     public String model;
     public String os;
     public String manufacturer;
+    public String tac;
 
     @Override
     public String toHdr(String sep) {
         StringBuffer sb = new StringBuffer();
         separate(sb, "di_model", sep);
         separate(sb, "di_os", sep);
-        separate(sb, "di_manufacturer", NO_SEP);
+        separate(sb, "di_manufacturer", sep);
+        separate(sb, "di_tac", NO_SEP);
         return(sb.toString());
     }
 
@@ -25,8 +27,8 @@ public class DeviceInfo extends Measurement {
         StringBuffer sb = new StringBuffer();
         quoteAndSeparate(sb, model, quote, sep);
         quoteAndSeparate(sb, os, quote, sep);
-        quoteAndSeparate(sb, manufacturer, quote, NO_SEP);
-
+        quoteAndSeparate(sb, manufacturer, quote, sep);
+        quoteAndSeparate(sb, tac, quote, NO_SEP);
         return(sb.toString());
     }
 
@@ -35,7 +37,8 @@ public class DeviceInfo extends Measurement {
         StringBuffer sb = new StringBuffer();
         separate(sb, nullValue, sep); // model
         separate(sb, nullValue, sep); // os
-        separate(sb, nullValue, NO_SEP); // manufacturerr
+        separate(sb, nullValue, sep); // manufacturer
+        separate(sb, nullValue, NO_SEP); // tac
         return(sb.toString());
     }
 }
