@@ -451,7 +451,7 @@ public class GCPDataImport {
             BufferedWriter csvWriter = csvWriters.get(topic);
 
             if (csvWriter == null) {
-                String filename = prop.getProperty(CSV_FILE, "") + topic;
+                String filename = prop.getProperty(CSV_FILE, "") + topic + ".csv";
                 File csvFile = new File(filename);
                 csvWriter = new BufferedWriter(new FileWriter(csvFile));
                 csvWriter.write(measurement.toHdr(Measurement.TAB));
