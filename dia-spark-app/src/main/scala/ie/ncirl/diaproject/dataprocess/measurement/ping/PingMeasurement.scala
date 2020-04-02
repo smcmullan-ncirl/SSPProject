@@ -1,4 +1,4 @@
-package ie.ncirl.diaproject.dataprocess.measurement
+package ie.ncirl.diaproject.dataprocess.measurement.ping
 
 case class PingMeasurement
 (

@@ -2,12 +2,14 @@ package ie.ncirl.diaproject.dataprocess
 
 import java.util.{Objects, Properties}
 
-import ie.ncirl.diaproject.dataprocess.measurement.{Measurement, PingMeasurement}
+import ie.ncirl.diaproject.dataprocess.measurement.Measurement
+import ie.ncirl.diaproject.dataprocess.measurement.http.HttpMeasurement
+import ie.ncirl.diaproject.dataprocess.measurement.ping.PingMeasurement
 import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.slf4j.LoggerFactory
 
 class DIASparkApp {
@@ -64,7 +66,8 @@ object DIASparkApp {
             case "ping" => measurementSchema =
               ScalaReflection.schemaFor[PingMeasurement].dataType.asInstanceOf[StructType]
             case "traceroute" =>
-            case "http" =>
+            case "http" => measurementSchema =
+              ScalaReflection.schemaFor[HttpMeasurement].dataType.asInstanceOf[StructType]
             case "dns_lookup" =>
             case "udp_burst" =>
             case "tcpthroughput" =>
