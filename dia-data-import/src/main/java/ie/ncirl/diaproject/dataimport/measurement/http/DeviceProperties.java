@@ -27,6 +27,9 @@ public class DeviceProperties extends Measurement {
     public String request_app;
     public String ssid;
     public String bssid;
+    public String cell_rssi;
+    public String country_code;
+    public String wifi_ip_address;
 
     @Override
     public String toHdr(String sep) {
@@ -48,7 +51,10 @@ public class DeviceProperties extends Measurement {
         separate(sb, "dp_mobilyzer_version", sep);
         separate(sb, "dp_request_app", sep);
         separate(sb, "dp_ssid", sep);
-        separate(sb, "dp_bssid", NO_SEP);
+        separate(sb, "dp_bssid", sep);
+        separate(sb, "cell_rssi", sep);
+        separate(sb, "country_code", sep);
+        separate(sb, "wifi_ip_address", NO_SEP);
         return(sb.toString());
     }
 
@@ -80,7 +86,10 @@ public class DeviceProperties extends Measurement {
         quoteAndSeparate(sb, mobilyzer_version, quote, sep);
         quoteAndSeparate(sb, request_app, quote, sep);
         quoteAndSeparate(sb, ssid, quote, sep);
-        quoteAndSeparate(sb, bssid, quote, NO_SEP);
+        quoteAndSeparate(sb, bssid, quote, sep);
+        quoteAndSeparate(sb, cell_rssi, quote, sep);
+        quoteAndSeparate(sb, country_code, quote, sep);
+        quoteAndSeparate(sb, wifi_ip_address, quote, NO_SEP);
         return(sb.toString());
     }
 
@@ -104,7 +113,10 @@ public class DeviceProperties extends Measurement {
         separate(sb, nullValue, sep); // mobilyzer_version
         separate(sb, nullValue, sep); // request_app
         separate(sb, nullValue, sep); // ssid
-        separate(sb, nullValue, NO_SEP); // bssid
+        separate(sb, nullValue, sep); // bssid
+        separate(sb, nullValue, sep); // cell_rssi
+        separate(sb, nullValue, sep); // country_code
+        separate(sb, nullValue, NO_SEP); // wifi_ip_address
         return(sb.toString());
     }
 }

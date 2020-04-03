@@ -53,7 +53,10 @@ case class Parameters
   key: String,
   `type`: String,
   method: String,
-  context_interval_sec: String
+  context_interval_sec: String,
+  sensitive: String,
+  sample_byte_interval: String,
+  resolved_ip: String
 )
 
 case class DeviceProperties
@@ -75,7 +78,10 @@ case class DeviceProperties
   mobilyzer_version: String,
   request_app: String,
   ssid: String,
-  bssid: String
+  bssid: String,
+  cell_rssi: String,
+  country_code:String,
+  wifi_ip_address: String
 )
 
 case class DeviceInfo
@@ -114,6 +120,9 @@ case class Values
   currentRssi: String,
   MobilePktSend: String,
   contextMeasurementInterval: String,
-  context_results: String
+  context_results: String,
+  content_length: String,
+  status_code: String,
+  samples: String
 )
 

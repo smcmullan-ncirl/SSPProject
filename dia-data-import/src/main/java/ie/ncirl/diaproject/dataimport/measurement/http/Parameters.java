@@ -20,6 +20,9 @@ public class Parameters extends Measurement {
     public String type;
     public String method;
     public String context_interval_sec;
+    public String sensitive;
+    public String sample_byte_interval;
+    public String resolved_ip;
 
     @Override
     public String toHdr(String sep) {
@@ -35,8 +38,11 @@ public class Parameters extends Measurement {
         separate(sb, "p_end_time", sep);
         separate(sb, "p_key", sep);
         separate(sb, "p_type", sep);
-        separate(sb, "p_method", NO_SEP);
-        separate(sb, "p_context_interval_sec", NO_SEP);
+        separate(sb, "p_method", sep);
+        separate(sb, "p_context_interval_sec", sep);
+        separate(sb, "p_sensitive", sep);
+        separate(sb, "p_sample_byte_interval", sep);
+        separate(sb, "p_resolved_ip", NO_SEP);
         return(sb.toString());
     }
 
@@ -55,7 +61,10 @@ public class Parameters extends Measurement {
         quoteAndSeparate(sb, key, quote, sep);
         quoteAndSeparate(sb, type, quote, sep);
         quoteAndSeparate(sb, method, quote, sep);
-        quoteAndSeparate(sb, context_interval_sec, quote, NO_SEP);
+        quoteAndSeparate(sb, context_interval_sec, quote, sep);
+        quoteAndSeparate(sb, sensitive, quote, sep);
+        quoteAndSeparate(sb, sample_byte_interval, quote, sep);
+        quoteAndSeparate(sb, resolved_ip, quote, NO_SEP);
         return(sb.toString());
     }
 
@@ -74,7 +83,10 @@ public class Parameters extends Measurement {
         separate(sb, nullValue, sep); // key
         separate(sb, nullValue, sep); // type
         separate(sb, nullValue, sep); // method
-        separate(sb, nullValue, NO_SEP); // context_interval_sec
+        separate(sb, nullValue, sep); // context_interval_sec
+        separate(sb, nullValue, sep); // sensitive
+        separate(sb, nullValue, sep); // sample_byte_interval
+        separate(sb, nullValue, NO_SEP); // resolved_ip
         return(sb.toString());
     }
 }

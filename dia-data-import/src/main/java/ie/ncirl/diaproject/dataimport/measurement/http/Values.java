@@ -26,6 +26,9 @@ public class Values extends Measurement {
     public String MobilePktSend;
     public String contextMeasurementInterval;
     public String context_results;
+    public String content_length;
+    public String status_code;
+    public String samples;
 
     @Override
     public String toHdr(String sep) {
@@ -48,7 +51,10 @@ public class Values extends Measurement {
         separate(sb, "v_currentRssi", sep);
         separate(sb, "v_MobilePktSend", sep);
         separate(sb, "v_contextMeasurementInterval", sep);
-        separate(sb, "v_context_results", NO_SEP);
+        separate(sb, "v_context_results", sep);
+        separate(sb, "v_content_length", sep);
+        separate(sb, "v_status_code", sep);
+        separate(sb, "v_samples", NO_SEP);
         return(sb.toString());
     }
 
@@ -73,7 +79,10 @@ public class Values extends Measurement {
         quoteAndSeparate(sb, currentRssi, quote, sep);
         quoteAndSeparate(sb, MobilePktSend, quote, sep);
         quoteAndSeparate(sb, contextMeasurementInterval, quote, sep);
-        quoteAndSeparate(sb, context_results, quote, NO_SEP);
+        quoteAndSeparate(sb, context_results, quote, sep);
+        quoteAndSeparate(sb, content_length, quote, sep);
+        quoteAndSeparate(sb, status_code, quote, sep);
+        quoteAndSeparate(sb, samples, quote, NO_SEP);
         return(sb.toString());
     }
 
@@ -98,7 +107,10 @@ public class Values extends Measurement {
         separate(sb, nullValue, sep); // currentRssi
         separate(sb, nullValue, sep); // MobilePktSend
         separate(sb, nullValue, sep); // contextMeasurementInterval
-        separate(sb, nullValue, NO_SEP); // context_results
+        separate(sb, nullValue, sep); // context_results
+        separate(sb, nullValue, sep); // content_length
+        separate(sb, nullValue, sep); // status_code
+        separate(sb, nullValue, NO_SEP); // samples
         return(sb.toString());
     }
 }
