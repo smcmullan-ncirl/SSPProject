@@ -1,11 +1,8 @@
 package ie.ncirl.diaproject.dataimport.measurement.dnslookup;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DnsLookupMeasurement extends Measurement {
-    private static Logger logger = LoggerFactory.getLogger(DnsLookupMeasurement.class);
 
     @Override
     public String toHdr(String sep) {

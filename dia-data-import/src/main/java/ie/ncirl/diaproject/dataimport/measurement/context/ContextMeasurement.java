@@ -1,11 +1,8 @@
 package ie.ncirl.diaproject.dataimport.measurement.context;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ContextMeasurement extends Measurement {
-    private static Logger logger = LoggerFactory.getLogger(ContextMeasurement.class);
 
     @Override
     public String toHdr(String sep) {

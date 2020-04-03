@@ -1,11 +1,8 @@
 package ie.ncirl.diaproject.dataimport.measurement.http;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Location extends Measurement {
-    private static Logger logger = LoggerFactory.getLogger(Location.class);
 
     public String latitude;
     public String longitude;

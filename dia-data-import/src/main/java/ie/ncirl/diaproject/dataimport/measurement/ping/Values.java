@@ -1,11 +1,8 @@
 package ie.ncirl.diaproject.dataimport.measurement.ping;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Values extends Measurement {
-    private static Logger logger = LoggerFactory.getLogger(Values.class);
 
     public String packets_sent;
     public String packet_loss;

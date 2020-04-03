@@ -1,11 +1,8 @@
 package ie.ncirl.diaproject.dataimport.measurement.ping;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PingMeasurement extends Measurement {
-    private static Logger logger = LoggerFactory.getLogger(PingMeasurement.class);
 
     public Task task;
     public Parameters parameters;
@@ -62,7 +59,7 @@ public class PingMeasurement extends Measurement {
     public String toNullCsv(String nullValue, String sep) {
         StringBuffer sb = new StringBuffer();
         separate(sb, (new Task()).toNullCsv(nullValue, sep), sep); // task
-        separate(sb, (new TaskParameters()).toNullCsv(nullValue, sep), sep); // parameters
+        separate(sb, (new Parameters()).toNullCsv(nullValue, sep), sep); // parameters
         separate(sb, nullValue, sep); // success
         separate(sb, nullValue, sep); // timestamp
         separate(sb, (new DeviceProperties()).toNullCsv(nullValue, sep), sep); // device_properties

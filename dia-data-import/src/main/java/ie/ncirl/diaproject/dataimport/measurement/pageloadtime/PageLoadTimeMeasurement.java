@@ -1,11 +1,8 @@
 package ie.ncirl.diaproject.dataimport.measurement.pageloadtime;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PageLoadTimeMeasurement extends Measurement {
-    private static Logger logger = LoggerFactory.getLogger(PageLoadTimeMeasurement.class);
 
     @Override
     public String toHdr(String sep) {

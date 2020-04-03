@@ -1,12 +1,8 @@
 package ie.ncirl.diaproject.dataimport.measurement.http;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
-import ie.ncirl.diaproject.dataimport.measurement.ping.TaskParameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HttpMeasurement extends Measurement {
-    private static Logger logger = LoggerFactory.getLogger(HttpMeasurement.class);
 
     public Task task;
     public Parameters parameters;
@@ -63,7 +59,7 @@ public class HttpMeasurement extends Measurement {
     public String toNullCsv(String nullValue, String sep) {
         StringBuffer sb = new StringBuffer();
         separate(sb, (new Task()).toNullCsv(nullValue, sep), sep); // task
-        separate(sb, (new TaskParameters()).toNullCsv(nullValue, sep), sep); // parameters
+        separate(sb, (new Parameters()).toNullCsv(nullValue, sep), sep); // parameters
         separate(sb, nullValue, sep); // success
         separate(sb, nullValue, sep); // timestamp
         separate(sb, (new DeviceProperties()).toNullCsv(nullValue, sep), sep); // device_properties

@@ -5,6 +5,7 @@ import java.util.{Objects, Properties}
 import ie.ncirl.diaproject.dataprocess.measurement.Measurement
 import ie.ncirl.diaproject.dataprocess.measurement.http.HttpMeasurement
 import ie.ncirl.diaproject.dataprocess.measurement.ping.PingMeasurement
+import ie.ncirl.diaproject.dataprocess.measurement.tcpthroughput.TcpThroughputMeasurement
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.ScalaReflection
@@ -70,7 +71,8 @@ object DIASparkApp {
               ScalaReflection.schemaFor[HttpMeasurement].dataType.asInstanceOf[StructType]
             case "dns_lookup" =>
             case "udp_burst" =>
-            case "tcpthroughput" =>
+            case "tcpthroughput" => measurementSchema =
+              ScalaReflection.schemaFor[TcpThroughputMeasurement].dataType.asInstanceOf[StructType]
             case "context" =>
             case "myspeedtest_ping" =>
             case "myspeedtestdns_lookup" =>

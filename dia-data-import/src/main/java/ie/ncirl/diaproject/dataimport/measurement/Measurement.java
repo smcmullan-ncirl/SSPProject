@@ -1,10 +1,6 @@
 package ie.ncirl.diaproject.dataimport.measurement;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 abstract public class Measurement {
-    private static Logger logger = LoggerFactory.getLogger(Measurement.class);
 
     public static final String NULL = null;
     public static final String NO_NULL = "";

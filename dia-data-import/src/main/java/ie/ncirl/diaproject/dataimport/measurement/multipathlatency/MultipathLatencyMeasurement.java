@@ -1,11 +1,8 @@
 package ie.ncirl.diaproject.dataimport.measurement.multipathlatency;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MultipathLatencyMeasurement extends Measurement {
-    private static Logger logger = LoggerFactory.getLogger(MultipathLatencyMeasurement.class);
 
     @Override
     public String toHdr(String sep) {

@@ -1,13 +1,10 @@
 package ie.ncirl.diaproject.dataimport.measurement.ping;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
 public class DeviceProperties extends Measurement {
-    private static Logger logger = LoggerFactory.getLogger(DeviceProperties.class);
 
     public String battery_level;
     public String cell_info;

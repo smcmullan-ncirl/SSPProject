@@ -1,11 +1,8 @@
 package ie.ncirl.diaproject.dataimport.measurement.ping;
 
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TaskParameters extends Measurement {
-    private static Logger logger = LoggerFactory.getLogger(TaskParameters.class);
 
     public String location_update_distance;
     public String target;
