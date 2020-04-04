@@ -1,6 +1,4 @@
-package ie.ncirl.diaproject.dataimport.measurement.ping;
-
-import ie.ncirl.diaproject.dataimport.measurement.Measurement;
+package ie.ncirl.diaproject.dataimport.measurement;
 
 public class Location extends Measurement {
 

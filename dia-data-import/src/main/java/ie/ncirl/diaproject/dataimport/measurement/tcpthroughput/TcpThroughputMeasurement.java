@@ -1,5 +1,6 @@
 package ie.ncirl.diaproject.dataimport.measurement.tcpthroughput;
 
+import ie.ncirl.diaproject.dataimport.measurement.DeviceProperties;
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
 
 public class TcpThroughputMeasurement extends Measurement {

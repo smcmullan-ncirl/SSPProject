@@ -3,6 +3,7 @@ package ie.ncirl.diaproject.dataimport.measurement.tcpthroughput;
 import ie.ncirl.diaproject.dataimport.measurement.Measurement;
 
 public class Task extends Measurement {
+
     public String count;
     public String filter;
     public TaskParameters parameters;
@@ -17,16 +18,56 @@ public class Task extends Measurement {
 
     @Override
     public String toHdr(String sep) throws UnsupportedOperationException {
-        return null;
+        StringBuffer sb = new StringBuffer();
+        separate(sb, "t_count", sep);
+        separate(sb, "t_filter", sep);
+        separate(sb, (new TaskParameters()).toHdr(sep), sep);
+        separate(sb, "t_created", sep);
+        separate(sb, "t_start_time", sep);
+        separate(sb, "t_interval_sec", sep);
+        separate(sb, "t_priority", sep);
+        separate(sb, "t_tag", sep);
+        separate(sb, "t_end_time", sep);
+        separate(sb, "t_type", sep);
+        separate(sb, "t_id", NO_SEP);
+        return(sb.toString());
     }
 
     @Override
     public String toCsv(String nullValue, String quote, String sep) throws UnsupportedOperationException {
-        return null;
+        StringBuffer sb = new StringBuffer();
+        quoteAndSeparate(sb, count, quote, sep);
+        quoteAndSeparate(sb, filter, quote, sep);
+
+        separate(sb, parameters != null
+                ? parameters.toCsv(nullValue, quote, sep)
+                : (new TaskParameters()).toNullCsv(nullValue, sep), sep);
+
+        quoteAndSeparate(sb, created, quote, sep);
+        quoteAndSeparate(sb, start_time, quote, sep);
+        quoteAndSeparate(sb, interval_sec, quote, sep);
+        quoteAndSeparate(sb, priority, quote, sep);
+        quoteAndSeparate(sb, tag, quote, sep);
+        quoteAndSeparate(sb, end_time, quote, sep);
+        quoteAndSeparate(sb, type, quote, sep);
+        quoteAndSeparate(sb, id, quote, NO_SEP);
+        return(sb.toString());
     }
 
     @Override
     public String toNullCsv(String nullValue, String sep) throws UnsupportedOperationException {
-        return null;
+        StringBuffer sb = new StringBuffer();
+        separate(sb, nullValue, sep); // count
+        separate(sb, nullValue, sep); // filter
+        separate(sb, (new TaskParameters()).toNullCsv(nullValue, sep), sep); // parameters
+        separate(sb, nullValue, sep); // created
+        separate(sb, nullValue, sep); // start_time
+        separate(sb, nullValue, sep); // interval_sec
+        separate(sb, nullValue, sep); // priority
+        separate(sb, nullValue, sep); // tag
+        separate(sb, nullValue, sep); // end_time
+        separate(sb, nullValue, sep); // type
+        separate(sb, nullValue, NO_SEP); // id
+        return(sb.toString());
     }
 }

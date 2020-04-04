@@ -48,7 +48,6 @@ public class Values extends Measurement {
         separate(sb, "v_time", sep);
         separate(sb, "v_context_results", sep);
         separate(sb, "v_mptcp_config", NO_SEP);
-
         return(sb.toString());
     }
 
@@ -75,7 +74,6 @@ public class Values extends Measurement {
         quoteAndSeparate(sb, time, quote, sep);
         quoteAndSeparate(sb, context_results, quote, sep);
         quoteAndSeparate(sb, mptcp_config, quote, NO_SEP);
-
         return(sb.toString());
     }
 
