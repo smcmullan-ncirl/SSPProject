@@ -1,3 +1,5 @@
 # Project exclude paths
 /dia-data-import/target/
 /dia-spark-app/target/
+/http_output.tsv/
+/ping_output.tsv/

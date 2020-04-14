@@ -30,12 +30,15 @@ object DIASparkApp {
       .setMaster("local[*]")
       .setAppName("DIASparkApp")
       .set("spark.sql.shuffle.partitions", "2")
+      .set("spark.debug.maxToStringFields", "100")
 
     val spark = SparkSession
       .builder
       .config(conf)
       .getOrCreate
 
+    // Produce a DataFrame with all the records from all the subscribed to Kafka topics
+    // The DataFrame should have a single column of type String called jsonString
     val rawDF = spark
       .read
       .format("kafka")
@@ -45,37 +48,52 @@ object DIASparkApp {
       .load()
       .selectExpr("CAST(value AS STRING) AS jsonString")
 
-    rawDF.show(false)
-
     if (!rawDF.isEmpty) {
       import spark.implicits._
 
+      // Create a generic Measurement schema StructType
       val measurementSchema = ScalaReflection.schemaFor[Measurement].dataType.asInstanceOf[StructType]
 
-      val jsonDF = rawDF.select(from_json($"jsonString", schema = measurementSchema) as "measurement")
+      // Create a new DataFrame containing the JSON String in one column and the parsed JSON as a StructType column
+      // called measurement in the other
+      val measurementDF = rawDF.select($"jsonString",
+        from_json($"jsonString", schema = measurementSchema) as "measurement")
 
-      jsonDF.show(false)
+      if (!measurementDF.isEmpty) {
+        // Create a new DataFrame which flattens the measurement StructType to individual columns
+        // The jsonString column should still be there
+        val explodedMeasurementDF = JSONUtils.flattenDataFrame(measurementDF)
 
-      if (!jsonDF.isEmpty) {
-        val typesDF = jsonDF.select("type").distinct
+        // Extract the distinct measurement types in the overall data set and iterate through them
+        val types = explodedMeasurementDF.select("measurement_type").distinct.collectAsList()
 
-        typesDF.foreach {
-          row =>
-            row.toSeq.foreach {
-              col => {
-                logger.info(s"Processing $col")
+        val iter = types.iterator()
 
-                val measurementSchema: StructType = createMeasurementSchema(col)
+        while(iter.hasNext) {
+          val measurementType = iter.next().getString(0)
+          logger.info(s"Processing $measurementType measurement type")
 
-                val measurementDF = rawDF.select(from_json($"jsonString", schema = measurementSchema) as "measurement")
+          // Get the detailed Schema for the specific measurement type
+          val typedMeasurementSchema: StructType = createMeasurementSchema(measurementType)
 
-                val explodedMeasurementDF = JSONUtils.flattenDataFrame(measurementDF)
+          // Create a DataFrame with just the specific measurement type as rows and a single measurement column
+          // of type StructType containing the measurement details
+          val typedMeasurementDF = explodedMeasurementDF
+            .filter(col("measurement_type") === measurementType)
+            .select(from_json($"jsonString", schema = typedMeasurementSchema) as "measurement")
 
-                explodedMeasurementDF.show(false)
+          // Create a new DataFrame which flattens the measurement StructType to individual columns
+          val explodedTypedMeasurementDF = JSONUtils.flattenDataFrame(typedMeasurementDF)
 
-                explodedMeasurementDF.write.csv(s"${col}_output.csv")
-              }
-            }
+          // Start doing some interesting aggregations here and write out the results
+          explodedTypedMeasurementDF
+            .repartition(1)
+            .write
+            .format("csv")
+            .mode("overwrite")
+            .option("sep", "\t")
+            .option("header", "true")
+            .save(s"${measurementType}_output.tsv")
         }
       }
     }
@@ -83,10 +101,10 @@ object DIASparkApp {
     spark.close
   }
 
-  def createMeasurementSchema(col: Any): StructType = {
+  def createMeasurementSchema(measurementType: String): StructType = {
     var measurementSchema: StructType = null
 
-    col match {
+    measurementType match {
       case "ping" => measurementSchema =
         ScalaReflection.schemaFor[PingMeasurement].dataType.asInstanceOf[StructType]
       case "traceroute" =>
