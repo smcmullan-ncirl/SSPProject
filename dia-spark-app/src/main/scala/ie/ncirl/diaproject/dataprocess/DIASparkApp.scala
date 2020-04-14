@@ -47,66 +47,78 @@ object DIASparkApp {
 
     rawDF.show(false)
 
-    import spark.implicits._
+    if (!rawDF.isEmpty) {
+      import spark.implicits._
 
-    var measurementSchema = ScalaReflection.schemaFor[Measurement].dataType.asInstanceOf[StructType]
+      val measurementSchema = ScalaReflection.schemaFor[Measurement].dataType.asInstanceOf[StructType]
 
-    val jsonDF = rawDF.select(from_json($"jsonString", schema=measurementSchema) as "measurement")
+      val jsonDF = rawDF.select(from_json($"jsonString", schema = measurementSchema) as "measurement")
 
-    jsonDF.show(false)
+      jsonDF.show(false)
 
-    val typesDF = jsonDF.select("type").distinct
+      if (!jsonDF.isEmpty) {
+        val typesDF = jsonDF.select("type").distinct
 
-    typesDF.foreach {
-      row => row.toSeq.foreach {
-        col => {
-          logger.info(s"Processing $col")
+        typesDF.foreach {
+          row =>
+            row.toSeq.foreach {
+              col => {
+                logger.info(s"Processing $col")
 
-          var measurementSchema: StructType = null
-          col match {
-            case "ping" => measurementSchema =
-              ScalaReflection.schemaFor[PingMeasurement].dataType.asInstanceOf[StructType]
-            case "traceroute" =>
-            case "http" => measurementSchema =
-              ScalaReflection.schemaFor[HttpMeasurement].dataType.asInstanceOf[StructType]
-            case "dns_lookup" =>
-            case "udp_burst" =>
-            case "tcpthroughput" => measurementSchema =
-              ScalaReflection.schemaFor[TcpThroughputMeasurement].dataType.asInstanceOf[StructType]
-            case "context" =>
-            case "myspeedtest_ping" =>
-            case "myspeedtestdns_lookup" =>
-            case "device_info" =>
-            case "network_info" =>
-            case "battery_info" =>
-            case "ping_test" =>
-            case "sim_info" =>
-            case "state_info" =>
-            case "usage_info" =>
-            case "rrc" =>
-            case "PageLoadTime" =>
-            case "pageloadtime" =>
-            case "video" =>
-            case "sequential" =>
-            case "quic-http" =>
-            case "cronet-http" =>
-            case "multipath_latency" =>
-            case "multipath_http" =>
-            case _ =>
-          }
+                val measurementSchema: StructType = createMeasurementSchema(col)
 
-          val measurementDF = rawDF.select(from_json($"jsonString", schema=measurementSchema) as "measurement")
+                val measurementDF = rawDF.select(from_json($"jsonString", schema = measurementSchema) as "measurement")
 
-          val explodedMeasurementDF = JSONUtils.flattenDataFrame(measurementDF)
+                val explodedMeasurementDF = JSONUtils.flattenDataFrame(measurementDF)
 
-          explodedMeasurementDF.show(false)
+                explodedMeasurementDF.show(false)
 
-          explodedMeasurementDF.write.csv(s"${col}_output.csv")
+                explodedMeasurementDF.write.csv(s"${col}_output.csv")
+              }
+            }
         }
       }
     }
 
     spark.close
+  }
+
+  def createMeasurementSchema(col: Any): StructType = {
+    var measurementSchema: StructType = null
+
+    col match {
+      case "ping" => measurementSchema =
+        ScalaReflection.schemaFor[PingMeasurement].dataType.asInstanceOf[StructType]
+      case "traceroute" =>
+      case "http" => measurementSchema =
+        ScalaReflection.schemaFor[HttpMeasurement].dataType.asInstanceOf[StructType]
+      case "dns_lookup" =>
+      case "udp_burst" =>
+      case "tcpthroughput" => measurementSchema =
+        ScalaReflection.schemaFor[TcpThroughputMeasurement].dataType.asInstanceOf[StructType]
+      case "context" =>
+      case "myspeedtest_ping" =>
+      case "myspeedtestdns_lookup" =>
+      case "device_info" =>
+      case "network_info" =>
+      case "battery_info" =>
+      case "ping_test" =>
+      case "sim_info" =>
+      case "state_info" =>
+      case "usage_info" =>
+      case "rrc" =>
+      case "PageLoadTime" =>
+      case "pageloadtime" =>
+      case "video" =>
+      case "sequential" =>
+      case "quic-http" =>
+      case "cronet-http" =>
+      case "multipath_latency" =>
+      case "multipath_http" =>
+      case _ =>
+    }
+
+    measurementSchema
   }
 
 }
