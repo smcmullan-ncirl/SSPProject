@@ -85,7 +85,69 @@ object DIASparkApp {
           // Create a new DataFrame which flattens the measurement StructType to individual columns
           val explodedTypedMeasurementDF = JSONUtils.flattenDataFrame(typedMeasurementDF)
 
-          // Start doing some interesting aggregations here and write out the results
+          // Start doing some interesting aggregations here
+          explodedTypedMeasurementDF
+            .groupBy($"measurement_device_properties_carrier",
+              $"measurement_device_properties_network_type")
+            .count()
+            .orderBy($"measurement_device_properties_carrier",
+              $"measurement_device_properties_network_type")
+            .withColumnRenamed("measurement_device_properties_carrier", "Carrier")
+            .withColumnRenamed("measurement_device_properties_network_type", "Network Type")
+            .show(false);
+
+          explodedTypedMeasurementDF
+            .groupBy($"measurement_device_properties_device_info_manufacturer",
+              $"measurement_device_properties_device_info_model")
+            .count()
+            .orderBy($"measurement_device_properties_device_info_manufacturer",
+              $"measurement_device_properties_device_info_model")
+            .withColumnRenamed("measurement_device_properties_device_info_manufacturer", "Manufacturer")
+            .withColumnRenamed("measurement_device_properties_device_info_model", "Model")
+            .show(false);
+
+          explodedTypedMeasurementDF
+            .agg(max("measurement_device_properties_battery_level"))
+            .withColumnRenamed("max(measurement_device_properties_battery_level)", "Max Battery Level")
+            .show(false)
+
+          explodedTypedMeasurementDF
+            .agg(min("measurement_device_properties_battery_level"))
+            .withColumnRenamed("min(measurement_device_properties_battery_level)", "Min Battery Level")
+            .show(false)
+
+          explodedTypedMeasurementDF
+            .agg(avg("measurement_device_properties_battery_level"))
+            .withColumnRenamed("avg(measurement_device_properties_battery_level)", "Avg Battery Level")
+            .show(false)
+
+          explodedTypedMeasurementDF
+            .agg(max("measurement_device_properties_rssi"))
+            .withColumnRenamed("max(measurement_device_properties_rssi)", "Max RSSI")
+            .show(false)
+
+          explodedTypedMeasurementDF
+            .agg(min("measurement_device_properties_rssi"))
+            .withColumnRenamed("min(measurement_device_properties_rssi)", "Min RSSI")
+            .show(false)
+
+          explodedTypedMeasurementDF
+            .agg(avg("measurement_device_properties_rssi"))
+            .withColumnRenamed("avg(measurement_device_properties_rssi)", "Avg RSSI")
+            .show(false)
+
+          measurementType match {
+            case "http" => {
+
+            }
+
+            case "ping" => {
+
+            }
+
+            case _ =>
+          }
+
           explodedTypedMeasurementDF
             .repartition(1)
             .write

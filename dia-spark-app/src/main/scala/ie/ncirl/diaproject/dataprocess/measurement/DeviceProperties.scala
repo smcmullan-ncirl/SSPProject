@@ -2,7 +2,7 @@ package ie.ncirl.diaproject.dataprocess.measurement
 
 case class DeviceProperties
 (
-  battery_level: String,
+  battery_level: Integer,
   cell_info: String,
   timestamp: String,
   network_type: String,
@@ -10,7 +10,7 @@ case class DeviceProperties
   device_info: DeviceInfo,
   carrier: String,
   location: Location,
-  rssi: String,
+  rssi: Integer,
   app_version: String,
   location_type: String,
   is_battery_charging: String,
