@@ -55,6 +55,10 @@ https://console.cloud.google.com/storage/browser/openmobiledata_public
 4. CPU
 5. Disk Space
 
+## Architecture Diagram
+
+![DIA Project Architecture](DIAProject.png)
+ 	
 ## Setup Build Environment Instructions
 
     sudo apt-get install maven
