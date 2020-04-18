@@ -69,7 +69,7 @@ Post build the application working directory is approx 33MB
 
 ## Architecture Diagram
 
-![DIA Project Architecture](DIAProject.png)
+![DIA Project Architecture](DIAProjectArch.png)
  	
 # Overall Application Build and Deployment
 
@@ -200,6 +200,9 @@ The configuration properties are:
 There's no real need to change any settings apart from the enabled flags
 
 ## Performance
+
+The following metrics were acquired running the GCPDataImport application without any modifications to the configuration
+file supplied i.e. it processes the entire dataset into the Kafka broker in 7029 seconds ~ 2 hours 
 
 ![GCPDataImport Performance](GCPDataImportPerf.png)
 
