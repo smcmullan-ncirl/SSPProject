@@ -18,7 +18,7 @@ https://www.measurementlab.net/tests/mobiperf/
 
 ## Datasets
 
-Processed 16809 files, 8564395 records in 9741 seconds at a rate of 879 records/sec
+The dataset contains the following quantities of measurements by type:
 
     ping : 3066411
     traceroute : 369750
@@ -198,6 +198,10 @@ The configuration properties are:
     csv.file.prefix = openmobiledata_
 
 There's no real need to change any settings apart from the enabled flags
+
+## Performance
+
+![GCPDataImport Performance](GCPDataImportPerf.png)
 
 # DIASparkApp - The Data Aggregation Processor application
 
