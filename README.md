@@ -68,6 +68,8 @@ Post build the application working directory is approx 33MB
 
 ![DIA Project Architecture](DIAProject.png)
  	
+# Overall Application Build and Deployment
+
 ## Setup Build Environment Instructions
 
     sudo apt-get install maven
@@ -94,41 +96,123 @@ You can then check if Docker is running correctly by running the Hello World con
 
     docker-compose up -d
     docker-compose ps
-    docker-compose exec kafka kafka-topics.sh --create --replication-factor 1 --partitions 1 --bootstrap-server localhost:9092 --topic my-topic
-    docker-compose exec kafka kafka-topics.sh --list --bootstrap-server localhost:9092
 
-## Kafka Consumer Instructions
+## Kafka Topic Creation (Optional)
 
-    docker-compose exec kafka kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic <topic name>
-    
 I've provided a script to create all topics associated with this project
 
     createKafkaTopics.sh
     
+This combines the following commands for each topic and then a general listing at the end:
+
+    docker-compose exec kafka kafka-topics.sh --create --replication-factor 1 --partitions 1 --bootstrap-server localhost:9092 --topic <topic-name>
+    
+    docker-compose exec kafka kafka-topics.sh --list --bootstrap-server localhost:9092
+    
 However it isn't strictly necessary to do this as the topics are created by the broker when the client producer sends messages to those topics if they do not exist previously.
 
-## Postgres Setup Instructions
+## Kafka Consumer Instructions (Optional)
+
+If you want to monitor the records being produced into any Kafka topic then you can start the Kafka console consumer as follows:
+
+    docker-compose exec kafka kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic <topic name>
+
+## Postgres Setup Instructions (Optional)
+
+If you choose to persist data to PostgreSQL then installing the command line SQL client is very useful:
 
     sudo apt-get install postgresql-client
     sudo apt install postgresql-client-common
+    
+DBVizualizer is recommended if you would like a full GUI
+
+# GCPDataImport - The Data Collection Processor application
 
 ## Starting Processing Instructons
 
     cd dia-data-import
+    
+and then
+
     mvn exec:java
     
 or
 
     java -jar dia-data-import/target/gcpdataimport-jar-with-dependencies.jar
     
-## Shutdown Instructions
+This will start the processing of the data records from the Open Mobile Performance dataset to the Kafka broker by default.
+
+### Configuration Options
+If you would like to enable/disable Kafka, PostgreSQL or CSV processing then you need to edit the following file and rebuild the project and re-run the application as described above:
+
+    dia-data-import/src/main/resources/config.properties
+    
+The configuration properties are:
+
+    gcp.bucketname = openmobiledata_public
+
+    tempfile.dir = /tmp
+
+    file.offset.min = 0
+    file.offset.max = -1
+
+    ping = true
+    traceroute = true
+    http = true
+    dns_lookup = true
+    udp_burst = true
+    tcpthroughput = true
+    context = true
+    myspeedtest_ping = true
+    myspeedtestdns_lookup = true
+    device_info = true
+    network_info = true
+    battery_info = true
+    ping_test = true
+    sim_info = true
+    state_info = true
+    usage_info = true
+    rrc = true
+    PageLoadTime = true
+    pageloadtime = true
+    video = true
+    sequential = true
+    quic-http = true
+    cronet-http = true
+    multipath_latency = true
+    multipath_http = true
+
+    kafka.enabled = true
+    kafka.server = localhost:9092
+
+    db.enabled = false
+    db.url = jdbc:postgresql://localhost:5432/diadb
+    db.user = diauser
+    db.password = diapassword
+    db.schema = bigdata
+
+    csv.enabled = false
+    csv.file.prefix = openmobiledata_
+
+There's no real need to change any settings apart from the enabled flags
+    
+# Environment Shutdown Instructions
+
+## Kafka Topic Deletion (Optional)
+
+You can remove the topics from the Kafka with this command:
 
     docker-compose exec kafka kafka-topics.sh --delete --bootstrap-server localhost:9092 --topic <topic name>
     
 I've provided a script to remove all topics associated with this project
 
     deleteKafkaTopics.sh
-    
+
+## Stopping the Docker containers
+
+    docker-compose down
+    docker-compose ps
+
 ## Cleanup Instructions
 
 A lot of diskspace can be consumed over time with Docker with containers, images and volumes. Some of the useful commands to see what is active and to remove it are as follows:
