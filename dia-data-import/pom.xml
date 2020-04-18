@@ -68,7 +68,7 @@
     </dependencies>
 
     <build>
-        <finalName>gcpdataimport</finalName>
+        <finalName>dia-data-import</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -90,7 +90,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>ie.ncirl.diaproject.dataimport.GCPDataImport</mainClass>
+                            <mainClass>ie.ncirl.diaproject.dataimport.DIADataImport</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -110,7 +110,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.6.0</version>
                 <configuration>
-                    <mainClass>ie.ncirl.diaproject.dataimport.GCPDataImport</mainClass>
+                    <mainClass>ie.ncirl.diaproject.dataimport.DIADataImport</mainClass>
                 </configuration>
             </plugin>
         </plugins>

@@ -130,9 +130,9 @@ If you choose to persist data to PostgreSQL then installing the command line SQL
     
 DBVizualizer is recommended if you would like a full GUI
 
-# GCPDataImport - The Data Collection Processor application
+# DIADataImport - The Data Collection Processor application
 
-## Starting Processing Instructons
+## Starting Processing Instructions
 
     cd dia-data-import
     
@@ -142,7 +142,7 @@ and then
     
 or
 
-    java -jar dia-data-import/target/gcpdataimport-jar-with-dependencies.jar
+    java -jar dia-data-import/target/dia-data-import-jar-with-dependencies.jar
     
 This will start the processing of the data records from the Open Mobile Performance dataset to the Kafka broker by default.
 
@@ -202,11 +202,11 @@ There's no real need to change any settings apart from the enabled flags
 
 ## Performance
 
-The following metrics were acquired running the GCPDataImport application on the machine specification listed above
+The following metrics were acquired running the DIADataImport application on the machine specification listed above
 without any modifications to the configuration file supplied i.e. it processes the entire dataset into the Kafka broker
 in 7029 seconds ~ **2 hours**
 
-![GCPDataImport Performance](GCPDataImportPerf.png)
+![DIADataImport Performance](DIADataImportPerf.png)
 
 # DIASparkApp - The Data Aggregation Processor application
 
@@ -219,19 +219,19 @@ After building the project with Maven
     
 The Spark application will be packaged in a JAR file in:
 
-    DIAProject/dia-spark-app/target/diasparkapp-jar-with-dependencies.jar
+    DIAProject/dia-spark-app/target/dia-spark-app.jar
     
 The application can be deployed to Spark with the following commands:
 
     cd DIAProject/dia-spark-app/target
-    docker cp diasparkapp-jar-with-dependencies.jar diaproject_spark-master_1:/
-    docker cp diasparkapp-jar-with-dependencies.jar diaproject_spark-worker_1:/
+    docker cp dia-spark-app.jar diaproject_spark-master_1:/
+    docker cp dia-spark-app.jar diaproject_spark-worker_1:/
         
     docker exec -it diaproject_spark-master_1 bin/spark-submit -v \
     --master spark://localhost:7077 \
     --deploy-mode cluster \
     --class ie.ncirl.diaproject.dataprocess.DIASparkApp \
-    file:///diasparkapp-jar-with-dependencies.jar
+    file:///dia-spark-app.jar
 
 ### Spark deployment troubleshooting
 

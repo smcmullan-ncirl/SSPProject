@@ -3,3 +3,4 @@
 /dia-spark-app/target/
 /http_output.tsv/
 /ping_output.tsv/
+/dia-spark-app/dependency-reduced-pom.xml

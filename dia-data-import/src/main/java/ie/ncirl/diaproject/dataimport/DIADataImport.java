@@ -53,10 +53,10 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class GCPDataImport {
-    private static Logger logger = LoggerFactory.getLogger(GCPDataImport.class);
+public class DIADataImport {
+    private static final Logger logger = LoggerFactory.getLogger(DIADataImport.class);
 
-    private static Properties prop = new Properties();
+    private static final Properties prop = new Properties();
     private static final String CONFIG_PROPERTIES = "config.properties";
     private static final String GCP_BUCKET_NAME = "gcp.bucketname";
     private static final String TEMP_FILE_DIR = "tempfile.dir";
@@ -81,7 +81,7 @@ public class GCPDataImport {
     private static boolean dbEnabled = false;
     private static boolean csvEnabled = false;
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static Producer<String, JsonNode> producer = null;
 
@@ -160,7 +160,7 @@ public class GCPDataImport {
 
     private static void loadProperties() {
         try {
-            prop.load(Objects.requireNonNull(GCPDataImport.class.getClassLoader().getResourceAsStream(CONFIG_PROPERTIES)));
+            prop.load(Objects.requireNonNull(DIADataImport.class.getClassLoader().getResourceAsStream(CONFIG_PROPERTIES)));
 
             tempFileDir = prop.getProperty(TEMP_FILE_DIR, "/tmp");
 
