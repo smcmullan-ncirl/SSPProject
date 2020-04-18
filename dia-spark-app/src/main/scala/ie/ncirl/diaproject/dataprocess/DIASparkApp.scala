@@ -30,6 +30,10 @@ object DIASparkApp {
     // It is worth changing this property to the number of CPUs you have available across your cluster
     val sparkPartitions = properties.getProperty("spark.partitions")
 
+    import scala.collection.JavaConverters._
+    val props = properties.asScala
+    props.foreach((e: (String, String)) => logger.info(s"${e._1} : ${e._2}"))
+
     // Set the Spark cluster configuration
     val conf: SparkConf = new SparkConf()
       .setAppName("DIASparkApp")
