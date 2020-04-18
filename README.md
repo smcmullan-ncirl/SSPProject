@@ -90,7 +90,11 @@ You can then check if Docker is running correctly by running the Hello World con
 
 ## Kafka Consumer Instructions
 
-    docker-compose exec kafka kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic my-topic
+    docker-compose exec kafka kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic <topic name>
+    
+I've provided a script to remove all topics associated with this project
+
+    createKafkaTopics.sh
 
 ## Postgres Setup Instructions
 
@@ -108,10 +112,28 @@ or
     
 ## Shutdown Instructions
 
-    docker-compose exec kafka kafka-topics.sh --delete --bootstrap-server localhost:9092 --topic my-topic
+    docker-compose exec kafka kafka-topics.sh --delete --bootstrap-server localhost:9092 --topic <topic name>
+    
+I've provided a script to remove all topics associated with this project
 
+    deleteKafkaTopics.sh
+    
+## Cleanup Instructions
+
+A lot of diskspace can be consumed over time with Docker with containers, images and volumes. Some of the useful commands to see what is active and to remove it are as follows:
+
+    docker ps
+    docker stop <container name>
+    docker rm <container name>
+    docker images
+    docker rmi <image name>
+    
+and finally Docker volumes under /var/lib/docker/volumes can be removed with:
+
+    docker system prune --all --volumes
 
 ## Links
+
     https://spark.apache.org/docs/latest/structured-streaming-kafka-integration.html
     https://spark.apache.org/docs/latest/streaming-kafka-0-10-integration.html
     https://docs.databricks.com/spark/latest/dataframes-datasets/complex-nested-data.html
