@@ -43,6 +43,15 @@ object DIASparkApp {
       .set("spark.sql.shuffle.partitions", sparkPartitions)
       .set("spark.debug.maxToStringFields", "100") // This is to prevent a warning regarding display of large DF schemas
 
+    // DEBUG mode
+    // This is for running the Spark application within the IDE for debug purposes
+    // You also need to remove the "provided" scope from the spark-core and spark-sql libraries in the Maven pom.xml
+    val runIDE = properties.getProperty("run.ide").toBoolean
+
+    if (runIDE) {
+      conf.setMaster("local[*]")
+    }
+
     val spark = SparkSession
       .builder
       .config(conf)

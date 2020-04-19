@@ -89,20 +89,28 @@ Processing the entire dataset into the Kafka broker consumes approx **20GB** of 
 
 ## Setup Build Environment Instructions
 
+    sudo apt-get install openjdk-8-jdk
+    sudo update-alternatives --config java (choose JDK8)
     sudo apt-get install maven
     sudo apt install git
     git clone https://github.com/smcmullan-ncirl/DIAProject.git
     cd DIAProject
     mvn clean package
     
-Although JDK8 is the preferred build environment, the application can be built with JDK11 assuming the target is a 
-Java 11 JVM and there is a dependency on Scala 2.11 for the Spark application.
+JDK8 is the preferred build environment and there is a dependency on Scala 2.11 for the Spark application.
     
-The target platform is Apache Spark 2.4.5 and the Scala 2.11 Kafka data source for that version of Spark seems to work 
-better with the Scala 2.11 variant.
+The target platform is Apache Spark 2.4.5
 
 TBD: Full Java 11 and Scala 2.12 support is coming with Apache Spark 3.0 which is still at pre-release status currently
-    
+
+## IDE Development and Debugging
+
+There is a property in the DIASparkApp config.properties file called "run.ide" which needs to be set to true. You also
+have to remove the "provided" scope from the spark-core and spark-sql libraries in the Maven pom.xml for the dia-spark-app
+module.
+
+The effect of these changes allow the application to be run outside the deployed Spark cluster in "local" mode
+
 JetBrains IntelliJ IDE with the Scala plugin is recommended for development.
 
 ## Setup Runtime Environment Instructions
