@@ -360,6 +360,7 @@ and finally Docker volumes under /var/lib/docker/volumes can be removed with:
 
 Wurtmeister Docker images for Kafka
 
+    http://wurstmeister.github.io/kafka-docker/
     https://github.com/wurstmeister/kafka-docker/blob/master/README.md
     https://github.com/wurstmeister/kafka-docker/wiki/Connectivity
     
