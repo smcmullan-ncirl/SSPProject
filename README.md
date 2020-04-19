@@ -46,7 +46,20 @@ The dataset contains the following quantities of measurements by type:
     multipath_latency : 2163380
     multipath_http : 2931
 
-https://console.cloud.google.com/storage/browser/openmobiledata_public
+The repository for the data is at the following location on the Google Cloud Platform:
+
+    https://console.cloud.google.com/storage/browser/openmobiledata_public
+    
+There is some description of the data schema associated with each measurement type in the GitHub repository of the
+MobiPerf application here:
+
+    https://github.com/Mobiperf/MobiPerf/blob/master/README
+    
+However it is far from definitive. This application and test measurement is defunct and there is evidence to suggest
+that the application was modified by independent research teams with new measurement types beyond what the GitHub
+repository for the application describes and the back-end M-Lab data repository used to collect in resulting in the
+overall dataset above. The schema of some of the measurement types above can be deduced from parameter key naming but
+the rest is pure guesswork.
 
 ## Prerequisites and resource usage
 
@@ -81,6 +94,16 @@ Processing the entire dataset into the Kafka broker consumes approx **20GB** of 
     git clone https://github.com/smcmullan-ncirl/DIAProject.git
     cd DIAProject
     mvn clean package
+    
+Although JDK8 is the preferred build environment, the application can be built with JDK11 assuming the target is a 
+Java 11 JVM and there is a dependency on Scala 2.11 for the Spark application.
+    
+The target platform is Apache Spark 2.4.5 and the Scala 2.11 Kafka data source for that version of Spark seems to work 
+better with the Scala 2.11 variant.
+
+TBD: Full Java 11 and Scala 2.12 support is coming with Apache Spark 3.0 which is still at pre-release status currently
+    
+JetBrains IntelliJ IDE with the Scala plugin is recommended for development.
 
 ## Setup Runtime Environment Instructions
 
@@ -113,13 +136,20 @@ This combines the following commands for each topic and then a general listing a
     
     docker-compose exec kafka kafka-topics.sh --list --bootstrap-server localhost:9092
     
-However it isn't strictly necessary to do this as the topics are created by the broker when the client producer sends messages to those topics if they do not exist previously.
+However it isn't strictly necessary to do this as the topics are created by the broker when the client producer
+sends messages to those topics if they do not exist previously.
+
+The topic names are the same of the measurement types listed above.
 
 ## Kafka Consumer Instructions (Optional)
 
 If you want to monitor the records being produced into any Kafka topic then you can start the Kafka console consumer as follows:
 
     docker-compose exec kafka kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic <topic name>
+    
+The topics can be read from the beginning by the consumer like this:
+
+    docker-compose exec kafka kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic ping --from-beginning
 
 ## Postgres Setup Instructions (Optional)
 
@@ -200,6 +230,14 @@ The configuration properties are:
 
 There's no real need to change any settings apart from the enabled flags
 
+**TBD**: Note that in the case of writing out to CSV and PostgresSQL DB there is only full implementation support for
+three types at the moment and thus the other types will need to be disabled in the config file above to suppress
+exceptions and error handling messages:
+
+    ping
+    http
+    tcpthroughput
+
 ## Performance
 
 The following metrics were acquired running the DIADataImport application on the machine specification listed above
@@ -233,6 +271,14 @@ The application can be deployed to Spark with the following commands:
     --class ie.ncirl.diaproject.dataprocess.DIASparkApp \
     file:///dia-spark-app.jar
 
+**TBD**: Note that in the case of Spark application processing there is only full implementation support for
+three types at the moment (the other types are disabled in the config.properties file assosciated with the
+application:
+
+    ping
+    http
+    tcpthroughput
+    
 ### Spark deployment troubleshooting
 
 If there are issues submitting the application you will see some output from the spark-submit command like this:
@@ -275,7 +321,6 @@ The Spark logs can be checked as follows:
 
     docker exec -it diaproject_spark-master_1 bash
     
-
 # Environment Shutdown Instructions
 
 ## Kafka Topic Deletion (Optional)
@@ -292,6 +337,9 @@ I've provided a script to remove all topics associated with this project
 
     docker-compose down
     docker-compose ps
+    
+**TBD**: Note that when the Docker environment is stopped and restarted the Kafka broker topics are no longer present. This
+requires further investigation.
 
 ## Cleanup Instructions
 
