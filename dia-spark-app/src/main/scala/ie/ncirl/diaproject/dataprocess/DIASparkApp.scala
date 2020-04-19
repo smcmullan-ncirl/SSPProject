@@ -170,55 +170,77 @@ object DIASparkApp {
 
   private def genMeasurementAggs(explodedTypedMeasurementDF: DataFrame): Unit = {
     // Start doing some interesting aggregations here - these are generic to all measurement types
-    explodedTypedMeasurementDF
+    val groupByCarrierAndNetwork = explodedTypedMeasurementDF
       .groupBy(col("measurement_device_properties_carrier"),
         col("measurement_device_properties_network_type"))
-      .count()
+      .count
       .orderBy(col("measurement_device_properties_carrier"),
         col("measurement_device_properties_network_type"))
       .withColumnRenamed("measurement_device_properties_carrier", "Carrier")
       .withColumnRenamed("measurement_device_properties_network_type", "Network Type")
-      .show(false)
+      .collect
 
-    explodedTypedMeasurementDF
+    logger.info("Aggregate (Carrier & Network)")
+    groupByCarrierAndNetwork.toSeq.foreach(x => {
+      logger.info(s"${x.getString(0)} : ${x.getString(1)} : ${x.getLong(2)}")
+    })
+
+    val groupByDeviceManufacturerAndModel = explodedTypedMeasurementDF
       .groupBy(col("measurement_device_properties_device_info_manufacturer"),
         col("measurement_device_properties_device_info_model"))
-      .count()
+      .count
       .orderBy(col("measurement_device_properties_device_info_manufacturer"),
         col("measurement_device_properties_device_info_model"))
       .withColumnRenamed("measurement_device_properties_device_info_manufacturer", "Manufacturer")
       .withColumnRenamed("measurement_device_properties_device_info_model", "Model")
-      .show(false)
+      .collect
 
-    explodedTypedMeasurementDF
+    logger.info("Aggregate (Device Manufacturer & Model))")
+    groupByDeviceManufacturerAndModel.toSeq.foreach(x => {
+      logger.info(s"${x.getString(0)} : ${x.getString(1)} : ${x.getLong(2)}")
+    })
+
+    val maxDeviceBatteryLevel = explodedTypedMeasurementDF
       .agg(max("measurement_device_properties_battery_level"))
       .withColumnRenamed("max(measurement_device_properties_battery_level)", "Max Battery Level")
-      .show(false)
+      .collect()(0).getInt(0)
 
-    explodedTypedMeasurementDF
+    logger.info(s"Max Battery Level $maxDeviceBatteryLevel")
+
+    val minDeviceBatteryLevel = explodedTypedMeasurementDF
       .agg(min("measurement_device_properties_battery_level"))
       .withColumnRenamed("min(measurement_device_properties_battery_level)", "Min Battery Level")
-      .show(false)
+      .collect()(0).getInt(0)
 
-    explodedTypedMeasurementDF
+    logger.info(s"Min Battery Level $minDeviceBatteryLevel")
+
+    val avgDeviceBatteryLevel = explodedTypedMeasurementDF
       .agg(avg("measurement_device_properties_battery_level"))
       .withColumnRenamed("avg(measurement_device_properties_battery_level)", "Avg Battery Level")
-      .show(false)
+      .collect()(0).getDouble(0)
 
-    explodedTypedMeasurementDF
+    logger.info(s"Avg Battery Level $avgDeviceBatteryLevel")
+
+    val maxRSSI = explodedTypedMeasurementDF
       .agg(max("measurement_device_properties_rssi"))
       .withColumnRenamed("max(measurement_device_properties_rssi)", "Max RSSI")
-      .show(false)
+      .collect()(0).getInt(0)
 
-    explodedTypedMeasurementDF
+    logger.info(s"Max RSSI $maxRSSI")
+
+    val minRSSI = explodedTypedMeasurementDF
       .agg(min("measurement_device_properties_rssi"))
       .withColumnRenamed("min(measurement_device_properties_rssi)", "Min RSSI")
-      .show(false)
+      .collect()(0).getInt(0)
 
-    explodedTypedMeasurementDF
+    logger.info(s"Min RSSI $minRSSI")
+
+    val avgRSSI = explodedTypedMeasurementDF
       .agg(avg("measurement_device_properties_rssi"))
       .withColumnRenamed("avg(measurement_device_properties_rssi)", "Avg RSSI")
-      .show(false)
+      .collect()(0).getDouble(0)
+
+    logger.info(s"Avg RSSI $avgRSSI")
   }
 
   private def genMeasurementTypeAggs(measurementType: String): Unit = {
