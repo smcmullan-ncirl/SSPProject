@@ -2,6 +2,10 @@ CREATE DATABASE diadb;
 
 CREATE SCHEMA bigdata;
 
+-- Only the ping, http and tcpthroughput table schemas are supported at the moment
+-- DB persistence for other measurement types will require implementation of object mappers for the specific
+-- measurement type under the ie.ncirl.diaproject.dataimport.measurement package in dia-data-import
+
 CREATE TABLE ping_measurement (
     t_count VARCHAR,
     t_filter VARCHAR,

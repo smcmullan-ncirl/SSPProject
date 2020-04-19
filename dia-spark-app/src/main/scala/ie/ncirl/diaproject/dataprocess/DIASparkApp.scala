@@ -26,8 +26,11 @@ object DIASparkApp {
 
     val kafkaServer = properties.getProperty("kafka.server")
     val kafkaTopics = properties.getProperty("kafka.topics")
+    val kafkaTopicStartingOffset = properties.getProperty("kafka.topic.starting.offset")
+    val kafkaTopicEndingOffset = properties.getProperty("kafka.topic.ending.offset")
 
     // It is worth changing this property to the number of CPUs you have available across your cluster
+    // Make sure it reflects the SPARK_WORKER_CORES environment setting in docker-compose.yml
     val sparkPartitions = properties.getProperty("spark.partitions")
 
     import scala.collection.JavaConverters._
@@ -38,7 +41,7 @@ object DIASparkApp {
     val conf: SparkConf = new SparkConf()
       .setAppName("DIASparkApp")
       .set("spark.sql.shuffle.partitions", sparkPartitions)
-      .set("spark.debug.maxToStringFields", "100")
+      .set("spark.debug.maxToStringFields", "100") // This is to prevent a warning regarding display of large DF schemas
 
     val spark = SparkSession
       .builder
@@ -52,7 +55,8 @@ object DIASparkApp {
       .format("kafka")
       .option("kafka.bootstrap.servers", kafkaServer)
       .option("subscribe", kafkaTopics)
-      .option("startingOffsets", "earliest")
+      .option("startingOffsets", kafkaTopicStartingOffset)
+      .option("endingOffsets", kafkaTopicEndingOffset)
       .load()
       .selectExpr("CAST(value AS STRING) AS jsonString")
 
