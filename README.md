@@ -129,6 +129,15 @@ You can then check if Docker is running correctly by running the Hello World con
 
 ## Run Instructions
 
+Add the following to /etc/hosts to allow the Kafka container to be addressable by the IDE, DIADataImport and the Spark
+Worker
+
+    sudo vi /etc/hosts
+    
+    127.0.0.1	localhost kafka
+    
+Then bring up the Docker environment
+
     docker-compose up -d
     docker-compose ps
 
@@ -328,6 +337,12 @@ When the application has been deployed it can be monitored using the Spark UI
 The Spark logs can be checked as follows:
 
     docker exec -it diaproject_spark-master_1 bash
+        cd /opt/bitnami/spark/work/
+        ls -lrtd driver*
+        cd <last driver directory>
+        cat stderr
+        
+The logs are also viewable via the Spark UI at the link given above
     
 # Environment Shutdown Instructions
 
