@@ -1,6 +1,6 @@
 # Project exclude paths
-/dia-data-import/target/
-/dia-spark-app/target/
+/ssp-data-import/target/
+/ssp-spark-app/target/
 /http_output.tsv/
 /ping_output.tsv/
-/dia-spark-app/dependency-reduced-pom.xml
+/ssp-spark-app/dependency-reduced-pom.xml

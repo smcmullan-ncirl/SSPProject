@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ie.ncirl</groupId>
-    <artifactId>DIAProject</artifactId>
+    <artifactId>SSPProject</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
 
@@ -15,7 +15,7 @@
     </properties>
 
     <modules>
-        <module>dia-data-import</module>
-        <module>dia-spark-app</module>
+        <module>ssp-data-import</module>
+        <module>ssp-spark-app</module>
     </modules>
 </project>

@@ -83,30 +83,28 @@ Processing the entire dataset into the Kafka broker consumes approx **20GB** of 
 
 ## Architecture Diagram
 
-![SSP Project Architecture](DIAProjectArch.png)
+![SSP Project Architecture](SSPProjectArch.png)
  	
 # Overall Application Build and Deployment
 
 ## Setup Build Environment Instructions
 
-    sudo apt-get install openjdk-8-jdk
-    sudo update-alternatives --config java (choose JDK8)
+    sudo apt-get install openjdk-11-jdk
+    sudo update-alternatives --config java (choose JDK11)
     sudo apt-get install maven
     sudo apt install git
     git clone https://github.com/smcmullan-ncirl/SSPProject.git
     cd SSPProject
     mvn clean package
     
-JDK8 is the preferred build environment and there is a dependency on Scala 2.11 for the Spark application.
+JDK11 is the preferred build environment and there is a dependency on Scala 2.12 for the Spark application.
     
-The target platform is Apache Spark 2.4.5
-
-TBD: Full Java 11 and Scala 2.12 support is coming with Apache Spark 3.0 which is still at pre-release status currently
+The target platform is Apache Spark 3.0.0 Preview 2
 
 ## IDE Development and Debugging
 
-There is a property in the DIASparkApp config.properties file called "run.ide" which needs to be set to true. You also
-have to remove the "provided" scope from the spark-core and spark-sql libraries in the Maven pom.xml for the dia-spark-app
+There is a property in the SSPSparkApp config.properties file called "run.ide" which needs to be set to true. You also
+have to remove the "provided" scope from the spark-core and spark-sql libraries in the Maven pom.xml for the ssp-spark-app
 module.
 
 The effect of these changes allow the application to be run outside the deployed Spark cluster in "local" mode
@@ -129,7 +127,7 @@ You can then check if Docker is running correctly by running the Hello World con
 
 ## Run Instructions
 
-Add the following to /etc/hosts to allow the Kafka container to be addressable by the IDE, DIADataImport and the Spark
+Add the following to /etc/hosts to allow the Kafka container to be addressable by the IDE, SSPDataImport and the Spark
 Worker
 
     sudo vi /etc/hosts
@@ -177,11 +175,11 @@ If you choose to persist data to PostgreSQL then installing the command line SQL
     
 DBVizualizer is recommended if you would like a full GUI
 
-# DIADataImport - The Data Collection Processor application
+# SSPDataImport - The Data Collection Processor application
 
 ## Starting Processing Instructions
 
-    cd dia-data-import
+    cd ssp-data-import
     
 and then
 
@@ -189,14 +187,14 @@ and then
     
 or
 
-    java -jar dia-data-import/target/dia-data-import-jar-with-dependencies.jar
+    java -jar ssp-data-import/target/ssp-data-import-jar-with-dependencies.jar
     
 This will start the processing of the data records from the Open Mobile Performance dataset to the Kafka broker by default.
 
 ### Configuration Options
 If you would like to enable/disable Kafka, PostgreSQL or CSV processing then you need to edit the following file and rebuild the project and re-run the application as described above:
 
-    dia-data-import/src/main/resources/config.properties
+    ssp-data-import/src/main/resources/config.properties
     
 The configuration properties are:
 
@@ -237,9 +235,9 @@ The configuration properties are:
     kafka.server = localhost:9092
 
     db.enabled = false
-    db.url = jdbc:postgresql://localhost:5432/diadb
-    db.user = diauser
-    db.password = diapassword
+    db.url = jdbc:postgresql://localhost:5432/sspdb
+    db.user = sspuser
+    db.password = ssppassword
     db.schema = bigdata
 
     csv.enabled = false
@@ -257,39 +255,39 @@ exceptions and error handling messages:
 
 ## Performance
 
-The following metrics were acquired running the DIADataImport application on the machine specification listed above
+The following metrics were acquired running the SSPDataImport application on the machine specification listed above
 without any modifications to the configuration file supplied i.e. it processes the entire dataset into the Kafka broker
 in 7029 seconds ~ **2 hours**
 
-![DIADataImport Performance](DIADataImportPerf.png)
+![SSPDataImport Performance](SSPDataImportPerf.png)
 
-# DIASparkApp - The Data Aggregation Processor application
+# SSPSparkApp - The Data Aggregation Processor application
 
 ## Building and deploying the application to Spark
 
 After building the project with Maven
 
-    cd DIAProject
+    cd SSPProject
     mvn clean package
     
 The Spark application will be packaged in a JAR file in:
 
-    DIAProject/dia-spark-app/target/dia-spark-app.jar
+    SSPProject/ssp-spark-app/target/ssp-spark-app.jar
     
 The application can be deployed to Spark with the following commands:
 
-    cd DIAProject/dia-spark-app/target
-    docker cp dia-spark-app.jar diaproject_spark-master_1:/
-    docker cp dia-spark-app.jar diaproject_spark-worker_1:/
+    cd SSPProject/ssp-spark-app/target
+    docker cp ssp-spark-app.jar sspproject_spark-master_1:/
+    docker cp ssp-spark-app.jar sspproject_spark-worker_1:/
         
-    docker exec -it diaproject_spark-master_1 bin/spark-submit -v \
+    docker exec -it sspproject_spark-master_1 bin/spark-submit -v \
     --master spark://localhost:7077 \
     --deploy-mode cluster \
-    --class ie.ncirl.diaproject.dataprocess.DIASparkApp \
-    file:///dia-spark-app.jar
+    --class ie.ncirl.sspproject.dataprocess.SSPSparkApp \
+    file:///ssp-spark-app.jar
 
 **TBD**: Note that in the case of Spark application processing there is only full implementation support for
-three types at the moment (the other types are disabled in the config.properties file assosciated with the
+three types at the moment (the other types are disabled in the config.properties file associated with the
 application:
 
     ping
@@ -320,7 +318,7 @@ If there are issues submitting the application you will see some output from the
 
 If something like this occurs then check the following location:
 
-    docker exec -it diaproject_spark-worker_1 bash
+    docker exec -it sspproject_spark-worker_1 bash
     cd /opt/bitnami/spark/work/
     ls -lrtd driver*
     cd <last driver directory>
@@ -336,7 +334,7 @@ When the application has been deployed it can be monitored using the Spark UI
 
 The Spark logs can be checked as follows:
 
-    docker exec -it diaproject_spark-master_1 bash
+    docker exec -it sspproject_spark-master_1 bash
         cd /opt/bitnami/spark/work/
         ls -lrtd driver*
         cd <last driver directory>

@@ -6,8 +6,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="dia-spark-app" />
-        <module name="dia-data-import" />
+        <module name="ssp-data-import" />
+        <module name="ssp-spark-app" />
       </profile>
     </annotationProcessing>
   </component>

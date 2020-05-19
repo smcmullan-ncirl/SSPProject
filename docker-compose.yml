@@ -18,9 +18,9 @@ services:
         ports:
             - "5432:5432"
         environment:
-            POSTGRES_DB: diadb
-            POSTGRES_USER: diauser
-            POSTGRES_PASSWORD: diapassword
+            POSTGRES_DB: sspdb
+            POSTGRES_USER: sspuser
+            POSTGRES_PASSWORD: ssppassword
             POSTGRES_DATA: /var/lib/postgresql/data/pgdata
         volumes:
             - "postgres:/var/lib/postgresql/data"
