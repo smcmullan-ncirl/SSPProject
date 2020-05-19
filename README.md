@@ -1,14 +1,14 @@
-# Data Intensive Architecture Project
+# Scalable Systems Programming Project
 
 Stephen McMullan (x19139497@student.ncirl.ie)
 
-Semester 2, Data Intensive Architectures, Postgraduate Diploma in Data Analytics
+Semester 3, Scalable Systems Programming, Postgraduate Diploma in Data Analytics
 
 National College of Ireland
 
 ## GitHub Project Code Repository
 
-https://github.com/smcmullan-ncirl/DIAProject
+https://github.com/smcmullan-ncirl/SSPProject
 
 ## About the Open Mobile Performance Dataset
 
@@ -83,7 +83,7 @@ Processing the entire dataset into the Kafka broker consumes approx **20GB** of 
 
 ## Architecture Diagram
 
-![DIA Project Architecture](DIAProjectArch.png)
+![SSP Project Architecture](DIAProjectArch.png)
  	
 # Overall Application Build and Deployment
 
@@ -93,8 +93,8 @@ Processing the entire dataset into the Kafka broker consumes approx **20GB** of 
     sudo update-alternatives --config java (choose JDK8)
     sudo apt-get install maven
     sudo apt install git
-    git clone https://github.com/smcmullan-ncirl/DIAProject.git
-    cd DIAProject
+    git clone https://github.com/smcmullan-ncirl/SSPProject.git
+    cd SSPProject
     mvn clean package
     
 JDK8 is the preferred build environment and there is a dependency on Scala 2.11 for the Spark application.
