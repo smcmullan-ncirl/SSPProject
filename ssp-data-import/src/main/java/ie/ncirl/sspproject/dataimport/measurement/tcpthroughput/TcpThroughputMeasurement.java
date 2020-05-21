@@ -64,7 +64,7 @@ public class TcpThroughputMeasurement extends Measurement {
         separate(sb, nullValue, sep); // success
         separate(sb, nullValue, sep); // timestamp
         separate(sb, (new DeviceProperties()).toNullCsv(nullValue, sep), sep); // device_properties
-        separate(sb, nullValue, sep); // values
+        separate(sb, (new Values()).toNullCsv(nullValue, sep), sep); // values
         separate(sb, nullValue, sep); // type
         separate(sb, nullValue, NO_SEP); // id
         return(sb.toString());

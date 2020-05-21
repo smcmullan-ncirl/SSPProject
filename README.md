@@ -252,6 +252,7 @@ exceptions and error handling messages:
     ping
     http
     tcpthroughput
+    udp_burst
 
 ## Performance
 
@@ -293,6 +294,7 @@ application:
     ping
     http
     tcpthroughput
+    udp_burst
     
 ### Spark deployment troubleshooting
 

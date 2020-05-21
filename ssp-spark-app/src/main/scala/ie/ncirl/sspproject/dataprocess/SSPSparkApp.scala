@@ -6,6 +6,7 @@ import ie.ncirl.sspproject.dataprocess.measurement.Measurement
 import ie.ncirl.sspproject.dataprocess.measurement.http.HttpMeasurement
 import ie.ncirl.sspproject.dataprocess.measurement.ping.PingMeasurement
 import ie.ncirl.sspproject.dataprocess.measurement.tcpthroughput.TcpThroughputMeasurement
+import ie.ncirl.sspproject.dataprocess.measurement.udpburst.UdpBurstMeasurement
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.catalyst.ScalaReflection
@@ -140,7 +141,8 @@ object SSPSparkApp {
       case "http" => measurementSchema =
         ScalaReflection.schemaFor[HttpMeasurement].dataType.asInstanceOf[StructType]
       case "dns_lookup" =>
-      case "udp_burst" =>
+      case "udp_burst" => measurementSchema =
+        ScalaReflection.schemaFor[UdpBurstMeasurement].dataType.asInstanceOf[StructType]
       case "tcpthroughput" => measurementSchema =
         ScalaReflection.schemaFor[TcpThroughputMeasurement].dataType.asInstanceOf[StructType]
       case "context" =>
