@@ -3,6 +3,7 @@ package ie.ncirl.sspproject.dataprocess
 import java.util.{Objects, Properties}
 
 import ie.ncirl.sspproject.dataprocess.measurement.Measurement
+import ie.ncirl.sspproject.dataprocess.measurement.dnslookup.DnsLookupMeasurement
 import ie.ncirl.sspproject.dataprocess.measurement.http.HttpMeasurement
 import ie.ncirl.sspproject.dataprocess.measurement.ping.PingMeasurement
 import ie.ncirl.sspproject.dataprocess.measurement.tcpthroughput.TcpThroughputMeasurement
@@ -140,7 +141,8 @@ object SSPSparkApp {
       case "traceroute" =>
       case "http" => measurementSchema =
         ScalaReflection.schemaFor[HttpMeasurement].dataType.asInstanceOf[StructType]
-      case "dns_lookup" =>
+      case "dns_lookup" => measurementSchema =
+        ScalaReflection.schemaFor[DnsLookupMeasurement].dataType.asInstanceOf[StructType]
       case "udp_burst" => measurementSchema =
         ScalaReflection.schemaFor[UdpBurstMeasurement].dataType.asInstanceOf[StructType]
       case "tcpthroughput" => measurementSchema =
