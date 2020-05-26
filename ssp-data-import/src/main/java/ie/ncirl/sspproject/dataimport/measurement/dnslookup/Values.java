@@ -11,6 +11,10 @@ public class Values extends Measurement {
     public String MeasurementLongitude;
     public String error;
     public String context_results;
+    public String qclass;
+    public String qtype;
+    public String results;
+    public String target;
 
     @Override
     public String toHdr(String sep) {
@@ -22,7 +26,11 @@ public class Values extends Measurement {
         separate(sb, "v_address", sep);
         separate(sb, "v_MeasurementLongitude", sep);
         separate(sb, "v_error", sep);
-        separate(sb, "v_context_results", NO_SEP);
+        separate(sb, "v_context_results", sep);
+        separate(sb, "v_qclass", sep);
+        separate(sb, "v_qtype", sep);
+        separate(sb, "v_target", sep);
+        separate(sb, "v_results", NO_SEP);
         return(sb.toString());
     }
 
@@ -36,7 +44,11 @@ public class Values extends Measurement {
         quoteAndSeparate(sb, address, quote, sep);
         quoteAndSeparate(sb, MeasurementLongitude, quote, sep);
         quoteAndSeparate(sb, error, quote, sep);
-        quoteAndSeparate(sb, context_results, quote, NO_SEP);
+        quoteAndSeparate(sb, context_results, quote, sep);
+        quoteAndSeparate(sb, qclass, quote, sep);
+        quoteAndSeparate(sb, qtype, quote, sep);
+        quoteAndSeparate(sb, results, quote, sep);
+        quoteAndSeparate(sb, target, quote, NO_SEP);
         return(sb.toString());
     }
 
@@ -50,7 +62,11 @@ public class Values extends Measurement {
         separate(sb, nullValue, sep); // address
         separate(sb, nullValue, sep); // MeasurementLongitude
         separate(sb, nullValue, sep); // error
-        separate(sb, nullValue, NO_SEP); // context_results
+        separate(sb, nullValue, sep); // context_results
+        separate(sb, nullValue, sep); // qclass
+        separate(sb, nullValue, sep); // qtype
+        separate(sb, nullValue, sep); // results
+        separate(sb, nullValue, NO_SEP); // target
         return(sb.toString());
     }
 }

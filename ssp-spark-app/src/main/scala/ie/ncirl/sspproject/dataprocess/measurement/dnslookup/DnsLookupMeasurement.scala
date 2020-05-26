@@ -53,6 +53,11 @@ case class Parameters
   key: String,
   `type`: String,
   context_interval_sec: String,
+  has_multi_server: String,
+  servers: String,
+  sensitive: String,
+  qclass: String,
+  qtype: String
 )
 
 case class Values
@@ -65,5 +70,9 @@ case class Values
   MeasurementLongitude: String,
   error: String,
   context_results: String,
+  qclass: String,
+  qtype: String,
+  results: String,
+  target: String
 )
 
