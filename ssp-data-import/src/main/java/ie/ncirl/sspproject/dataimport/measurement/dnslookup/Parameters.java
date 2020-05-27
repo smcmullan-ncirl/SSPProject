@@ -2,6 +2,8 @@ package ie.ncirl.sspproject.dataimport.measurement.dnslookup;
 
 import ie.ncirl.sspproject.dataimport.measurement.Measurement;
 
+import java.util.Arrays;
+
 public class Parameters extends Measurement {
 
     public String count;
@@ -16,7 +18,7 @@ public class Parameters extends Measurement {
     public String type;
     public String context_interval_sec;
     public String has_multi_server;
-    public String servers;
+    public String[] servers;
     public String sensitive;
     public String qclass;
     public String qtype;
@@ -58,7 +60,7 @@ public class Parameters extends Measurement {
         quoteAndSeparate(sb, type, quote, sep);
         quoteAndSeparate(sb, context_interval_sec, quote, sep);
         quoteAndSeparate(sb, has_multi_server, quote, sep);
-        quoteAndSeparate(sb, servers, quote, sep);
+        quoteAndSeparate(sb, Arrays.toString(servers), quote, sep);
         quoteAndSeparate(sb, sensitive, quote, sep);
         quoteAndSeparate(sb, qclass, quote, sep);
         quoteAndSeparate(sb, qtype, quote, NO_SEP);
