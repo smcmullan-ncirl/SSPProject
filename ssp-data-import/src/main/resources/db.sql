@@ -2,7 +2,7 @@ CREATE DATABASE sspdb;
 
 CREATE SCHEMA bigdata;
 
--- Only the ping, http and tcpthroughput table schemas are supported at the moment
+-- Only the ping, traceroute, http, dns_lookup, udp_burst and tcpthroughput table schemas are supported at the moment
 -- DB persistence for other measurement types will require implementation of object mappers for the specific
 -- measurement type under the ie.ncirl.sspproject.dataimport.measurement package in ssp-data-import
 
@@ -102,6 +102,10 @@ CREATE TABLE ping_measurement (
     m_id VARCHAR
 );
 
+CREATE TABLE traceroute_measurement
+(
+);
+
 CREATE TABLE http_measurement
 (
     t_count VARCHAR,
@@ -191,6 +195,14 @@ CREATE TABLE http_measurement
     v_samples VARCHAR,
     m_type VARCHAR,
     m_id VARCHAR
+);
+
+CREATE TABLE dns_lookup_measurement
+(
+);
+
+CREATE TABLE udp_burst_measurement
+(
 );
 
 CREATE TABLE tcpthroughput_measurement

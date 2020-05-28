@@ -95,6 +95,7 @@ Processing the entire dataset into the Kafka broker consumes approx **20GB** of 
     sudo apt install git
     git clone https://github.com/smcmullan-ncirl/SSPProject.git
     cd SSPProject
+    export MAVEN_OPTS="-Xss4m"
     mvn clean package
     
 JDK11 is the preferred build environment and there is a dependency on Scala 2.12 for the Spark application.
@@ -250,9 +251,11 @@ three types at the moment and thus the other types will need to be disabled in t
 exceptions and error handling messages:
 
     ping
+    traceroute
     http
-    tcpthroughput
+    dns_lookup
     udp_burst
+    tcpthroughput
 
 ## Performance
 
@@ -292,9 +295,11 @@ three types at the moment (the other types are disabled in the config.properties
 application:
 
     ping
+    traceroute
     http
-    tcpthroughput
+    dns_lookup
     udp_burst
+    tcpthroughput
     
 ### Spark deployment troubleshooting
 

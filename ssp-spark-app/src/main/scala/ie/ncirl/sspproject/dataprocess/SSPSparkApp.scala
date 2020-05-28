@@ -7,6 +7,7 @@ import ie.ncirl.sspproject.dataprocess.measurement.dnslookup.DnsLookupMeasuremen
 import ie.ncirl.sspproject.dataprocess.measurement.http.HttpMeasurement
 import ie.ncirl.sspproject.dataprocess.measurement.ping.PingMeasurement
 import ie.ncirl.sspproject.dataprocess.measurement.tcpthroughput.TcpThroughputMeasurement
+import ie.ncirl.sspproject.dataprocess.measurement.traceroute.TracerouteMeasurement
 import ie.ncirl.sspproject.dataprocess.measurement.udpburst.UdpBurstMeasurement
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -138,7 +139,8 @@ object SSPSparkApp {
     measurementType match {
       case "ping" => measurementSchema =
         ScalaReflection.schemaFor[PingMeasurement].dataType.asInstanceOf[StructType]
-      case "traceroute" =>
+      case "traceroute" => measurementSchema =
+        ScalaReflection.schemaFor[TracerouteMeasurement].dataType.asInstanceOf[StructType]
       case "http" => measurementSchema =
         ScalaReflection.schemaFor[HttpMeasurement].dataType.asInstanceOf[StructType]
       case "dns_lookup" => measurementSchema =
