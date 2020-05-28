@@ -460,11 +460,9 @@ public class SSPDataImport {
 
             csvWriter.write(measurement.toCsv(Measurement.NO_NULL, Measurement.NO_QUOTE, Measurement.TAB));
             csvWriter.newLine();
-            csvWriter.flush();
         } catch (Exception e) {
             logger.error("Can't write to CSV file for topic {} : {}", topic,
                     e.getMessage() != null ? e.getMessage() : jsonNode, e);
-            System.exit(-1);
         }
     }
 
