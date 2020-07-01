@@ -65,8 +65,8 @@ the rest is pure guesswork.
 
 The application was developed and tested on the following configuration:
 
-    1. VM: Oracle VirtualBox 6.0
-    2. Linux OS: Mint Linux 19.3
+    1. VM: Oracle VirtualBox 6.1
+    2. Linux OS: Mint Linux 20
     3. RAM: 16GB
     4. CPU: 2 logical processors
     5. Disk Space: 50GB
@@ -100,7 +100,7 @@ Processing the entire dataset into the Kafka broker consumes approx **20GB** of 
     
 JDK11 is the preferred build environment and there is a dependency on Scala 2.12 for the Spark application.
     
-The target platform is Apache Spark 3.0.0 Preview 2
+The target platform is Apache Spark 3.0.0 and Apache Flink 1.10
 
 ## IDE Development and Debugging
 
