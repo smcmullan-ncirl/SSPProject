@@ -272,6 +272,7 @@ in 7029 seconds ~ **2 hours**
 After building the project with Maven
 
     cd SSPProject
+    export MAVEN_OPTS="-Xss4m"
     mvn clean package
     
 The Spark application will be packaged in a JAR file in:
