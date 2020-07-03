@@ -19,11 +19,85 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4ff4d3e4-3bfe-4fe4-bf91-b6f998544518" name="Default Changelist" comment="Housekeeping">
+    <list default="true" id="4ff4d3e4-3bfe-4fe4-bf91-b6f998544518" name="Default Changelist" comment="Updates for Spark 3">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/createKafkaTopics.sh" beforeDir="false" afterPath="$PROJECT_DIR$/createKafkaTopics.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/deleteKafkaTopics.sh" beforeDir="false" afterPath="$PROJECT_DIR$/deleteKafkaTopics.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ssp-data-import/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/JsonSerializer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/SSPDataImport.java" beforeDir="false" afterPath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/SSPDataImport.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/DeviceInfo.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/DeviceProperties.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/Location.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/Measurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/batteryinfo/BatteryInfoMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/context/ContextMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/cronethttp/CronetHttpMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/deviceinfo/DeviceInfoMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/dnslookup/DnsLookupMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/dnslookup/Parameters.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/dnslookup/Task.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/dnslookup/TaskParameters.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/dnslookup/Values.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/http/HttpMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/http/Parameters.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/http/Task.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/http/TaskParameters.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/http/Values.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/multipathhttp/MultipathHttpMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/multipathlatency/MultipathLatencyMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/myspeedtestdnslookup/MySpeedtestDnsLookupMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/myspeedtestping/MySpeedtestPingMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/networkinfo/NetworkInfoMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/pageloadtime/PageLoadTimeMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/pageloadtime2/PageLoadTime2Measurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/ping/Parameters.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/ping/PingMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/ping/Task.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/ping/TaskParameters.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/ping/Values.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/pingtest/PingTestMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/quichttp/QuicHttpMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/rrc/RrcMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/sequential/SequentialMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/siminfo/SimInfoMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/stateinfo/StateInfoMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/tcpthroughput/Parameters.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/tcpthroughput/Task.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/tcpthroughput/TaskParameters.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/tcpthroughput/TcpThroughputMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/tcpthroughput/Values.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/traceroute/Parameters.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/traceroute/Task.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/traceroute/TaskParameters.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/traceroute/TracerouteMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/traceroute/Values.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/udpburst/Parameters.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/udpburst/Task.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/udpburst/TaskParameters.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/udpburst/UdpBurstMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/udpburst/Values.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/usageinfo/UsageInfoMeasurement.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/java/ie/ncirl/sspproject/dataimport/measurement/video/VideoMeasurement.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/resources/config.properties" beforeDir="false" afterPath="$PROJECT_DIR$/ssp-data-import/src/main/resources/config.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/resources/logback.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ssp-data-import/src/main/resources/logback.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/test/java/ie/ncirl/sspproject/dataimport/PingMeasurementTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/test/resources/test_measurement.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-spark-app/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ssp-spark-app/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-spark-app/src/main/resources/config.properties" beforeDir="false" afterPath="$PROJECT_DIR$/ssp-spark-app/src/main/resources/config.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-spark-app/src/main/scala/ie/ncirl/sspproject/dataprocess/JSONUtils.scala" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-spark-app/src/main/scala/ie/ncirl/sspproject/dataprocess/SSPSparkApp.scala" beforeDir="false" afterPath="$PROJECT_DIR$/ssp-spark-app/src/main/scala/ie/ncirl/sspproject/dataprocess/SSPSparkApp.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-spark-app/src/main/scala/ie/ncirl/sspproject/dataprocess/measurement/DeviceProperties.scala" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-spark-app/src/main/scala/ie/ncirl/sspproject/dataprocess/measurement/Measurement.scala" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-spark-app/src/main/scala/ie/ncirl/sspproject/dataprocess/measurement/dnslookup/DnsLookupMeasurement.scala" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-spark-app/src/main/scala/ie/ncirl/sspproject/dataprocess/measurement/http/HttpMeasurement.scala" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-spark-app/src/main/scala/ie/ncirl/sspproject/dataprocess/measurement/ping/PingMeasurement.scala" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-spark-app/src/main/scala/ie/ncirl/sspproject/dataprocess/measurement/tcpthroughput/TcpThroughputMeasurement.scala" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-spark-app/src/main/scala/ie/ncirl/sspproject/dataprocess/measurement/traceroute/TracerouteMeasurement.scala" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-spark-app/src/main/scala/ie/ncirl/sspproject/dataprocess/measurement/udpburst/UdpBurstMeasurement.scala" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,7 +144,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.SSPSparkApp">
     <configuration name="SSPDataImport" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="ie.ncirl.sspproject.dataimport.SSPDataImport" />
       <module name="ssp-data-import" />
@@ -78,8 +152,20 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="SSPSparkApp" type="Application" factoryName="Application" temporary="true">
+      <option name="MAIN_CLASS_NAME" value="ie.ncirl.sspproject.dataprocess.SSPSparkApp" />
+      <module name="ssp-spark-app" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.SSPDataImport" />
+      <item itemvalue="Application.SSPSparkApp" />
+    </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.SSPSparkApp" />
         <item itemvalue="Application.SSPDataImport" />
       </list>
     </recent_temporary>
@@ -106,13 +192,18 @@
     <MESSAGE value="Traceroute support CSV files and dependency version management" />
     <MESSAGE value="Updated PostgreSQL support" />
     <MESSAGE value="Housekeeping" />
-    <option name="LAST_COMMIT_MESSAGE" value="Housekeeping" />
+    <MESSAGE value="Updates for Spark 3" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updates for Spark 3" />
   </component>
   <component name="WindowStateProjectService">
     <state x="693" y="231" width="524" height="479" key="#com.intellij.codeInsight.editorActions.RestoreReferencesDialog" timestamp="1590685555401">
       <screen x="0" y="0" width="1920" height="949" />
     </state>
     <state x="693" y="231" width="524" height="479" key="#com.intellij.codeInsight.editorActions.RestoreReferencesDialog/0.0.1920.949@0.0.1920.949" timestamp="1590685555401" />
+    <state x="418" y="136" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1593800388280">
+      <screen x="0" y="0" width="1920" height="958" />
+    </state>
+    <state x="418" y="136" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.958@0.0.1920.958" timestamp="1593800388280" />
     <state x="692" y="278" width="526" height="385" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1590676514801">
       <screen x="0" y="0" width="1920" height="949" />
     </state>
@@ -122,46 +213,55 @@
     </state>
     <state x="768" y="185" width="374" height="576" key="#com.intellij.ide.util.MemberChooser/0.0.1920.949@0.0.1920.949" timestamp="1590676932766" />
     <state x="768" y="187" width="374" height="576" key="#com.intellij.ide.util.MemberChooser/0.0.1920.958@0.0.1920.958" timestamp="1590443289978" />
-    <state x="182" y="76" width="1536" height="784" key="DiffContextDialog" timestamp="1590690515612">
-      <screen x="0" y="0" width="1920" height="949" />
+    <state x="693" y="228" width="524" height="494" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1593800934908">
+      <screen x="0" y="0" width="1920" height="958" />
+    </state>
+    <state x="693" y="228" width="524" height="494" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.958@0.0.1920.958" timestamp="1593800934908" />
+    <state x="182" y="77" width="1536" height="792" key="DiffContextDialog" timestamp="1593806329297">
+      <screen x="0" y="0" width="1920" height="958" />
     </state>
     <state x="182" y="76" width="1536" height="784" key="DiffContextDialog/0.0.1920.949@0.0.1920.949" timestamp="1590690515612" />
-    <state width="1878" height="340" key="GridCell.Tab.0.bottom" timestamp="1590700219034">
-      <screen x="0" y="0" width="1920" height="949" />
+    <state x="182" y="77" width="1536" height="792" key="DiffContextDialog/0.0.1920.958@0.0.1920.958" timestamp="1593806329297" />
+    <state width="1878" height="305" key="GridCell.Tab.0.bottom" timestamp="1593808773556">
+      <screen x="0" y="0" width="1920" height="958" />
     </state>
     <state width="1878" height="340" key="GridCell.Tab.0.bottom/0.0.1920.949@0.0.1920.949" timestamp="1590700219034" />
-    <state width="1878" height="675" key="GridCell.Tab.0.bottom/0.0.1920.958@0.0.1920.958" timestamp="1590448517452" />
-    <state width="1878" height="340" key="GridCell.Tab.0.center" timestamp="1590700219033">
-      <screen x="0" y="0" width="1920" height="949" />
+    <state width="1878" height="305" key="GridCell.Tab.0.bottom/0.0.1920.958@0.0.1920.958" timestamp="1593808773556" />
+    <state width="1878" height="305" key="GridCell.Tab.0.center" timestamp="1593808773555">
+      <screen x="0" y="0" width="1920" height="958" />
     </state>
     <state width="1878" height="340" key="GridCell.Tab.0.center/0.0.1920.949@0.0.1920.949" timestamp="1590700219033" />
-    <state width="1878" height="675" key="GridCell.Tab.0.center/0.0.1920.958@0.0.1920.958" timestamp="1590448517451" />
-    <state width="1878" height="340" key="GridCell.Tab.0.left" timestamp="1590700219032">
-      <screen x="0" y="0" width="1920" height="949" />
+    <state width="1878" height="305" key="GridCell.Tab.0.center/0.0.1920.958@0.0.1920.958" timestamp="1593808773555" />
+    <state width="1878" height="305" key="GridCell.Tab.0.left" timestamp="1593808773554">
+      <screen x="0" y="0" width="1920" height="958" />
     </state>
     <state width="1878" height="340" key="GridCell.Tab.0.left/0.0.1920.949@0.0.1920.949" timestamp="1590700219032" />
-    <state width="1878" height="675" key="GridCell.Tab.0.left/0.0.1920.958@0.0.1920.958" timestamp="1590448517450" />
-    <state width="1878" height="340" key="GridCell.Tab.0.right" timestamp="1590700219034">
-      <screen x="0" y="0" width="1920" height="949" />
+    <state width="1878" height="305" key="GridCell.Tab.0.left/0.0.1920.958@0.0.1920.958" timestamp="1593808773554" />
+    <state width="1878" height="305" key="GridCell.Tab.0.right" timestamp="1593808773556">
+      <screen x="0" y="0" width="1920" height="958" />
     </state>
     <state width="1878" height="340" key="GridCell.Tab.0.right/0.0.1920.949@0.0.1920.949" timestamp="1590700219034" />
-    <state width="1878" height="675" key="GridCell.Tab.0.right/0.0.1920.958@0.0.1920.958" timestamp="1590448517451" />
-    <state width="1878" height="308" key="GridCell.Tab.1.bottom" timestamp="1590099211408">
+    <state width="1878" height="305" key="GridCell.Tab.0.right/0.0.1920.958@0.0.1920.958" timestamp="1593808773556" />
+    <state width="1878" height="681" key="GridCell.Tab.1.bottom" timestamp="1593808794581">
       <screen x="0" y="0" width="1920" height="958" />
     </state>
-    <state width="1878" height="308" key="GridCell.Tab.1.bottom/0.0.1920.958@0.0.1920.958" timestamp="1590099211408" />
-    <state width="1878" height="308" key="GridCell.Tab.1.center" timestamp="1590099211407">
+    <state width="1878" height="681" key="GridCell.Tab.1.bottom/0.0.1920.958@0.0.1920.958" timestamp="1593808794581" />
+    <state width="1878" height="681" key="GridCell.Tab.1.center" timestamp="1593808794578">
       <screen x="0" y="0" width="1920" height="958" />
     </state>
-    <state width="1878" height="308" key="GridCell.Tab.1.center/0.0.1920.958@0.0.1920.958" timestamp="1590099211407" />
-    <state width="1878" height="308" key="GridCell.Tab.1.left" timestamp="1590099211407">
+    <state width="1878" height="681" key="GridCell.Tab.1.center/0.0.1920.958@0.0.1920.958" timestamp="1593808794578" />
+    <state width="1878" height="681" key="GridCell.Tab.1.left" timestamp="1593808794577">
       <screen x="0" y="0" width="1920" height="958" />
     </state>
-    <state width="1878" height="308" key="GridCell.Tab.1.left/0.0.1920.958@0.0.1920.958" timestamp="1590099211407" />
-    <state width="1878" height="308" key="GridCell.Tab.1.right" timestamp="1590099211408">
+    <state width="1878" height="681" key="GridCell.Tab.1.left/0.0.1920.958@0.0.1920.958" timestamp="1593808794577" />
+    <state width="1878" height="681" key="GridCell.Tab.1.right" timestamp="1593808794579">
       <screen x="0" y="0" width="1920" height="958" />
     </state>
-    <state width="1878" height="308" key="GridCell.Tab.1.right/0.0.1920.958@0.0.1920.958" timestamp="1590099211408" />
+    <state width="1878" height="681" key="GridCell.Tab.1.right/0.0.1920.958@0.0.1920.958" timestamp="1593808794579" />
+    <state x="493" y="136" width="924" height="678" key="Maven.ArtifactSearchDialog" timestamp="1593801486999">
+      <screen x="0" y="0" width="1920" height="958" />
+    </state>
+    <state x="493" y="136" width="924" height="678" key="Maven.ArtifactSearchDialog/0.0.1920.958@0.0.1920.958" timestamp="1593801486999" />
     <state x="696" y="179" width="517" height="583" key="RollbackChangesDialog" timestamp="1590686766061">
       <screen x="0" y="0" width="1920" height="949" />
     </state>
@@ -171,11 +271,15 @@
     </state>
     <state x="443" y="54" key="SettingsEditor/0.0.1920.949@0.0.1920.949" timestamp="1590690515299" />
     <state x="443" y="55" width="1024" height="840" key="SettingsEditor/0.0.1920.958@0.0.1920.958" timestamp="1593597821311" />
-    <state x="555" y="212" width="800" height="523" key="Vcs.Push.Dialog.v2" timestamp="1590701303988">
-      <screen x="0" y="0" width="1920" height="949" />
+    <state x="555" y="214" width="800" height="523" key="Vcs.Push.Dialog.v2" timestamp="1593597891851">
+      <screen x="0" y="0" width="1920" height="958" />
     </state>
     <state x="555" y="212" width="800" height="523" key="Vcs.Push.Dialog.v2/0.0.1920.949@0.0.1920.949" timestamp="1590701303988" />
-    <state x="555" y="214" width="800" height="523" key="Vcs.Push.Dialog.v2/0.0.1920.958@0.0.1920.958" timestamp="1590448196955" />
+    <state x="555" y="214" width="800" height="523" key="Vcs.Push.Dialog.v2/0.0.1920.958@0.0.1920.958" timestamp="1593597891851" />
+    <state x="100" y="99" width="1720" height="758" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1593798307876">
+      <screen x="0" y="0" width="1920" height="958" />
+    </state>
+    <state x="100" y="99" width="1720" height="758" key="com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.1920.958@0.0.1920.958" timestamp="1593798307876" />
     <state x="522" y="210" width="866" height="530" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1590096960608">
       <screen x="0" y="0" width="1920" height="958" />
     </state>
