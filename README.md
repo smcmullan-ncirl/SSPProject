@@ -8,58 +8,26 @@ National College of Ireland
 
 ## GitHub Project Code Repository
 
-https://github.com/smcmullan-ncirl/SSPProject
+    https://github.com/smcmullan-ncirl/SSPProject
 
-## About the Open Mobile Performance Dataset
+## About the Telecom Italia Big Data Challenge dataset
 
-https://www.measurementlab.net/
+    https://www.nature.com/articles/sdata201555
 
-https://www.measurementlab.net/tests/mobiperf/
+[1]G. Barlacchi et al., ‘A multi-source dataset of urban life in the city of Milan and the Province of Trentino’, 
+Scientific Data, vol. 2, no. 1, Art. no. 1, Oct. 2015, doi: 10.1038/sdata.2015.55.
+
 
 ## Datasets
 
-The dataset contains the following quantities of measurements by type:
+https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/QLCABU
 
-    ping : 3066411
-    traceroute : 369750
-    http : 819611
-    dns_lookup : 1009149
-    udp_burst : 13307
-    tcpthroughput : 266445
-    context : 291
-    myspeedtest_ping : 1
-    myspeedtestdns_lookup : 2
-    device_info : 2681
-    network_info : 2661
-    battery_info : 2657
-    ping_test : 3
-    sim_info : 2651
-    state_info : 2650
-    usage_info : 2644
-    rrc : 10846
-    PageLoadTime : 1
-    pageloadtime : 14169
-    video : 3679
-    sequential : 5163
-    quic-http : 402207
-    cronet-http : 401105
-    multipath_latency : 2163380
-    multipath_http : 2931
+[1]Telecom Italia, ‘Telecommunications - SMS, Call, Internet - TN’. Harvard Dataverse, 2015, doi: 10.7910/DVN/QLCABU.
 
-The repository for the data is at the following location on the Google Cloud Platform:
+The repository for the data is at the following location on AWS:
 
-    https://console.cloud.google.com/storage/browser/openmobiledata_public
-    
-There is some description of the data schema associated with each measurement type in the GitHub repository of the
-MobiPerf application here:
+    https://s3.console.aws.amazon.com/s3/buckets/x19139497/Telecommunications%2520-%2520SMS%252C%2520Call%252C%2520Internet%2520-%2520TN/?region=eu-west-1&tab=overview
 
-    https://github.com/Mobiperf/MobiPerf/blob/master/README
-    
-However it is far from definitive. This application and test measurement is defunct and there is evidence to suggest
-that the application was modified by independent research teams with new measurement types beyond what the GitHub
-repository for the application describes and the back-end M-Lab data repository used to collect in resulting in the
-overall dataset above. The schema of some of the measurement types above can be deduced from parameter key naming but
-the rest is pure guesswork.
 
 ## Prerequisites and resource usage
 
@@ -83,7 +51,6 @@ Processing the entire dataset into the Kafka broker consumes approx **20GB** of 
 
 ## Architecture Diagram
 
-![SSP Project Architecture](SSPProjectArch.png)
  	
 # Overall Application Build and Deployment
 
@@ -199,71 +166,18 @@ If you would like to enable/disable Kafka, PostgreSQL or CSV processing then you
     
 The configuration properties are:
 
-    gcp.bucketname = openmobiledata_public
-
-    tempfile.dir = /tmp
-
-    file.offset.min = 0
-    file.offset.max = -1
-
-    ping = true
-    traceroute = true
-    http = true
-    dns_lookup = true
-    udp_burst = true
-    tcpthroughput = true
-    context = true
-    myspeedtest_ping = true
-    myspeedtestdns_lookup = true
-    device_info = true
-    network_info = true
-    battery_info = true
-    ping_test = true
-    sim_info = true
-    state_info = true
-    usage_info = true
-    rrc = true
-    PageLoadTime = true
-    pageloadtime = true
-    video = true
-    sequential = true
-    quic-http = true
-    cronet-http = true
-    multipath_latency = true
-    multipath_http = true
-
-    kafka.enabled = true
+    aws.bucketname = x19139497
+    aws.object.prefix = Telecommunications - SMS, Call, Internet - TN/sms-call-internet-tn-
     kafka.server = localhost:9092
+    kafka.topic = telecom_trento
 
-    db.enabled = false
-    db.url = jdbc:postgresql://localhost:5432/sspdb
-    db.user = sspuser
-    db.password = ssppassword
-    db.schema = bigdata
-
-    csv.enabled = false
-    csv.file.prefix = openmobiledata_
-
-There's no real need to change any settings apart from the enabled flags
-
-**TBD**: Note that in the case of writing out to CSV and PostgresSQL DB there is only full implementation support for
-three types at the moment and thus the other types will need to be disabled in the config file above to suppress
-exceptions and error handling messages:
-
-    ping
-    traceroute
-    http
-    dns_lookup
-    udp_burst
-    tcpthroughput
+There's no real need to change any settings
 
 ## Performance
 
 The following metrics were acquired running the SSPDataImport application on the machine specification listed above
 without any modifications to the configuration file supplied i.e. it processes the entire dataset into the Kafka broker
 in 7029 seconds ~ **2 hours**
-
-![SSPDataImport Performance](SSPDataImportPerf.png)
 
 # SSPSparkApp - The Data Aggregation Processor application
 
@@ -272,7 +186,6 @@ in 7029 seconds ~ **2 hours**
 After building the project with Maven
 
     cd SSPProject
-    export MAVEN_OPTS="-Xss4m"
     mvn clean package
     
 The Spark application will be packaged in a JAR file in:
@@ -290,17 +203,6 @@ The application can be deployed to Spark with the following commands:
     --deploy-mode cluster \
     --class ie.ncirl.sspproject.dataprocess.SSPSparkApp \
     file:///ssp-spark-app.jar
-
-**TBD**: Note that in the case of Spark application processing there is only full implementation support for
-three types at the moment (the other types are disabled in the config.properties file associated with the
-application:
-
-    ping
-    traceroute
-    http
-    dns_lookup
-    udp_burst
-    tcpthroughput
     
 ### Spark deployment troubleshooting
 
