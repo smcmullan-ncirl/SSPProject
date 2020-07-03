@@ -19,10 +19,11 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4ff4d3e4-3bfe-4fe4-bf91-b6f998544518" name="Default Changelist" comment="Repurposed project - end to end batch mode working">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SSPDataImportPerf.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/SSPProjectArch.png" beforeDir="false" />
+    <list default="true" id="4ff4d3e4-3bfe-4fe4-bf91-b6f998544518" name="Default Changelist" comment="Updated the README.md file">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-data-import/src/main/resources/logback.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ssp-data-import/src/main/resources/logback.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-spark-app/src/main/resources/config.properties" beforeDir="false" afterPath="$PROJECT_DIR$/ssp-spark-app/src/main/resources/config.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ssp-spark-app/src/main/scala/ie/ncirl/sspproject/dataprocess/SSPSparkApp.scala" beforeDir="false" afterPath="$PROJECT_DIR$/ssp-spark-app/src/main/scala/ie/ncirl/sspproject/dataprocess/SSPSparkApp.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,7 +60,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="project.structure.last.edited" value="Project" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="project.propCompiler" />
@@ -69,7 +70,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.SSPSparkApp">
+  <component name="RunManager" selected="Application.SSPDataImport">
     <configuration name="SSPDataImport" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="ie.ncirl.sspproject.dataimport.SSPDataImport" />
       <module name="ssp-data-import" />
@@ -90,8 +91,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.SSPSparkApp" />
         <item itemvalue="Application.SSPDataImport" />
+        <item itemvalue="Application.SSPSparkApp" />
       </list>
     </recent_temporary>
   </component>
@@ -119,9 +120,14 @@
     <MESSAGE value="Housekeeping" />
     <MESSAGE value="Updates for Spark 3" />
     <MESSAGE value="Repurposed project - end to end batch mode working" />
-    <option name="LAST_COMMIT_MESSAGE" value="Repurposed project - end to end batch mode working" />
+    <MESSAGE value="Updated the README.md file" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated the README.md file" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="443" y="55" width="1024" height="839" key="#Project_Structure" timestamp="1593810971557">
+      <screen x="0" y="0" width="1920" height="958" />
+    </state>
+    <state x="443" y="55" width="1024" height="839" key="#Project_Structure/0.0.1920.958@0.0.1920.958" timestamp="1593810971557" />
     <state x="693" y="231" width="524" height="479" key="#com.intellij.codeInsight.editorActions.RestoreReferencesDialog" timestamp="1590685555401">
       <screen x="0" y="0" width="1920" height="949" />
     </state>
@@ -148,26 +154,26 @@
     </state>
     <state x="182" y="76" width="1536" height="784" key="DiffContextDialog/0.0.1920.949@0.0.1920.949" timestamp="1590690515612" />
     <state x="182" y="77" width="1536" height="792" key="DiffContextDialog/0.0.1920.958@0.0.1920.958" timestamp="1593806329297" />
-    <state width="1878" height="659" key="GridCell.Tab.0.bottom" timestamp="1593809077409">
+    <state width="1878" height="489" key="GridCell.Tab.0.bottom" timestamp="1593814721124">
       <screen x="0" y="0" width="1920" height="958" />
     </state>
     <state width="1878" height="340" key="GridCell.Tab.0.bottom/0.0.1920.949@0.0.1920.949" timestamp="1590700219034" />
-    <state width="1878" height="659" key="GridCell.Tab.0.bottom/0.0.1920.958@0.0.1920.958" timestamp="1593809077409" />
-    <state width="1878" height="659" key="GridCell.Tab.0.center" timestamp="1593809077408">
+    <state width="1878" height="489" key="GridCell.Tab.0.bottom/0.0.1920.958@0.0.1920.958" timestamp="1593814721124" />
+    <state width="1878" height="489" key="GridCell.Tab.0.center" timestamp="1593814721123">
       <screen x="0" y="0" width="1920" height="958" />
     </state>
     <state width="1878" height="340" key="GridCell.Tab.0.center/0.0.1920.949@0.0.1920.949" timestamp="1590700219033" />
-    <state width="1878" height="659" key="GridCell.Tab.0.center/0.0.1920.958@0.0.1920.958" timestamp="1593809077408" />
-    <state width="1878" height="659" key="GridCell.Tab.0.left" timestamp="1593809077408">
+    <state width="1878" height="489" key="GridCell.Tab.0.center/0.0.1920.958@0.0.1920.958" timestamp="1593814721123" />
+    <state width="1878" height="489" key="GridCell.Tab.0.left" timestamp="1593814721123">
       <screen x="0" y="0" width="1920" height="958" />
     </state>
     <state width="1878" height="340" key="GridCell.Tab.0.left/0.0.1920.949@0.0.1920.949" timestamp="1590700219032" />
-    <state width="1878" height="659" key="GridCell.Tab.0.left/0.0.1920.958@0.0.1920.958" timestamp="1593809077408" />
-    <state width="1878" height="659" key="GridCell.Tab.0.right" timestamp="1593809077409">
+    <state width="1878" height="489" key="GridCell.Tab.0.left/0.0.1920.958@0.0.1920.958" timestamp="1593814721123" />
+    <state width="1878" height="489" key="GridCell.Tab.0.right" timestamp="1593814721123">
       <screen x="0" y="0" width="1920" height="958" />
     </state>
     <state width="1878" height="340" key="GridCell.Tab.0.right/0.0.1920.949@0.0.1920.949" timestamp="1590700219034" />
-    <state width="1878" height="659" key="GridCell.Tab.0.right/0.0.1920.958@0.0.1920.958" timestamp="1593809077409" />
+    <state width="1878" height="489" key="GridCell.Tab.0.right/0.0.1920.958@0.0.1920.958" timestamp="1593814721123" />
     <state width="1878" height="660" key="GridCell.Tab.1.bottom" timestamp="1593809031034">
       <screen x="0" y="0" width="1920" height="958" />
     </state>
@@ -197,11 +203,11 @@
     </state>
     <state x="443" y="54" key="SettingsEditor/0.0.1920.949@0.0.1920.949" timestamp="1590690515299" />
     <state x="443" y="55" width="1024" height="840" key="SettingsEditor/0.0.1920.958@0.0.1920.958" timestamp="1593597821311" />
-    <state x="555" y="214" width="800" height="523" key="Vcs.Push.Dialog.v2" timestamp="1593809144598">
+    <state x="555" y="214" width="800" height="523" key="Vcs.Push.Dialog.v2" timestamp="1593810425042">
       <screen x="0" y="0" width="1920" height="958" />
     </state>
     <state x="555" y="212" width="800" height="523" key="Vcs.Push.Dialog.v2/0.0.1920.949@0.0.1920.949" timestamp="1590701303988" />
-    <state x="555" y="214" width="800" height="523" key="Vcs.Push.Dialog.v2/0.0.1920.958@0.0.1920.958" timestamp="1593809144598" />
+    <state x="555" y="214" width="800" height="523" key="Vcs.Push.Dialog.v2/0.0.1920.958@0.0.1920.958" timestamp="1593810425042" />
     <state x="100" y="99" width="1720" height="758" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1593798307876">
       <screen x="0" y="0" width="1920" height="958" />
     </state>

@@ -3,7 +3,10 @@ package ie.ncirl.sspproject.dataprocess
 import java.util.{Objects, Properties}
 
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions.{col, window}
+import org.apache.spark.sql.streaming.OutputMode
+import org.apache.spark.sql.types.{DoubleType, TimestampType}
+import org.apache.spark.sql.{Column, SparkSession}
 import org.slf4j.LoggerFactory
 
 class SSPSparkApp {
@@ -20,7 +23,6 @@ object SSPSparkApp {
     val kafkaServer = properties.getProperty("kafka.server")
     val kafkaTopics = properties.getProperty("kafka.topics")
     val kafkaTopicStartingOffset = properties.getProperty("kafka.topic.starting.offset")
-    val kafkaTopicEndingOffset = properties.getProperty("kafka.topic.ending.offset")
 
     // It is worth changing this property to the number of CPUs you have available across your cluster
     // Make sure it reflects the SPARK_WORKER_CORES environment setting in docker-compose.yml
@@ -49,21 +51,42 @@ object SSPSparkApp {
       .config(conf)
       .getOrCreate
 
-    // Produce a DataFrame with all the records from all the subscribed to Kafka topics
-    // The DataFrame should have a single column of type String called jsonString
-    val rawDF = spark
-      .read
+    val streamDF = spark
+      .readStream
       .format("kafka")
       .option("kafka.bootstrap.servers", kafkaServer)
       .option("subscribe", kafkaTopics)
       .option("startingOffsets", kafkaTopicStartingOffset)
-      .option("endingOffsets", kafkaTopicEndingOffset)
       .load()
-      .selectExpr("CAST(value AS STRING) AS csvString")
+      .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+      .selectExpr(
+        "split(value,',')[0] as cell_id",
+        "split(value,',')[1] as timestamp",
+        "split(value,',')[2] as calls_in",
+        "split(value,',')[3] as calls_out",
+        "split(value,',')[4] as sms_in",
+        "split(value,',')[5] as sms_out",
+        "split(value,',')[6] as internet_activity"
+      )
+      .withColumn("timestamp", col("timestamp").cast(TimestampType))
+      .withColumn("calls_in", col("calls_in").cast(DoubleType))
+      .withColumn("calls_out", col("calls_out").cast(DoubleType))
+      .withColumn("sms_in", col("sms_in").cast(DoubleType))
+      .withColumn("sms_out", col("sms_out").cast(DoubleType))
+      .withColumn("internet_activity", col("internet_activity").cast(DoubleType))
 
-    if (!rawDF.isEmpty) {
-      LOGGER.info("Row count: {}", rawDF.count())
-    }
+    val windowedDF = streamDF
+      .groupBy(window(new Column("timestamp"), "5 seconds"))
+      .sum("calls_in")
+
+    val query = windowedDF
+      .writeStream
+      .outputMode(OutputMode.Complete)
+      .format("console")
+      .option("checkpointLocation", "/tmp")
+      .start
+
+    query.awaitTermination
 
     spark.close
   }
