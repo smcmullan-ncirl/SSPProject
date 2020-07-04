@@ -2,3 +2,4 @@
 /.idea/
 /ssp-data-import/target/
 /ssp-spark-app/target/
+/ssp-spark-app/dependency-reduced-pom.xml
