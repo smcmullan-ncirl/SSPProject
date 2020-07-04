@@ -3,3 +3,6 @@
 /ssp-data-import/target/
 /ssp-spark-app/target/
 /ssp-spark-app/dependency-reduced-pom.xml
+/ssp-data-import/ssp-data-import.iml
+/ssp-spark-app/ssp-spark-app.iml
+/SSPProject.iml
