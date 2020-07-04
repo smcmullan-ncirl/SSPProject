@@ -303,8 +303,5 @@ Kakfa - Spark integration
 
     https://spark.apache.org/docs/latest/structured-streaming-kafka-integration.html
     https://spark.apache.org/docs/latest/streaming-kafka-0-10-integration.html
-    
-Complex dataset processing using the Spark API
 
-    https://docs.databricks.com/spark/latest/dataframes-datasets/complex-nested-data.html
 

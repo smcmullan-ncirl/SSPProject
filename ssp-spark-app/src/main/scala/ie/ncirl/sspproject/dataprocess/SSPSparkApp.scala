@@ -1,11 +1,13 @@
 package ie.ncirl.sspproject.dataprocess
 
+import java.sql.Timestamp
 import java.util.{Objects, Properties}
 
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.functions.{col, window}
+import org.apache.spark.sql.catalyst.ScalaReflection
+import org.apache.spark.sql.functions.{col, from_json, window}
 import org.apache.spark.sql.streaming.OutputMode
-import org.apache.spark.sql.types.{DoubleType, TimestampType}
+import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{Column, SparkSession}
 import org.slf4j.LoggerFactory
 
@@ -51,6 +53,8 @@ object SSPSparkApp {
       .config(conf)
       .getOrCreate
 
+    val telecomRecordSchema = ScalaReflection.schemaFor[TelecomRecord].dataType.asInstanceOf[StructType]
+
     val streamDF = spark
       .readStream
       .format("kafka")
@@ -58,22 +62,10 @@ object SSPSparkApp {
       .option("subscribe", kafkaTopics)
       .option("startingOffsets", kafkaTopicStartingOffset)
       .load()
-      .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
-      .selectExpr(
-        "split(value,',')[0] as cell_id",
-        "split(value,',')[1] as timestamp",
-        "split(value,',')[2] as calls_in",
-        "split(value,',')[3] as calls_out",
-        "split(value,',')[4] as sms_in",
-        "split(value,',')[5] as sms_out",
-        "split(value,',')[6] as internet_activity"
-      )
-      .withColumn("timestamp", col("timestamp").cast(TimestampType))
-      .withColumn("calls_in", col("calls_in").cast(DoubleType))
-      .withColumn("calls_out", col("calls_out").cast(DoubleType))
-      .withColumn("sms_in", col("sms_in").cast(DoubleType))
-      .withColumn("sms_out", col("sms_out").cast(DoubleType))
-      .withColumn("internet_activity", col("internet_activity").cast(DoubleType))
+      .select(from_json(col("value").cast("string"), telecomRecordSchema).alias("telecom_record"))
+      .select("telecom_record.*")
+
+    streamDF.printSchema
 
     val windowedDF = streamDF
       .groupBy(window(new Column("timestamp"), "5 seconds"))
@@ -90,5 +82,16 @@ object SSPSparkApp {
 
     spark.close
   }
-
 }
+
+case class TelecomRecord
+(
+  cell_id: String,
+  timestamp: Timestamp,
+  area_code: Int,
+  calls_in: Double,
+  calls_out: Double,
+  sms_in: Double,
+  sms_out: Double,
+  internet_activity: Double
+)

@@ -1,5 +1,8 @@
 package ie.ncirl.sspproject.dataimport;
 
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -14,9 +17,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
@@ -35,7 +36,7 @@ public class SSPDataImport {
     private static String objectPrefix = null;
     private static final Region region = Region.EU_WEST_1;
 
-    private static Producer<String, String> producer = null;
+    private static Producer<String, JsonNode> producer = null;
     private static String kafkaServer = null;
     private static String kafkaTopic = null;
 
@@ -99,21 +100,33 @@ public class SSPDataImport {
                             ResponseTransformer.toInputStream()
                     );
 
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(result));
+                    CsvMapper csvMapper = new CsvMapper();
+                    csvMapper.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
 
-                    String line;
-                    int lineNum = 0;
-                    while ((line = reader.readLine()) != null) {
-                        publishRecordToKafka(kafkaTopic, line);
-                        lineNum++;
+                    CsvSchema telecomSchema = csvMapper
+                            .schemaFor(TelecomRecord.class)
+                            .withoutHeader()
+                            .withColumnSeparator('\t');
+
+                    MappingIterator<TelecomRecord> csvLines = csvMapper.readerFor(TelecomRecord.class)
+                            .with(telecomSchema)
+                            .readValues(result);
+
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    int recordNum = 0;
+                    while (csvLines.hasNext()) {
+                        TelecomRecord telecomRecord = csvLines.next();
+                        JsonNode jsonNode = objectMapper.valueToTree(telecomRecord);
+                        publishRecordToKafka(kafkaTopic, jsonNode);
+                        recordNum++;
                     }
 
                     long fileProcessingTime = (System.currentTimeMillis() - fileStartTime)/1000;
 
                     LOGGER.info("Processed {} of size {} lines {} in {} secs at a rate of {} records/sec",
-                            s3ObjectKey, s3Object.size(), lineNum, fileProcessingTime, lineNum/fileProcessingTime);
+                            s3ObjectKey, s3Object.size(), recordNum, fileProcessingTime, recordNum/fileProcessingTime);
 
-                    processedRecords += lineNum;
+                    processedRecords += recordNum;
                 } catch (Exception ex) {
                     LOGGER.error("Can't process file {}", s3ObjectKey, ex);
                 }
@@ -136,13 +149,13 @@ public class SSPDataImport {
         Properties producerProps = new Properties();
         producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
         producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
         producer = new KafkaProducer<>(producerProps);
     }
 
-    private static void publishRecordToKafka(String topic, String record) {
-        ProducerRecord<String, String> rec = new ProducerRecord<>(topic, record);
+    private static void publishRecordToKafka(String topic, JsonNode record) {
+        ProducerRecord<String, JsonNode> rec = new ProducerRecord<>(topic, record);
 
         if (LOGGER.isDebugEnabled()) {
             producer.send(rec, (recordMetadata, e) -> {
@@ -165,5 +178,30 @@ public class SSPDataImport {
         if (producer!= null)
             producer.close();
         producer = null;
+    }
+
+    private static class TelecomRecord {
+        public String cell_id;
+        public long timestamp;
+        public int area_code;
+        public double calls_in;
+        public double calls_out;
+        public double sms_in;
+        public double sms_out;
+        public double internet_activity;
+
+        @Override
+        public String toString() {
+            return "TelecomRecord{" +
+                    "cell_id='" + cell_id + '\'' +
+                    ", timestamp=" + timestamp +
+                    ", area_code=" + area_code +
+                    ", calls_in=" + calls_in +
+                    ", calls_out=" + calls_out +
+                    ", sms_in=" + sms_in +
+                    ", sms_out=" + sms_out +
+                    ", internet_activity=" + internet_activity +
+                    '}';
+        }
     }
 }
