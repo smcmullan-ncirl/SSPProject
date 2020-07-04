@@ -1,10 +1,4 @@
 # Project exclude paths
+/.idea/
 /ssp-data-import/target/
 /ssp-spark-app/target/
-/ssp-spark-app/dependency-reduced-pom.xml
-/openmobiledata_dns_lookup.csv
-/openmobiledata_http.csv
-/openmobiledata_ping.csv
-/openmobiledata_tcpthroughput.csv
-/openmobiledata_traceroute.csv
-/openmobiledata_udp_burst.csv
