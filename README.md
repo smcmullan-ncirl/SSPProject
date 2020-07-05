@@ -289,19 +289,21 @@ and finally Docker volumes under /var/lib/docker/volumes can be removed with:
 
 ## Links
 
-Wurtmeister Docker images for Kafka
+### Wurtmeister Docker images for Kafka
 
     http://wurstmeister.github.io/kafka-docker/
     https://github.com/wurstmeister/kafka-docker/blob/master/README.md
     https://github.com/wurstmeister/kafka-docker/wiki/Connectivity
     
-Bitnami Docker images for Spark
+### Bitnami Docker images for Spark
 
     https://github.com/bitnami/bitnami-docker-spark
 
-Kakfa - Spark integration
+### Kakfa - Spark integration
 
     https://spark.apache.org/docs/latest/structured-streaming-kafka-integration.html
     https://spark.apache.org/docs/latest/streaming-kafka-0-10-integration.html
 
+### Kakfa - Flink integration
 
+    https://ci.apache.org/projects/flink/flink-docs-stable/dev/connectors/kafka.html
