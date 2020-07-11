@@ -4,11 +4,11 @@ import java.sql.Timestamp
 import java.util.{Objects, Properties}
 
 import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.ScalaReflection
-import org.apache.spark.sql.functions.{col, from_json, window}
-import org.apache.spark.sql.streaming.OutputMode
-import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.{Column, SparkSession}
+import org.apache.spark.sql.functions.{col, date_format, from_json}
+import org.apache.spark.sql.streaming.{OutputMode, Trigger}
+import org.apache.spark.sql.types.{StructType, TimestampType}
 import org.slf4j.LoggerFactory
 
 class SSPSparkApp {
@@ -25,6 +25,7 @@ object SSPSparkApp {
     val kafkaServer = properties.getProperty("kafka.server")
     val kafkaTopics = properties.getProperty("kafka.topics")
     val kafkaTopicStartingOffset = properties.getProperty("kafka.topic.starting.offset")
+    val kafkaMaxOffsetsPerTrigger = properties.getProperty("kafka.max.offsets.per.trigger")
 
     // It is worth changing this property to the number of CPUs you have available across your cluster
     // Make sure it reflects the SPARK_WORKER_CORES environment setting in docker-compose.yml
@@ -61,19 +62,26 @@ object SSPSparkApp {
       .option("kafka.bootstrap.servers", kafkaServer)
       .option("subscribe", kafkaTopics)
       .option("startingOffsets", kafkaTopicStartingOffset)
+      .option("maxOffsetsPerTrigger", kafkaMaxOffsetsPerTrigger)
       .load()
       .select(from_json(col("value").cast("string"), telecomRecordSchema).alias("telecom_record"))
       .select("telecom_record.*")
+      .withColumn("timestamp", (col("timestamp") / 1000).cast(TimestampType))
+      .withColumn("year", date_format(col("timestamp"), "yyyy"))
+      .withColumn("month", date_format(col("timestamp"), "MM"))
+      .withColumn("day", date_format(col("timestamp"), "dd"))
+      .withColumn("hour", date_format(col("timestamp"), "HH"))
 
     streamDF.printSchema
 
-    val windowedDF = streamDF
-      .groupBy(window(new Column("timestamp"), "5 seconds"))
-      .sum("calls_in")
+//    val windowedDF = streamDF
+//      .groupBy(window(new Column("timestamp"), "5 seconds"))
+//      .sum("calls_in")
 
-    val query = windowedDF
+    val query = streamDF
       .writeStream
-      .outputMode(OutputMode.Complete)
+      .trigger(Trigger.ProcessingTime("60 seconds"))
+      .outputMode(OutputMode.Append)
       .format("console")
       .option("checkpointLocation", "/tmp")
       .start
@@ -87,7 +95,7 @@ object SSPSparkApp {
 case class TelecomRecord
 (
   cell_id: String,
-  timestamp: Timestamp,
+  timestamp: Long,
   area_code: Int,
   calls_in: Double,
   calls_out: Double,

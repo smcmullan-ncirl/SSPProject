@@ -37,7 +37,7 @@ object SSPFlinkApp {
 case class TelecomRecord
 (
   cell_id: String,
-  timestamp: Timestamp,
+  timestamp: Long,
   area_code: Int,
   calls_in: Double,
   calls_out: Double,

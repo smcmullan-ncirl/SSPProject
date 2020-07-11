@@ -67,7 +67,7 @@ Processing the entire dataset into the Kafka broker consumes approx **20GB** of 
     
 JDK11 is the preferred build environment and there is a dependency on Scala 2.12 for the Spark application.
     
-The target platform is Apache Spark 3.0.0 and Apache Flink 1.10
+The target platform is Apache Spark 3.0.0 and Apache Flink 1.11
 
 ## IDE Development and Debugging
 
