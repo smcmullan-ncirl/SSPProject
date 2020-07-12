@@ -48,29 +48,30 @@ services:
             - "4040:4040"
             - "8081:8081"
 
-#    flink-jobmanager:
-#        image: flink
-#        depends_on:
-#            - kafka
-#        hostname: flink-jobmanager
-#        expose:
-#            - "6123"
-#        ports:
-#            - "8081:8081"
-#        command: jobmanager
-#        environment:
-#            - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
-#
-#    flink-taskmanager:
-#        image: flink
-#        depends_on:
-#            - flink-jobmanager
-#        hostname: flink-taskmanager
-#        expose:
-#            - "6121"
-#            - "6122"
-#        command: taskmanager
-#        links:
-#            - "flink-jobmanager:jobmanager"
-#        environment:
-#            - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+    flink-jobmanager:
+        image: flink
+        depends_on:
+            - kafka
+        hostname: flink-jobmanager
+        expose:
+            - "6123"
+        ports:
+            - "9081:8081"
+        command: jobmanager
+        environment:
+            - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+
+    flink-taskmanager:
+        image: flink
+        depends_on:
+            - flink-jobmanager
+        hostname: flink-taskmanager
+        expose:
+            - "6121"
+            - "6122"
+        command: taskmanager
+        links:
+            - "flink-jobmanager:jobmanager"
+        environment:
+            - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+
