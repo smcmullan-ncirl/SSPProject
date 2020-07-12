@@ -179,7 +179,7 @@ The following metrics were acquired running the SSPDataImport application on the
 without any modifications to the configuration file supplied i.e. it processes the entire dataset into the Kafka broker
 in 7029 seconds ~ **2 hours**
 
-# SSPSparkApp - The Data Aggregation Processor application
+# SSPSparkApp - The Spark Streaming Processor application
 
 ## Building and deploying the application to Spark
 
@@ -251,7 +251,31 @@ The Spark logs can be checked as follows:
         cat stderr
         
 The logs are also viewable via the Spark UI at the link given above
+
+# SSPFlinkApp - The Flink Streaming Processor application
+
+## Building and deploying the application to Flink
+
+### Flink deployment troubleshooting
+
+### Flink UI
+
+    http://http://localhost:9081
     
+### Flink logs
+
+# SSPElasticApp - The Elasticsearch/Kibana Processor application
+
+## Building and deploying the application to Elasticsearch/Kibana
+
+### Elasticsearch/Kibana deployment troubleshooting
+
+### Elasticsearch/Kibana UI
+
+    http://http://localhost:9081
+    
+### Elasticsearch/Kibana logs
+
 # Environment Shutdown Instructions
 
 ## Kafka Topic Deletion (Optional)

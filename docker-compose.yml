@@ -1,4 +1,4 @@
-version: "3.5"
+version: "3.7"
 services:
     zookeeper:
         image: wurstmeister/zookeeper
@@ -15,8 +15,6 @@ services:
 
     spark-master:
         image: bitnami/spark
-        depends_on:
-            - kafka
         hostname: spark-master
         environment:
             - SPARK_MODE=master
@@ -33,6 +31,8 @@ services:
         image: bitnami/spark
         depends_on:
             - spark-master
+            - kafka
+            - elasticsearch
         hostname: spark-worker
         environment:
             - SPARK_MODE=worker
@@ -50,8 +50,6 @@ services:
 
     flink-jobmanager:
         image: flink
-        depends_on:
-            - kafka
         hostname: flink-jobmanager
         expose:
             - "6123"
@@ -65,6 +63,8 @@ services:
         image: flink
         depends_on:
             - flink-jobmanager
+            - kafka
+            - elasticsearch
         hostname: flink-taskmanager
         expose:
             - "6121"
@@ -75,3 +75,26 @@ services:
         environment:
             - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
 
+    elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+        hostname: elasticsearch
+        environment:
+            - discovery.type=single-node
+        ports:
+            - "9200:9200"
+        networks:
+            - elastic
+
+    kibana:
+        image: "docker.elastic.co/kibana/kibana:7.8.0"
+        hostname: kibana
+        depends_on:
+            - elasticsearch
+        ports:
+            - "5601:5601"
+        networks:
+            - elastic
+
+networks:
+  elastic:
+    driver: bridge
