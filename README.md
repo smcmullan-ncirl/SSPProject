@@ -50,7 +50,6 @@ Post build the application working directory is approx 33MB of storage
 Processing the entire dataset into the Kafka broker consumes approx **20GB** of storage
 
 ## Architecture Diagram
-
  	
 # Overall Application Build and Deployment
 
@@ -62,12 +61,11 @@ Processing the entire dataset into the Kafka broker consumes approx **20GB** of 
     sudo apt install git
     git clone https://github.com/smcmullan-ncirl/SSPProject.git
     cd SSPProject
-    export MAVEN_OPTS="-Xss4m"
     mvn clean package
     
-JDK11 is the preferred build environment and there is a dependency on Scala 2.12 for the Spark application.
+JDK11 is the preferred build environment
     
-The target platform is Apache Spark 3.0.0 and Apache Flink 1.11
+The target platform is Apache Spark 2.4.6 (limited by Elasticsearch integration) and Apache Flink 1.11
 
 ## IDE Development and Debugging
 
@@ -260,7 +258,7 @@ The logs are also viewable via the Spark UI at the link given above
 
 ### Flink UI
 
-    http://http://localhost:9081
+    http://localhost:8081
     
 ### Flink logs
 
@@ -272,7 +270,7 @@ The logs are also viewable via the Spark UI at the link given above
 
 ### Elasticsearch/Kibana UI
 
-    http://http://localhost:9081
+    http://localhost:5601/app/kibana
     
 ### Elasticsearch/Kibana logs
 

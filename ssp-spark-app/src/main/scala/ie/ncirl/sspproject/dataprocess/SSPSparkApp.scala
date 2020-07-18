@@ -1,13 +1,11 @@
 package ie.ncirl.sspproject.dataprocess
 
-import java.sql.Timestamp
 import java.util.{Objects, Properties}
 
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.functions.{col, date_format, from_json}
-import org.apache.spark.sql.streaming.{OutputMode, Trigger}
 import org.apache.spark.sql.types.{StructType, TimestampType}
 import org.slf4j.LoggerFactory
 
@@ -27,6 +25,10 @@ object SSPSparkApp {
     val kafkaTopicStartingOffset = properties.getProperty("kafka.topic.starting.offset")
     val kafkaMaxOffsetsPerTrigger = properties.getProperty("kafka.max.offsets.per.trigger")
 
+    val esServer = properties.getProperty("es.server")
+    val esPort = properties.getProperty("es.port")
+    val esIndex = properties.getProperty("es.index")
+
     // It is worth changing this property to the number of CPUs you have available across your cluster
     // Make sure it reflects the SPARK_WORKER_CORES environment setting in docker-compose.yml
     val sparkPartitions = properties.getProperty("spark.partitions")
@@ -39,6 +41,8 @@ object SSPSparkApp {
     val conf: SparkConf = new SparkConf()
       .setAppName("SSPSparkApp")
       .set("spark.sql.shuffle.partitions", sparkPartitions)
+      .set("spark.es.nodes", esServer)
+      .set("spark.es.port", esPort)
 
     // DEBUG mode
     // This is for running the Spark application within the IDE for debug purposes
@@ -63,6 +67,7 @@ object SSPSparkApp {
       .option("subscribe", kafkaTopics)
       .option("startingOffsets", kafkaTopicStartingOffset)
       .option("maxOffsetsPerTrigger", kafkaMaxOffsetsPerTrigger)
+      .option("failOnDataLoss", "false")
       .load()
       .select(from_json(col("value").cast("string"), telecomRecordSchema).alias("telecom_record"))
       .select("telecom_record.*")
@@ -78,13 +83,20 @@ object SSPSparkApp {
 //      .groupBy(window(new Column("timestamp"), "5 seconds"))
 //      .sum("calls_in")
 
+//    val query = streamDF
+//      .writeStream
+//      .trigger(Trigger.ProcessingTime("60 seconds"))
+//      .outputMode(OutputMode.Append)
+//      .format("console")
+//      .option("checkpointLocation", "/tmp")
+//      .start
+
     val query = streamDF
       .writeStream
-      .trigger(Trigger.ProcessingTime("60 seconds"))
-      .outputMode(OutputMode.Append)
-      .format("console")
-      .option("checkpointLocation", "/tmp")
-      .start
+      .outputMode("append")
+      .format("org.elasticsearch.spark.sql")
+      .option("checkpointLocation", "/tmp/checkpoint")
+      .start(esIndex)
 
     query.awaitTermination
 

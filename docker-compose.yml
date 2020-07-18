@@ -14,7 +14,7 @@ services:
             KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
 
     spark-master:
-        image: bitnami/spark
+        image: bitnami/spark:2.4.6
         hostname: spark-master
         environment:
             - SPARK_MODE=master
@@ -28,7 +28,7 @@ services:
             - "8080:8080"
 
     spark-worker:
-        image: bitnami/spark
+        image: bitnami/spark:2.4.6
         depends_on:
             - spark-master
             - kafka

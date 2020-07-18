@@ -14,28 +14,28 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-core_${scala.version}</artifactId>
+            <artifactId>spark-core_${spark.scala.version}</artifactId>
             <version>${spark.version}</version>
             <!--<scope>provided</scope>-->
         </dependency>
 
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_${scala.version}</artifactId>
+            <artifactId>spark-sql_${spark.scala.version}</artifactId>
             <version>${spark.version}</version>
             <!--<scope>provided</scope>-->
         </dependency>
 
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql-kafka-0-10_${scala.version}</artifactId>
+            <artifactId>spark-sql-kafka-0-10_${spark.scala.version}</artifactId>
             <version>${spark.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch-spark-20_2.11</artifactId>
-            <version>7.8.0</version>
+            <artifactId>elasticsearch-spark-20_${spark.scala.version}</artifactId>
+            <version>${elasticsearch.version}</version>
         </dependency>
     </dependencies>
 
