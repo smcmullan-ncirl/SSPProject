@@ -65,7 +65,7 @@ Processing the entire dataset into the Kafka broker consumes approx **20GB** of 
     
 JDK11 is the preferred build environment
     
-The target platform is Apache Spark 2.4.6 (limited by Elasticsearch integration) and Apache Flink 1.11
+The target platform is Apache Spark 2.4.6 (limited by Elasticsearch integration) and Apache Flink 1.10
 
 ## IDE Development and Debugging
 

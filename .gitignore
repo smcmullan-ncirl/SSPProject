@@ -3,8 +3,10 @@
 /SSPProject.iml
 /ssp-data-import/ssp-data-import.iml
 /ssp-data-import/target/
+/ssp-flink-app/dependency-reduced-pom.xml
 /ssp-flink-app/ssp-flink-app.iml
 /ssp-flink-app/target/
 /ssp-spark-app/dependency-reduced-pom.xml
 /ssp-spark-app/ssp-spark-app.iml
 /ssp-spark-app/target/
+

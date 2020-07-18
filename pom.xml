@@ -23,8 +23,8 @@
         <spark.version>2.4.6</spark.version>
         <spark.scala.version>2.11</spark.scala.version>
 
-        <flink.version>1.11.0</flink.version>
-        <flink.scala.version>2.12</flink.scala.version>
+        <flink.version>1.10.0</flink.version>
+        <flink.scala.version>2.11</flink.scala.version>
 
         <elasticsearch.version>7.8.0</elasticsearch.version>
 
