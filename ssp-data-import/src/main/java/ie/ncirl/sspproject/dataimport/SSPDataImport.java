@@ -1,13 +1,25 @@
 package ie.ncirl.sspproject.dataimport;
 
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import org.apache.http.HttpHost;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.client.Cancellable;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
@@ -29,16 +41,31 @@ public class SSPDataImport {
     private static final String CONFIG_PROPERTIES = "config.properties";
     private static final String AWS_BUCKET_NAME = "aws.bucketname";
     private static final String AWS_OBJECT_PREFIX = "aws.object.prefix";
+    private static final String KAFKA_PERSIST = "kafka.persist";
     private static final String KAFKA_SERVER = "kafka.server";
     private static final String KAFKA_TOPIC = "kafka.topic";
+    private static final String ES_PERSIST = "es.persist";
+    private static final String ES_SERVER = "es.server";
+    private static final String ES_PORT = "es.port";
+    private static final String ES_SCHEME = "es.scheme";
+    private static final String ES_INDEX = "es.index";
 
     private static String bucketName = null;
     private static String objectPrefix = null;
     private static final Region region = Region.EU_WEST_1;
 
     private static Producer<String, JsonNode> producer = null;
+    private static Boolean kafkaPersist = false;
     private static String kafkaServer = null;
     private static String kafkaTopic = null;
+
+    private static RestHighLevelClient esClient = null;
+    private static Boolean esPersist = false;
+    private static String esServer = null;
+    private static String esPort = null;
+    private static String esScheme = null;
+    private static String esIndex = null;
+    private static IndexRequest esIndexRequest = null;
 
     private static long startTime = 0;
     private static int processedFiles = 0;
@@ -49,11 +76,11 @@ public class SSPDataImport {
 
         loadProperties();
 
-        initKafkaConnection();
+        initSinkConnection();
 
         processAWSObjects();
 
-        closeKafkaConnection();
+        closeSinkConnection();
 
         printStats();
     }
@@ -64,8 +91,16 @@ public class SSPDataImport {
 
             bucketName = prop.getProperty(AWS_BUCKET_NAME);
             objectPrefix = prop.getProperty(AWS_OBJECT_PREFIX);
+
+            kafkaPersist = Boolean.parseBoolean(prop.getProperty(KAFKA_PERSIST));
             kafkaServer = prop.getProperty(KAFKA_SERVER);
             kafkaTopic = prop.getProperty(KAFKA_TOPIC);
+
+            esPersist = Boolean.parseBoolean(prop.getProperty(ES_PERSIST));
+            esServer = prop.getProperty(ES_SERVER);
+            esPort = prop.getProperty(ES_PORT);
+            esScheme = prop.getProperty(ES_SCHEME);
+            esIndex = prop.getProperty(ES_INDEX);
         } catch (IOException e) {
             LOGGER.error("Unable to load config.properties from classpath");
         }
@@ -117,7 +152,7 @@ public class SSPDataImport {
                     while (csvLines.hasNext()) {
                         TelecomRecord telecomRecord = csvLines.next();
                         JsonNode jsonNode = objectMapper.valueToTree(telecomRecord);
-                        publishRecordToKafka(kafkaTopic, jsonNode);
+                        publishRecordToSink(jsonNode);
                         recordNum++;
                     }
 
@@ -145,6 +180,16 @@ public class SSPDataImport {
                 processedFiles, processedRecords, processingTime, processingRate);
     }
 
+    private static void initSinkConnection() {
+        if (kafkaPersist) {
+            initKafkaConnection();
+        }
+
+        if (esPersist) {
+            initEsConnection();
+        }
+    }
+
     private static void initKafkaConnection() {
         Properties producerProps = new Properties();
         producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
@@ -154,8 +199,28 @@ public class SSPDataImport {
         producer = new KafkaProducer<>(producerProps);
     }
 
-    private static void publishRecordToKafka(String topic, JsonNode record) {
-        ProducerRecord<String, JsonNode> rec = new ProducerRecord<>(topic, record);
+    private static void initEsConnection() {
+        esClient = new RestHighLevelClient(
+                RestClient.builder(
+                        new HttpHost(esServer, Integer.parseInt(esPort), esScheme)
+                )
+        );
+
+        esIndexRequest = new IndexRequest(esIndex);
+    }
+
+    private static void publishRecordToSink(JsonNode record) {
+        if (kafkaPersist) {
+            publishRecordToKafka(record);
+        }
+
+        if (esPersist) {
+            publishRecordToEs(record);
+        }
+    }
+
+    private static void publishRecordToKafka(JsonNode record) {
+        ProducerRecord<String, JsonNode> rec = new ProducerRecord<>(kafkaTopic, record);
 
         if (LOGGER.isDebugEnabled()) {
             producer.send(rec, (recordMetadata, e) -> {
@@ -174,10 +239,57 @@ public class SSPDataImport {
         }
     }
 
+    private static void publishRecordToEs(JsonNode record) {
+        esIndexRequest.source(record.toString(), XContentType.JSON);
+
+        if (LOGGER.isDebugEnabled()) {
+            ActionListener<IndexResponse> esListener = new ActionListener<>() {
+                @Override
+                public void onResponse(IndexResponse indexResponse) {
+                    LOGGER.debug("Successfully published request to Elasticsearch: {}", indexResponse.getResult());
+
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    LOGGER.error("Error publishing request to Elasticsearch", e);
+                }
+            };
+
+            Cancellable indexResponse = esClient.indexAsync(esIndexRequest, RequestOptions.DEFAULT, esListener);
+            LOGGER.info("Successfully published request to Elasticsearch: {}", indexResponse.toString());
+        } else {
+            try {
+                IndexResponse indexResponse = esClient.index(esIndexRequest, RequestOptions.DEFAULT);
+                LOGGER.info("Successfully published request to Elasticsearch: {}", indexResponse.getResult());
+            } catch (IOException e) {
+                LOGGER.error("Error sending record to Elasticsearch", e);
+            }
+        }
+    }
+
+    private static void closeSinkConnection() {
+        if (kafkaPersist) {
+            closeKafkaConnection();
+        }
+
+        if (esPersist) {
+            closeEsConnection();
+        }
+    }
+
     private static void closeKafkaConnection() {
         if (producer!= null)
             producer.close();
         producer = null;
+    }
+
+    private static void closeEsConnection() {
+        try {
+            esClient.close();
+        } catch (IOException e) {
+            LOGGER.error("Error closing Elasticsearch client", e);
+        }
     }
 
     private static class TelecomRecord {

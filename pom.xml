@@ -26,7 +26,7 @@
         <flink.version>1.10.0</flink.version>
         <flink.scala.version>2.11</flink.scala.version>
 
-        <elasticsearch.version>7.8.0</elasticsearch.version>
+        <elasticsearch.version>7.8.1</elasticsearch.version>
 
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <scala-maven-plugin.version>4.4.0</scala-maven-plugin.version>

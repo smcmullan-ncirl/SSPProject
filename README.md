@@ -329,3 +329,7 @@ and finally Docker volumes under /var/lib/docker/volumes can be removed with:
 ### Kakfa - Flink integration
 
     https://ci.apache.org/projects/flink/flink-docs-stable/dev/connectors/kafka.html
+    
+### Elasticsearch Java High Level REST Client
+
+    https://www.elastic.co/guide/en/elasticsearch/client/java-rest/7.8/java-rest-high.html
