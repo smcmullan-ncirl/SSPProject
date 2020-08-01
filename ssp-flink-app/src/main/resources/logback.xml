@@ -5,7 +5,9 @@
         </encoder>
     </appender>
 
-    <root level="info">
+    <logger name="ie.ncirl.sspproject" level="DEBUG"/>
+
+    <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>

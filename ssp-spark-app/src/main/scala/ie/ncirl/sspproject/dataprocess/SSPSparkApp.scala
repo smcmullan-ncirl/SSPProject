@@ -1,6 +1,6 @@
 package ie.ncirl.sspproject.dataprocess
 
-import java.util.{Objects, Properties}
+import java.util.{Date, Objects, Properties}
 
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
@@ -113,5 +113,6 @@ case class TelecomRecord
   calls_out: Double,
   sms_in: Double,
   sms_out: Double,
-  internet_activity: Double
+  internet_activity: Double,
+  timestamp_str: Date
 )

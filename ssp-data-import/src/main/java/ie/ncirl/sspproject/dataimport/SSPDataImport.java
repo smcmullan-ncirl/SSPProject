@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.http.HttpHost;
@@ -12,10 +13,8 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.client.Cancellable;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -30,6 +29,9 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
@@ -149,9 +151,13 @@ public class SSPDataImport {
 
                     ObjectMapper objectMapper = new ObjectMapper();
                     int recordNum = 0;
+
+                    DateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
                     while (csvLines.hasNext()) {
                         TelecomRecord telecomRecord = csvLines.next();
                         JsonNode jsonNode = objectMapper.valueToTree(telecomRecord);
+                        Date timestampDate = new Date(telecomRecord.timestamp);
+                        ((ObjectNode)jsonNode).put("timestamp_str", simpleDataFormat.format(timestampDate));
                         publishRecordToSink(jsonNode);
                         recordNum++;
                     }
@@ -242,29 +248,11 @@ public class SSPDataImport {
     private static void publishRecordToEs(JsonNode record) {
         esIndexRequest.source(record.toString(), XContentType.JSON);
 
-        if (LOGGER.isDebugEnabled()) {
-            ActionListener<IndexResponse> esListener = new ActionListener<>() {
-                @Override
-                public void onResponse(IndexResponse indexResponse) {
-                    LOGGER.debug("Successfully published request to Elasticsearch: {}", indexResponse.getResult());
-
-                }
-
-                @Override
-                public void onFailure(Exception e) {
-                    LOGGER.error("Error publishing request to Elasticsearch", e);
-                }
-            };
-
-            Cancellable indexResponse = esClient.indexAsync(esIndexRequest, RequestOptions.DEFAULT, esListener);
-            LOGGER.info("Successfully published request to Elasticsearch: {}", indexResponse.toString());
-        } else {
-            try {
-                IndexResponse indexResponse = esClient.index(esIndexRequest, RequestOptions.DEFAULT);
-                LOGGER.info("Successfully published request to Elasticsearch: {}", indexResponse.getResult());
-            } catch (IOException e) {
-                LOGGER.error("Error sending record to Elasticsearch", e);
-            }
+        try {
+            IndexResponse indexResponse = esClient.index(esIndexRequest, RequestOptions.DEFAULT);
+            LOGGER.debug("Successfully published request to Elasticsearch: {}", indexResponse.getResult());
+        } catch (IOException e) {
+            LOGGER.error("Error sending record to Elasticsearch", e);
         }
     }
 

@@ -1,6 +1,6 @@
 package ie.ncirl.sspproject.dataprocess
 
-import java.util.{Objects, Properties}
+import java.util.{Date, Objects, Properties}
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
@@ -99,7 +99,8 @@ object SSPFlinkApp {
     calls_out: Double,
     sms_in: Double,
     sms_out: Double,
-    internet_activity: Double
+    internet_activity: Double,
+    timestamp_str: Date
   ) extends Serializable
 }
 
