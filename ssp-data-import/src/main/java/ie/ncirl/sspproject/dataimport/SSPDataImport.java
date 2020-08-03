@@ -73,6 +73,13 @@ public class SSPDataImport {
     private static int processedFiles = 0;
     private static int processedRecords = 0;
 
+    private static final int MILLIS_IN_SECOND = 1000;
+    private static final int MILLIS_IN_MIN = MILLIS_IN_SECOND * 60;
+    private static final int MILLIS_IN_HOUR = MILLIS_IN_MIN * 60;
+    private static final int MILLIS_IN_DAY = MILLIS_IN_HOUR * 24;
+    private static final int MILLIS_IN_WEEK = MILLIS_IN_DAY * 7;
+    private static final DateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
     public static void main(String[] args) {
         startTime = System.currentTimeMillis();
 
@@ -152,12 +159,12 @@ public class SSPDataImport {
                     ObjectMapper objectMapper = new ObjectMapper();
                     int recordNum = 0;
 
-                    DateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
                     while (csvLines.hasNext()) {
                         TelecomRecord telecomRecord = csvLines.next();
                         JsonNode jsonNode = objectMapper.valueToTree(telecomRecord);
-                        Date timestampDate = new Date(telecomRecord.timestamp);
-                        ((ObjectNode)jsonNode).put("timestamp_str", simpleDataFormat.format(timestampDate));
+
+                        addTimestamps(jsonNode, telecomRecord.timestamp);
+
                         publishRecordToSink(jsonNode);
                         recordNum++;
                     }
@@ -254,6 +261,26 @@ public class SSPDataImport {
         } catch (IOException e) {
             LOGGER.error("Error sending record to Elasticsearch", e);
         }
+    }
+
+    private static void addTimestamps(JsonNode record, long timestamp) {
+        Date timestampDate = new Date(timestamp);
+        ((ObjectNode)record).put("timestamp_str", simpleDataFormat.format(timestampDate));
+
+        long hourly_timestamp = timestamp - (timestamp % MILLIS_IN_HOUR);
+        ((ObjectNode)record).put("hourly_timestamp", hourly_timestamp);
+        Date hourlyTimestampDate = new Date(hourly_timestamp);
+        ((ObjectNode)record).put("hourly_timestamp_str", simpleDataFormat.format(hourlyTimestampDate));
+
+        long daily_timestamp = timestamp - (timestamp % MILLIS_IN_DAY);
+        ((ObjectNode)record).put("daily_timestamp", daily_timestamp);
+        Date dailyTimestampDate = new Date(daily_timestamp);
+        ((ObjectNode)record).put("daily_timestamp_str", simpleDataFormat.format(dailyTimestampDate));
+
+        long weekly_timestamp = timestamp - (timestamp % MILLIS_IN_WEEK);
+        ((ObjectNode)record).put("weekly_timestamp", weekly_timestamp);
+        Date weeklyTimestampDate = new Date(weekly_timestamp);
+        ((ObjectNode)record).put("weekly_timestamp_str", simpleDataFormat.format(weeklyTimestampDate));
     }
 
     private static void closeSinkConnection() {

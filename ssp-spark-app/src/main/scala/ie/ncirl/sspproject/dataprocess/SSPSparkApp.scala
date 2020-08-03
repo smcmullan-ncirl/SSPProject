@@ -114,5 +114,11 @@ case class TelecomRecord
   sms_in: Double,
   sms_out: Double,
   internet_activity: Double,
-  timestamp_str: Date
+  timestamp_str: Date,
+  hourly_timestamp: Long,
+  hourly_timestamp_str: Date,
+  daily_timestamp: Long,
+  daily_timestamp_str: Date,
+  weekly_timestamp: Long,
+  weekly_timestamp_str: Date
 )
