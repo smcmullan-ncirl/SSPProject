@@ -1,12 +1,14 @@
 package ie.ncirl.sspproject.dataprocess
 
-import java.util.{Date, Objects, Properties}
+import java.sql.Timestamp
+import java.util.{Objects, Properties}
 
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.ScalaReflection
-import org.apache.spark.sql.functions.{col, date_format, from_json}
-import org.apache.spark.sql.types.{StructType, TimestampType}
+import org.apache.spark.sql.functions.{col, from_json, sum}
+import org.apache.spark.sql.streaming.{OutputMode, Trigger}
+import org.apache.spark.sql.types.StructType
 import org.slf4j.LoggerFactory
 
 class SSPSparkApp {
@@ -71,34 +73,92 @@ object SSPSparkApp {
       .load()
       .select(from_json(col("value").cast("string"), telecomRecordSchema).alias("telecom_record"))
       .select("telecom_record.*")
-      .withColumn("timestamp", (col("timestamp") / 1000).cast(TimestampType))
-      .withColumn("year", date_format(col("timestamp"), "yyyy"))
-      .withColumn("month", date_format(col("timestamp"), "MM"))
-      .withColumn("day", date_format(col("timestamp"), "dd"))
-      .withColumn("hour", date_format(col("timestamp"), "HH"))
 
     streamDF.printSchema
 
-//    val windowedDF = streamDF
-//      .groupBy(window(new Column("timestamp"), "5 seconds"))
-//      .sum("calls_in")
+    // Calculate hourly aggregates
+    val aggDF1 = streamDF
+      .withWatermark("hourly_timestamp", "5 minutes")
+      .groupBy("hourly_timestamp", "area_code" )
+      .agg(
+        sum("calls_in"),
+        sum("calls_out"),
+        sum("sms_in"),
+        sum("sms_out")
+      )
 
-//    val query = streamDF
-//      .writeStream
-//      .trigger(Trigger.ProcessingTime("60 seconds"))
-//      .outputMode(OutputMode.Append)
-//      .format("console")
-//      .option("checkpointLocation", "/tmp")
-//      .start
+    // Calculate daily aggregates
+    val aggDF2 = streamDF
+      .withWatermark("daily_timestamp", "5 minutes")
+      .groupBy("daily_timestamp", "area_code" )
+      .agg(
+        sum("calls_in"),
+        sum("calls_out"),
+        sum("sms_in"),
+        sum("sms_out")
+      )
 
-    val query = streamDF
+    // Calculate weekly aggregates
+    val aggDF3 = streamDF
+      .withWatermark("weekly_timestamp", "5 minutes")
+      .groupBy("weekly_timestamp", "area_code" )
+      .agg(
+        sum("calls_in"),
+        sum("calls_out"),
+        sum("sms_in"),
+        sum("sms_out")
+      )
+
+    // Write streams
+    aggDF1
+      .orderBy("hourly_timestamp", "area_code")
       .writeStream
-      .outputMode("append")
-      .format("org.elasticsearch.spark.sql")
-      .option("checkpointLocation", "/tmp/checkpoint")
-      .start(esIndex)
+      .trigger(Trigger.ProcessingTime("60 seconds"))
+      .outputMode(OutputMode.Complete)
+      .format("console")
+      .start
 
-    query.awaitTermination
+    aggDF1
+      .writeStream
+      .trigger(Trigger.ProcessingTime("60 seconds"))
+      .outputMode(OutputMode.Append)
+      .format("org.elasticsearch.spark.sql")
+      .option("checkpointLocation", "/tmp/checkpoint1")
+      .start(esIndex + "_hourly")
+
+    aggDF2
+      .orderBy("daily_timestamp", "area_code")
+      .writeStream
+      .trigger(Trigger.ProcessingTime("60 seconds"))
+      .outputMode(OutputMode.Complete)
+      .format("console")
+      .start
+
+    aggDF2
+      .writeStream
+      .trigger(Trigger.ProcessingTime("60 seconds"))
+      .outputMode(OutputMode.Append)
+      .format("org.elasticsearch.spark.sql")
+      .option("checkpointLocation", "/tmp/checkpoint2")
+      .start(esIndex + "_daily")
+
+    aggDF3
+      .orderBy("weekly_timestamp", "area_code")
+      .writeStream
+      .trigger(Trigger.ProcessingTime("60 seconds"))
+      .outputMode(OutputMode.Complete)
+      .format("console")
+      .start
+
+    aggDF3
+      .writeStream
+      .trigger(Trigger.ProcessingTime("60 seconds"))
+      .outputMode(OutputMode.Append)
+      .format("org.elasticsearch.spark.sql")
+      .option("checkpointLocation", "/tmp/checkpoint3")
+      .start(esIndex + "_weekly")
+
+    spark.streams.awaitAnyTermination()
 
     spark.close
   }
@@ -114,11 +174,11 @@ case class TelecomRecord
   sms_in: Double,
   sms_out: Double,
   internet_activity: Double,
-  timestamp_str: Date,
-  hourly_timestamp: Long,
-  hourly_timestamp_str: Date,
-  daily_timestamp: Long,
-  daily_timestamp_str: Date,
-  weekly_timestamp: Long,
-  weekly_timestamp_str: Date
+  timestamp_str: String,
+  hourly_timestamp: Timestamp,
+  hourly_timestamp_str: String,
+  daily_timestamp: Timestamp,
+  daily_timestamp_str: String,
+  weekly_timestamp: Timestamp,
+  weekly_timestamp_str: String
 )

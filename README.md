@@ -55,15 +55,15 @@ Processing the entire dataset into the Kafka broker consumes approx **20GB** of 
 
 ## Setup Build Environment Instructions
 
-    sudo apt-get install openjdk-11-jdk
-    sudo update-alternatives --config java (choose JDK11)
+    sudo apt-get install openjdk-8-jdk
+    sudo update-alternatives --config java (choose JDK8)
     sudo apt-get install maven
     sudo apt install git
     git clone https://github.com/smcmullan-ncirl/SSPProject.git
     cd SSPProject
     mvn clean package
     
-JDK11 is the preferred build environment
+JDK8 is the preferred build environment
     
 The target platform is Apache Spark 2.4.6 (limited by Elasticsearch integration) and Apache Flink 1.10
 

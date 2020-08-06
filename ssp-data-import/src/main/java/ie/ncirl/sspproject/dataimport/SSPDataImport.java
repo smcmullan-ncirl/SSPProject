@@ -268,17 +268,17 @@ public class SSPDataImport {
         ((ObjectNode)record).put("timestamp_str", simpleDataFormat.format(timestampDate));
 
         long hourly_timestamp = timestamp - (timestamp % MILLIS_IN_HOUR);
-        ((ObjectNode)record).put("hourly_timestamp", hourly_timestamp);
+        ((ObjectNode)record).put("hourly_timestamp", hourly_timestamp/1000);
         Date hourlyTimestampDate = new Date(hourly_timestamp);
         ((ObjectNode)record).put("hourly_timestamp_str", simpleDataFormat.format(hourlyTimestampDate));
 
         long daily_timestamp = timestamp - (timestamp % MILLIS_IN_DAY);
-        ((ObjectNode)record).put("daily_timestamp", daily_timestamp);
+        ((ObjectNode)record).put("daily_timestamp", daily_timestamp/1000);
         Date dailyTimestampDate = new Date(daily_timestamp);
         ((ObjectNode)record).put("daily_timestamp_str", simpleDataFormat.format(dailyTimestampDate));
 
         long weekly_timestamp = timestamp - (timestamp % MILLIS_IN_WEEK);
-        ((ObjectNode)record).put("weekly_timestamp", weekly_timestamp);
+        ((ObjectNode)record).put("weekly_timestamp", weekly_timestamp/1000);
         Date weeklyTimestampDate = new Date(weekly_timestamp);
         ((ObjectNode)record).put("weekly_timestamp_str", simpleDataFormat.format(weeklyTimestampDate));
     }
