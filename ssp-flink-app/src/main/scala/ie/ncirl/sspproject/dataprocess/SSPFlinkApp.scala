@@ -22,11 +22,14 @@ import org.apache.http.HttpHost
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.client.Requests
 import org.elasticsearch.common.xcontent.XContentType
+import org.slf4j.LoggerFactory
 
 class SSPFlinkApp {
 }
 
 object SSPFlinkApp {
+  private val LOGGER = LoggerFactory.getLogger(classOf[SSPFlinkApp])
+
   def main(args: Array[String]): Unit = {
     // Read in the config.properties file
     val properties: Properties = new Properties()
@@ -34,10 +37,13 @@ object SSPFlinkApp {
 
     val kafkaServer = properties.getProperty("kafka.server")
     val kafkaTopics = properties.getProperty("kafka.topics")
+    val kafkaEarliestOffset = properties.getProperty("kafka.earliest.offset").toBoolean
 
     val esServer = properties.getProperty("es.server")
     val esPort = properties.getProperty("es.port").toInt
     val esIndex = properties.getProperty("es.index")
+
+    val timeWindowSecs = properties.getProperty("time.window.secs")
 
     val kafkaProperties: Properties = new Properties()
     kafkaProperties.setProperty("bootstrap.servers", kafkaServer)
@@ -46,7 +52,13 @@ object SSPFlinkApp {
       kafkaTopics,
       new SimpleStringSchema(),
       kafkaProperties)
-    kafkaConsumer.setStartFromLatest()
+
+    if (kafkaEarliestOffset) {
+      kafkaConsumer.setStartFromEarliest()
+    } else {
+      kafkaConsumer.setStartFromLatest()
+    }
+
 
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime)
@@ -63,36 +75,46 @@ object SSPFlinkApp {
       }
     )
 
-    val telecomHourlyAggs = telecomRecordStream
+    if (LOGGER.isDebugEnabled()) {
+      telecomRecordStream.print
+    }
+
+    val telecomHourlyAggsStream = telecomRecordStream
       .keyBy("hourly_timestamp", "area_code")
-      .window(TumblingProcessingTimeWindows.of(Time.seconds(60)))
-      .process(new ProcessWindowFunction[TelecomRecord, TelecomAgg, Tuple, TimeWindow]() {
-        override def process(key: Tuple, context: Context, elements: Iterable[TelecomRecord], out: Collector[TelecomAgg]): Unit = {
-          var total_calls_in: Double = 0
-          var total_calls_out: Double = 0
-          var total_sms_in: Double = 0
-          var total_sms_out: Double = 0
+      .window(TumblingProcessingTimeWindows.of(Time.seconds(timeWindowSecs.toLong)))
+      .process(
+        new ProcessWindowFunction[TelecomRecord, TelecomAgg, Tuple, TimeWindow]() {
+          override def process(key: Tuple, context: Context, elements: Iterable[TelecomRecord], out: Collector[TelecomAgg]): Unit = {
+            LOGGER.info(s"Processing ${timeWindowSecs}sec window for $key")
 
-          while(elements.iterator.hasNext) {
-            val rec = elements.iterator.next
+            var total_calls_in: Double = 0
+            var total_calls_out: Double = 0
+            var total_sms_in: Double = 0
+            var total_sms_out: Double = 0
 
-            total_calls_in += rec.calls_in
-            total_calls_out += rec.calls_out
-            total_sms_in += rec.sms_in
-            total_sms_out += rec.sms_out
-          }
+            while(elements.iterator.hasNext) {
+              val rec = elements.iterator.next
 
-          out.collect(
-            TelecomAgg(
+              total_calls_in += rec.calls_in
+              total_calls_out += rec.calls_out
+              total_sms_in += rec.sms_in
+              total_sms_out += rec.sms_out
+            }
+
+            val outAgg = TelecomAgg(
               key.getField(1),
               key.getField(2),
               total_calls_in,
               total_calls_out,
               total_sms_in,
-              total_sms_out)
-          )
+              total_sms_out
+            )
+
+            LOGGER.info(outAgg.toString)
+
+            out.collect(outAgg)
+          }
         }
-      }
       )
 
     val httpHosts = new java.util.ArrayList[HttpHost]
@@ -116,9 +138,11 @@ object SSPFlinkApp {
 
     esSinkBuilderHourly.setBulkFlushMaxActions(1)
 
-    telecomHourlyAggs.addSink(esSinkBuilderHourly.build())
+    telecomHourlyAggsStream.addSink(esSinkBuilderHourly.build())
 
-    telecomHourlyAggs.print
+    if (LOGGER.isDebugEnabled()) {
+      telecomHourlyAggsStream.print
+    }
 
     env.execute
   }
