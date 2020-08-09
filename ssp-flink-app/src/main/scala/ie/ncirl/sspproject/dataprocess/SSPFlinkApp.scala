@@ -75,7 +75,7 @@ object SSPFlinkApp {
       }
     )
 
-    if (LOGGER.isDebugEnabled()) {
+    if (LOGGER.isTraceEnabled()) {
       telecomRecordStream.print
     }
 
@@ -84,33 +84,25 @@ object SSPFlinkApp {
       .window(TumblingProcessingTimeWindows.of(Time.seconds(timeWindowSecs.toLong)))
       .process(
         new ProcessWindowFunction[TelecomRecord, TelecomAgg, Tuple, TimeWindow]() {
-          override def process(key: Tuple, context: Context, elements: Iterable[TelecomRecord], out: Collector[TelecomAgg]): Unit = {
-            LOGGER.info(s"Processing ${timeWindowSecs}sec window for $key")
+          override def process(key: Tuple, context: Context, recs: Iterable[TelecomRecord], out: Collector[TelecomAgg]): Unit = {
+            LOGGER.info(s"Processing ${timeWindowSecs}sec window for $key with ${recs.size} events")
 
-            var total_calls_in: Double = 0
-            var total_calls_out: Double = 0
-            var total_sms_in: Double = 0
-            var total_sms_out: Double = 0
+            val total_calls_in: Double = recs.map(_.calls_in).sum
+            val total_calls_out: Double = recs.map(_.calls_out).sum
+            val total_sms_in: Double = recs.map(_.sms_in).sum
+            val total_sms_out: Double = recs.map(_.sms_out).sum
 
-            while(elements.iterator.hasNext) {
-              val rec = elements.iterator.next
-
-              total_calls_in += rec.calls_in
-              total_calls_out += rec.calls_out
-              total_sms_in += rec.sms_in
-              total_sms_out += rec.sms_out
-            }
+            val timestamp: Long = key.getField(0)
+            val area_code: Int = key.getField(1)
 
             val outAgg = TelecomAgg(
-              key.getField(1),
-              key.getField(2),
+              timestamp,
+              area_code,
               total_calls_in,
               total_calls_out,
               total_sms_in,
               total_sms_out
             )
-
-            LOGGER.info(outAgg.toString)
 
             out.collect(outAgg)
           }
@@ -140,9 +132,7 @@ object SSPFlinkApp {
 
     telecomHourlyAggsStream.addSink(esSinkBuilderHourly.build())
 
-    if (LOGGER.isDebugEnabled()) {
-      telecomHourlyAggsStream.print
-    }
+    telecomHourlyAggsStream.print
 
     env.execute
   }
