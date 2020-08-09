@@ -30,6 +30,10 @@ class SSPFlinkApp {
 object SSPFlinkApp {
   private val LOGGER = LoggerFactory.getLogger(classOf[SSPFlinkApp])
 
+  val Hourly = "hourly_"
+  val Daily = "daily_"
+  val Weekly = "weekly_"
+
   def main(args: Array[String]): Unit = {
     // Read in the config.properties file
     val properties: Properties = new Properties()
@@ -60,6 +64,64 @@ object SSPFlinkApp {
     }
 
 
+    def buildAggstream(eventStream: DataStream[TelecomRecord], interval: String) = {
+      eventStream
+        .keyBy(interval + "timestamp", "area_code")
+        .window(TumblingProcessingTimeWindows.of(Time.seconds(timeWindowSecs.toLong)))
+        .process(
+          new ProcessWindowFunction[TelecomRecord, TelecomAgg, Tuple, TimeWindow]() {
+            override def process(key: Tuple, context: Context, recs: Iterable[TelecomRecord], out: Collector[TelecomAgg]): Unit = {
+              LOGGER.info(s"Processing ${timeWindowSecs}sec window for $key with ${recs.size} events for $interval")
+
+              val total_calls_in: Double = recs.map(_.calls_in).sum
+              val total_calls_out: Double = recs.map(_.calls_out).sum
+              val total_sms_in: Double = recs.map(_.sms_in).sum
+              val total_sms_out: Double = recs.map(_.sms_out).sum
+
+              val timestamp: Long = key.getField(0)
+              val area_code: Int = key.getField(1)
+
+              val outAgg = TelecomAgg(
+                timestamp,
+                area_code,
+                total_calls_in,
+                total_calls_out,
+                total_sms_in,
+                total_sms_out
+              )
+
+              out.collect(outAgg)
+            }
+          }
+        )
+    }
+
+    def buildEsSink(interval: String): ElasticsearchSink[TelecomAgg] = {
+      val httpHosts = new java.util.ArrayList[HttpHost]
+      httpHosts.add(new HttpHost(esServer, esPort, "http"))
+
+      val esSinkBuilderHourly = new ElasticsearchSink.Builder[TelecomAgg](
+        httpHosts,
+        new ElasticsearchSinkFunction[TelecomAgg] {
+          def process(aggRec: TelecomAgg, ctx: RuntimeContext, indexer: RequestIndexer) {
+            val mapper: ObjectMapper = new ObjectMapper()
+            mapper.registerModule(DefaultScalaModule)
+
+            val jsonData = mapper.writeValueAsString(aggRec)
+
+            val rqst: IndexRequest = Requests.indexRequest
+              .index(interval + esIndex)
+              .source(jsonData, XContentType.JSON)
+
+            indexer.add(rqst)
+          }
+        }
+      )
+
+      esSinkBuilderHourly.setBulkFlushMaxActions(1)
+      esSinkBuilderHourly.build()
+    }
+
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime)
 
@@ -79,60 +141,17 @@ object SSPFlinkApp {
       telecomRecordStream.print
     }
 
-    val telecomHourlyAggsStream = telecomRecordStream
-      .keyBy("hourly_timestamp", "area_code")
-      .window(TumblingProcessingTimeWindows.of(Time.seconds(timeWindowSecs.toLong)))
-      .process(
-        new ProcessWindowFunction[TelecomRecord, TelecomAgg, Tuple, TimeWindow]() {
-          override def process(key: Tuple, context: Context, recs: Iterable[TelecomRecord], out: Collector[TelecomAgg]): Unit = {
-            LOGGER.info(s"Processing ${timeWindowSecs}sec window for $key with ${recs.size} events")
-
-            val total_calls_in: Double = recs.map(_.calls_in).sum
-            val total_calls_out: Double = recs.map(_.calls_out).sum
-            val total_sms_in: Double = recs.map(_.sms_in).sum
-            val total_sms_out: Double = recs.map(_.sms_out).sum
-
-            val timestamp: Long = key.getField(0)
-            val area_code: Int = key.getField(1)
-
-            val outAgg = TelecomAgg(
-              timestamp,
-              area_code,
-              total_calls_in,
-              total_calls_out,
-              total_sms_in,
-              total_sms_out
-            )
-
-            out.collect(outAgg)
-          }
-        }
-      )
-
-    val httpHosts = new java.util.ArrayList[HttpHost]
-    httpHosts.add(new HttpHost(esServer, esPort, "http"))
-
-    val esSinkBuilderHourly = new ElasticsearchSink.Builder[TelecomAgg](
-      httpHosts,
-      new ElasticsearchSinkFunction[TelecomAgg] {
-        def process(element: TelecomAgg, ctx: RuntimeContext, indexer: RequestIndexer) {
-          val mapper: ObjectMapper = new ObjectMapper()
-          val jsonData = mapper.writeValueAsString(element)
-
-          val rqst: IndexRequest = Requests.indexRequest
-            .index(esIndex + "_hourly")
-            .source(jsonData, XContentType.JSON)
-
-          indexer.add(rqst)
-        }
-      }
-    )
-
-    esSinkBuilderHourly.setBulkFlushMaxActions(1)
-
-    telecomHourlyAggsStream.addSink(esSinkBuilderHourly.build())
-
+    val telecomHourlyAggsStream = buildAggstream(telecomRecordStream, Hourly)
+    telecomHourlyAggsStream.addSink(buildEsSink(Hourly))
     telecomHourlyAggsStream.print
+
+    val telecomDailyAggsStream = buildAggstream(telecomRecordStream, Daily)
+    telecomDailyAggsStream.addSink(buildEsSink(Daily))
+    telecomDailyAggsStream.print
+
+    val telecomWeeklyAggsStream = buildAggstream(telecomRecordStream, Weekly)
+    telecomWeeklyAggsStream.addSink(buildEsSink(Weekly))
+    telecomWeeklyAggsStream.print
 
     env.execute
   }
@@ -165,6 +184,7 @@ object SSPFlinkApp {
     sms_in: Double,
     sms_out: Double
   )
+
 }
 
 

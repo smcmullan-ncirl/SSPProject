@@ -4,7 +4,7 @@ import java.sql.Timestamp
 import java.util.{Objects, Properties}
 
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.functions.{col, from_json, sum}
 import org.apache.spark.sql.streaming.{OutputMode, Trigger}
@@ -16,6 +16,10 @@ class SSPSparkApp {
 
 object SSPSparkApp {
   private val LOGGER = LoggerFactory.getLogger(classOf[SSPSparkApp])
+
+  val Hourly = "hourly_"
+  val Daily = "daily_"
+  val Weekly = "weekly_"
 
   def main(args: Array[String]): Unit = {
     // Read in the config.properties file
@@ -30,6 +34,8 @@ object SSPSparkApp {
     val esServer = properties.getProperty("es.server")
     val esPort = properties.getProperty("es.port")
     val esIndex = properties.getProperty("es.index")
+
+    val timeWindowSecs = properties.getProperty("time.window.secs")
 
     // It is worth changing this property to the number of CPUs you have available across your cluster
     // Make sure it reflects the SPARK_WORKER_CORES environment setting in docker-compose.yml
@@ -55,6 +61,38 @@ object SSPSparkApp {
       conf.setMaster("local[*]")
     }
 
+    def genAggs(streamDF: DataFrame, interval: String) = {
+      streamDF
+        .withWatermark(interval + "timestamp", "5 minutes")
+        .groupBy(interval + "timestamp", "area_code" )
+        .agg(
+          sum("calls_in"),
+          sum("calls_out"),
+          sum("sms_in"),
+          sum("sms_out")
+        )
+    }
+
+    def writeAggSink(aggStream: DataFrame, interval: String) = {
+      aggStream
+        .writeStream
+        .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
+        .outputMode(OutputMode.Append)
+        .format("org.elasticsearch.spark.sql")
+        .option("checkpointLocation", "/tmp/" + interval + "checkpoint")
+        .start(interval + esIndex)
+
+      if (LOGGER.isDebugEnabled()) {
+        aggStream
+          .orderBy(interval + "timestamp", "area_code")
+          .writeStream
+          .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
+          .outputMode(OutputMode.Complete)
+          .format("console")
+          .start
+      }
+    }
+
     val spark = SparkSession
       .builder
       .config(conf)
@@ -76,87 +114,15 @@ object SSPSparkApp {
 
     streamDF.printSchema
 
-    // Calculate hourly aggregates
-    val aggDF1 = streamDF
-      .withWatermark("hourly_timestamp", "5 minutes")
-      .groupBy("hourly_timestamp", "area_code" )
-      .agg(
-        sum("calls_in"),
-        sum("calls_out"),
-        sum("sms_in"),
-        sum("sms_out")
-      )
-
-    // Calculate daily aggregates
-    val aggDF2 = streamDF
-      .withWatermark("daily_timestamp", "5 minutes")
-      .groupBy("daily_timestamp", "area_code" )
-      .agg(
-        sum("calls_in"),
-        sum("calls_out"),
-        sum("sms_in"),
-        sum("sms_out")
-      )
-
-    // Calculate weekly aggregates
-    val aggDF3 = streamDF
-      .withWatermark("weekly_timestamp", "5 minutes")
-      .groupBy("weekly_timestamp", "area_code" )
-      .agg(
-        sum("calls_in"),
-        sum("calls_out"),
-        sum("sms_in"),
-        sum("sms_out")
-      )
+    // Calculate aggregates
+    val aggDF1 = genAggs(streamDF, Hourly)
+    val aggDF2 = genAggs(streamDF, Daily)
+    val aggDF3 = genAggs(streamDF, Weekly)
 
     // Write streams
-    aggDF1
-      .orderBy("hourly_timestamp", "area_code")
-      .writeStream
-      .trigger(Trigger.ProcessingTime("60 seconds"))
-      .outputMode(OutputMode.Complete)
-      .format("console")
-      .start
-
-    aggDF1
-      .writeStream
-      .trigger(Trigger.ProcessingTime("60 seconds"))
-      .outputMode(OutputMode.Append)
-      .format("org.elasticsearch.spark.sql")
-      .option("checkpointLocation", "/tmp/checkpoint1")
-      .start(esIndex + "_hourly")
-
-    aggDF2
-      .orderBy("daily_timestamp", "area_code")
-      .writeStream
-      .trigger(Trigger.ProcessingTime("60 seconds"))
-      .outputMode(OutputMode.Complete)
-      .format("console")
-      .start
-
-    aggDF2
-      .writeStream
-      .trigger(Trigger.ProcessingTime("60 seconds"))
-      .outputMode(OutputMode.Append)
-      .format("org.elasticsearch.spark.sql")
-      .option("checkpointLocation", "/tmp/checkpoint2")
-      .start(esIndex + "_daily")
-
-    aggDF3
-      .orderBy("weekly_timestamp", "area_code")
-      .writeStream
-      .trigger(Trigger.ProcessingTime("60 seconds"))
-      .outputMode(OutputMode.Complete)
-      .format("console")
-      .start
-
-    aggDF3
-      .writeStream
-      .trigger(Trigger.ProcessingTime("60 seconds"))
-      .outputMode(OutputMode.Append)
-      .format("org.elasticsearch.spark.sql")
-      .option("checkpointLocation", "/tmp/checkpoint3")
-      .start(esIndex + "_weekly")
+    writeAggSink(aggDF1, Hourly)
+    writeAggSink(aggDF2, Daily)
+    writeAggSink(aggDF3, Weekly)
 
     spark.streams.awaitAnyTermination()
 
