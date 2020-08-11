@@ -82,8 +82,6 @@ services:
             - discovery.type=single-node
         ports:
             - "9200:9200"
-        networks:
-            - elastic
 
     kibana:
         image: docker.elastic.co/kibana/kibana:7.8.1
@@ -92,9 +90,4 @@ services:
             - elasticsearch
         ports:
             - "5601:5601"
-        networks:
-            - elastic
 
-networks:
-  elastic:
-    driver: bridge

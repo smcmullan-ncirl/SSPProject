@@ -93,12 +93,12 @@ You can then check if Docker is running correctly by running the Hello World con
 
 ## Run Instructions
 
-Add the following to /etc/hosts to allow the Kafka container to be addressable by the IDE, SSPDataImport and the Spark
-Worker
+Add the following to /etc/hosts to allow the Kafka and Elasticsearch container to be addressable by the IDE, 
+SSPDataImport and the Spark Worker
 
     sudo vi /etc/hosts
     
-    127.0.0.1	localhost kafka
+    127.0.0.1	localhost kafka elasticsearch
     
 Then bring up the Docker environment
 
@@ -120,8 +120,6 @@ This combines the following commands for each topic and then a general listing a
 However it isn't strictly necessary to do this as the topics are created by the broker when the client producer
 sends messages to those topics if they do not exist previously.
 
-The topic names are the same of the measurement types listed above.
-
 ## Kafka Consumer Instructions (Optional)
 
 If you want to monitor the records being produced into any Kafka topic then you can start the Kafka console consumer as follows:
@@ -131,15 +129,6 @@ If you want to monitor the records being produced into any Kafka topic then you 
 The topics can be read from the beginning by the consumer like this:
 
     docker-compose exec kafka kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic ping --from-beginning
-
-## Postgres Setup Instructions (Optional)
-
-If you choose to persist data to PostgreSQL then installing the command line SQL client is very useful:
-
-    sudo apt-get install postgresql-client
-    sudo apt install postgresql-client-common
-    
-DBVizualizer is recommended if you would like a full GUI
 
 # SSPDataImport - The Data Collection Processor application
 
@@ -158,7 +147,8 @@ or
 This will start the processing of the data records from the Open Mobile Performance dataset to the Kafka broker by default.
 
 ### Configuration Options
-If you would like to enable/disable Kafka, PostgreSQL or CSV processing then you need to edit the following file and rebuild the project and re-run the application as described above:
+If you would like to enable persistence of the source dataset records to Elasticsearch to allow inspection using Kibana
+then you need to edit the following file and rebuild the project and re-run the application as described above:
 
     ssp-data-import/src/main/resources/config.properties
     
@@ -166,8 +156,16 @@ The configuration properties are:
 
     aws.bucketname = x19139497
     aws.object.prefix = Telecommunications - SMS, Call, Internet - TN/sms-call-internet-tn-
+    
+    kafka.persist = true
     kafka.server = localhost:9092
     kafka.topic = telecom_trento
+    
+    es.persist = false
+    es.server = localhost
+    es.port = 9200
+    es.scheme = http
+    es.index = dataimportcdr
 
 There's no real need to change any settings
 
@@ -197,7 +195,7 @@ The application can be deployed to Spark with the following commands:
     docker cp ssp-spark-app.jar sspproject_spark-worker_1:/
         
     docker exec -it sspproject_spark-master_1 bin/spark-submit -v \
-    --master spark://localhost:7077 \
+    --master spark://spark-master:7077 \
     --deploy-mode cluster \
     --class ie.ncirl.sspproject.dataprocess.SSPSparkApp \
     file:///ssp-spark-app.jar
