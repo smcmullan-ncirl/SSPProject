@@ -1,14 +1,21 @@
 package ie.ncirl.sspproject.dataprocess
 
 import java.sql.Timestamp
-import java.util.{Objects, Properties}
+import java.text.SimpleDateFormat
+import java.util.{Date, Objects, Properties}
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import org.apache.http.HttpHost
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.functions.{col, from_json, sum}
 import org.apache.spark.sql.streaming.{OutputMode, Trigger}
 import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.{DataFrame, ForeachWriter, Row, SparkSession}
+import org.elasticsearch.action.index.IndexRequest
+import org.elasticsearch.client.{RequestOptions, RestClient, RestHighLevelClient}
+import org.elasticsearch.common.xcontent.XContentType
 import org.slf4j.LoggerFactory
 
 class SSPSparkApp {
@@ -34,6 +41,7 @@ object SSPSparkApp {
     val esServer = properties.getProperty("es.server")
     val esPort = properties.getProperty("es.port")
     val esIndex = properties.getProperty("es.index")
+    val esScheme = properties.getProperty("es.scheme")
 
     val timeWindowSecs = properties.getProperty("time.window.secs")
 
@@ -63,7 +71,7 @@ object SSPSparkApp {
 
     def genAggs(streamDF: DataFrame, interval: String) = {
       streamDF
-        .withWatermark(interval + "timestamp", "5 minutes")
+//        .withWatermark(interval + "timestamp", "5 minutes")
         .groupBy(interval + "timestamp", "area_code" )
         .agg(
           sum("calls_in").alias("total_calls_in"),
@@ -74,13 +82,21 @@ object SSPSparkApp {
     }
 
     def writeAggSink(aggStream: DataFrame, interval: String) = {
+//      aggStream
+//        .writeStream
+//        .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
+//        .outputMode(OutputMode.Append)
+//        .format("org.elasticsearch.spark.sql")
+//        .option("checkpointLocation", "/tmp/" + interval + "checkpoint")
+//        .start(interval + esIndex)
+
       aggStream
         .writeStream
         .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
-        .outputMode(OutputMode.Append)
-        .format("org.elasticsearch.spark.sql")
-        .option("checkpointLocation", "/tmp/" + interval + "checkpoint")
-        .start(interval + esIndex)
+        .outputMode(OutputMode.Complete)
+        .foreach(new ESForeachWriter(esServer, esPort, esScheme, interval + esIndex))
+        .start
+
 
       if (LOGGER.isDebugEnabled()) {
         aggStream
@@ -124,7 +140,7 @@ object SSPSparkApp {
     writeAggSink(aggDF2, Daily)
     writeAggSink(aggDF3, Weekly)
 
-    spark.streams.awaitAnyTermination()
+    spark.streams.awaitAnyTermination
 
     spark.close
   }
@@ -148,3 +164,64 @@ case class TelecomRecord
   weekly_timestamp: Timestamp,
   weekly_timestamp_str: String
 )
+
+case class TelecomAgg
+(
+  timestamp: String,
+  area_code: Int,
+  total_calls_in: Double,
+  total_calls_out: Double,
+  total_sms_in: Double,
+  total_sms_out: Double
+)
+
+class ESForeachWriter(esServer: String, esPort: String, esScheme:String, esIndex: String) extends ForeachWriter[Row] {
+  var esClient: RestHighLevelClient = _
+  var esIndexRequest: IndexRequest = _
+  var mapper: ObjectMapper = _
+
+  override def open(partitionId: Long, epochId: Long): Boolean = {
+    esClient = new RestHighLevelClient(
+      RestClient.builder(
+        new HttpHost(esServer, Integer.parseInt(esPort), esScheme)
+      )
+    )
+
+    esIndexRequest = new IndexRequest(esIndex)
+    esClient != null && esIndexRequest != null
+  }
+
+  override def process(aggValue: Row): Unit = {
+    mapper = new ObjectMapper()
+    mapper.registerModule(DefaultScalaModule)
+
+    val timestamp = aggValue(0).asInstanceOf[Timestamp]
+    val areaCode = aggValue(1).asInstanceOf[Int]
+    val totalCallsIn = aggValue(2).asInstanceOf[Double]
+    val totalCallsOut = aggValue(3).asInstanceOf[Double]
+    val totalSmsIn = aggValue(4).asInstanceOf[Double]
+    val totalSmsOut = aggValue(5).asInstanceOf[Double]
+
+    val simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+    val timestampDate = new Date(timestamp.getTime)
+    val timestampStr = simpleDataFormat.format(timestampDate)
+
+    val aggRec = TelecomAgg(
+      timestampStr,
+      areaCode,
+      totalCallsIn,
+      totalCallsOut,
+      totalSmsIn,
+      totalSmsOut
+    )
+
+    val jsonData = mapper.writeValueAsString(aggRec)
+
+    esIndexRequest.source(jsonData, XContentType.JSON)
+    esClient.index(esIndexRequest, RequestOptions.DEFAULT)
+  }
+
+  override def close(errorOrNull: Throwable): Unit = {
+    esClient.close()
+  }
+}

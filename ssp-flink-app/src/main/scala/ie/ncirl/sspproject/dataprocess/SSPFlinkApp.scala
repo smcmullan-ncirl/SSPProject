@@ -1,5 +1,6 @@
 package ie.ncirl.sspproject.dataprocess
 
+import java.text.SimpleDateFormat
 import java.util.{Date, Objects, Properties}
 
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -81,8 +82,12 @@ object SSPFlinkApp {
               val timestamp: Long = key.getField(0)
               val area_code: Int = key.getField(1)
 
+              val simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+              val timestampDate = new Date(timestamp * 1000)
+              val timestampStr = simpleDataFormat.format(timestampDate)
+
               val outAgg = TelecomAgg(
-                timestamp,
+                timestampStr,
                 area_code,
                 total_calls_in,
                 total_calls_out,
@@ -177,12 +182,12 @@ object SSPFlinkApp {
 
   case class TelecomAgg
   (
-    timestamp: Long,
+    timestamp: String,
     area_code: Int,
-    calls_in: Double,
-    calls_out: Double,
-    sms_in: Double,
-    sms_out: Double
+    total_calls_in: Double,
+    total_calls_out: Double,
+    total_sms_in: Double,
+    total_sms_out: Double
   )
 
 }
