@@ -1,7 +1,7 @@
 version: "3.5"
 services:
     zookeeper:
-        image: wurstmeister/zookeeper
+        image: wurstmeister/zookeeper:latest
 
     kafka:
         image: wurstmeister/kafka:2.12-2.5.0
@@ -49,7 +49,7 @@ services:
             - "8081:8081"
 
     flink-jobmanager:
-        image: flink
+        image: flink:1.10.0
         hostname: flink-jobmanager
         expose:
             - "6123"
@@ -60,7 +60,7 @@ services:
             - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
 
     flink-taskmanager:
-        image: flink
+        image: flink:1.10.0
         depends_on:
             - flink-jobmanager
             - kafka

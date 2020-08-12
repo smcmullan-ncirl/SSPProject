@@ -252,11 +252,28 @@ The logs are also viewable via the Spark UI at the link given above
 
 ## Building and deploying the application to Flink
 
+After building the project with Maven
+
+    cd SSPProject
+    mvn clean package
+    
+The Flink application will be packaged in a JAR file in:
+
+    SSPProject/ssp-flink-app/target/ssp-flink-app.jar
+    
+The application can be deployed to Spark with the following commands:
+
+    cd SSPProject/ssp-flink-app/target
+    docker cp ssp-flink-app.jar sspproject_flink-jobmanager_1:/
+        
+    docker exec -it sspproject_flink-jobmanager_1 ./bin/flink run -c \
+    ie.ncirl.sspproject.dataprocess.SSPFlinkApp /ssp-flink-app.jar
+
 ### Flink deployment troubleshooting
 
 ### Flink UI
 
-    http://localhost:8081
+    http://localhost:9081
     
 ### Flink logs
 
