@@ -49,7 +49,7 @@ services:
             - "8081:8081"
 
     flink-jobmanager:
-        image: flink:1.10.0
+        image: flink:1.10-scala_2.11
         hostname: flink-jobmanager
         expose:
             - "6123"
@@ -60,7 +60,7 @@ services:
             - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
 
     flink-taskmanager:
-        image: flink:1.10.0
+        image: flink:1.10-scala_2.11
         depends_on:
             - flink-jobmanager
             - kafka
