@@ -66,10 +66,10 @@ object SSPSparkApp {
         .withWatermark(interval + "timestamp", "5 minutes")
         .groupBy(interval + "timestamp", "area_code" )
         .agg(
-          sum("calls_in"),
-          sum("calls_out"),
-          sum("sms_in"),
-          sum("sms_out")
+          sum("calls_in").alias("total_calls_in"),
+          sum("calls_out").alias("total_calls_out"),
+          sum("sms_in").alias("total_sms_in"),
+          sum("sms_out").alias("total_sms_out")
         )
     }
 
