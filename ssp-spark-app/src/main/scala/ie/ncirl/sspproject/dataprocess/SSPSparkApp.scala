@@ -1,3 +1,11 @@
+/*
+  Stephen McMullan x19139497@student.ncirl.ie
+
+  SSP Spark Data Processing Application
+
+  Processes stream from Kafka, aggregates and persists aggregate records to Elasticsearch
+*/
+
 package ie.ncirl.sspproject.dataprocess
 
 import java.sql.Timestamp
@@ -69,9 +77,11 @@ object SSPSparkApp {
       conf.setMaster("local[*]")
     }
 
+
+    // Aggregate the TelecomRecords by an aggregate key based on the hourly, daily or weekly timestamp
+    // Reduce to a TelecomAgg record with the aggregation keys and the total counts
     def genAggs(streamDF: DataFrame, interval: String) = {
       streamDF
-//        .withWatermark(interval + "timestamp", "5 minutes")
         .groupBy(interval + "timestamp", "area_code" )
         .agg(
           sum("calls_in").alias("total_calls_in"),
@@ -81,15 +91,10 @@ object SSPSparkApp {
         )
     }
 
+    // Write the aggregate records to Elasticsearch using a customer Foreach sink
+    // Unfortunately the standard Elasticsearch sink only supports Append mode with a Watermark which
+    // doesn't work well with historical data
     def writeAggSink(aggStream: DataFrame, interval: String) = {
-//      aggStream
-//        .writeStream
-//        .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
-//        .outputMode(OutputMode.Append)
-//        .format("org.elasticsearch.spark.sql")
-//        .option("checkpointLocation", "/tmp/" + interval + "checkpoint")
-//        .start(interval + esIndex)
-
       aggStream
         .writeStream
         .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
@@ -97,7 +102,7 @@ object SSPSparkApp {
         .foreach(new ESForeachWriter(esServer, esPort, esScheme, interval + esIndex))
         .start
 
-
+      // In DEBUG mode also write out the aggregate records to the console
       if (LOGGER.isDebugEnabled()) {
         aggStream
           .orderBy(interval + "timestamp", "area_code")
@@ -109,6 +114,7 @@ object SSPSparkApp {
       }
     }
 
+    // Initialise the Spark Stream Environment
     val spark = SparkSession
       .builder
       .config(conf)
@@ -116,6 +122,7 @@ object SSPSparkApp {
 
     val telecomRecordSchema = ScalaReflection.schemaFor[TelecomRecord].dataType.asInstanceOf[StructType]
 
+    // Add the Kafka source
     val streamDF = spark
       .readStream
       .format("kafka")
@@ -128,14 +135,24 @@ object SSPSparkApp {
       .select(from_json(col("value").cast("string"), telecomRecordSchema).alias("telecom_record"))
       .select("telecom_record.*")
 
-    streamDF.printSchema
+    // In TRACE mode also write out the aggregate records to the console
+    if (LOGGER.isTraceEnabled()) {
+      streamDF.printSchema
 
-    // Calculate aggregates
+      streamDF
+        .writeStream
+        .format("console")
+        .start
+    }
+
+    // Produce separate stream for Hourly, Daily and Weekly aggregates
+
+    // Map and Reduce the TelecomRecord data stream to TelecomAgg aggregate records
     val aggDF1 = genAggs(streamDF, Hourly)
     val aggDF2 = genAggs(streamDF, Daily)
     val aggDF3 = genAggs(streamDF, Weekly)
 
-    // Write streams
+    // Write streams To Elasticsearch
     writeAggSink(aggDF1, Hourly)
     writeAggSink(aggDF2, Daily)
     writeAggSink(aggDF3, Weekly)
@@ -146,6 +163,7 @@ object SSPSparkApp {
   }
 }
 
+// Schema class for Telecom Records (10 min aggregates)
 case class TelecomRecord
 (
   cell_id: String,
@@ -165,6 +183,7 @@ case class TelecomRecord
   weekly_timestamp_str: String
 )
 
+// Schema class for Telecom Agg Records (Hourly/Daily/Weekly aggregates)
 case class TelecomAgg
 (
   timestamp: String,
@@ -175,6 +194,7 @@ case class TelecomAgg
   total_sms_out: Double
 )
 
+// Customer Foreach sink to write stream partitions to Elasticsearch
 class ESForeachWriter(esServer: String, esPort: String, esScheme:String, esIndex: String) extends ForeachWriter[Row] {
   var esClient: RestHighLevelClient = _
   var esIndexRequest: IndexRequest = _

@@ -1,3 +1,9 @@
+/*
+    Stephen McMullan x19139497@student.ncirl.ie
+
+    JSON Serializer class used by Kafka producer
+ */
+
 package ie.ncirl.sspproject.dataimport;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

@@ -1,3 +1,11 @@
+/*
+    Stephen McMullan x19139497@student.ncirl.ie
+
+    SSP Data Import Application
+
+    Processes CSV dataset from AWS S3 Bucket to Kafka (and optionally Elasticsearch
+ */
+
 package ie.ncirl.sspproject.dataimport;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -83,28 +91,36 @@ public class SSPDataImport {
     public static void main(String[] args) {
         startTime = System.currentTimeMillis();
 
-        loadProperties();
+        // Load the Kafka broker and Elasticsearch instance connection properties
+        loadConfigProperties();
 
+        // Initialise the connection to Kafka and Elasticsearch
         initSinkConnection();
 
+        // Retrieve and process the CSV files from AWS S3 and send to Kafka and Elasticsearch
         processAWSObjects();
 
+        // Close the connection to Kafka and Elasticsearch
         closeSinkConnection();
 
+        // Print some stats regarding run time and processing rates
         printStats();
     }
 
-    private static void loadProperties() {
+    private static void loadConfigProperties() {
         try {
             prop.load(Objects.requireNonNull(SSPDataImport.class.getClassLoader().getResourceAsStream(CONFIG_PROPERTIES)));
 
+            // AWS S3 Bucket location
             bucketName = prop.getProperty(AWS_BUCKET_NAME);
             objectPrefix = prop.getProperty(AWS_OBJECT_PREFIX);
 
+            // Kafka properties
             kafkaPersist = Boolean.parseBoolean(prop.getProperty(KAFKA_PERSIST));
             kafkaServer = prop.getProperty(KAFKA_SERVER);
             kafkaTopic = prop.getProperty(KAFKA_TOPIC);
 
+            // Elasticsearch properties
             esPersist = Boolean.parseBoolean(prop.getProperty(ES_PERSIST));
             esServer = prop.getProperty(ES_SERVER);
             esPort = prop.getProperty(ES_PORT);
@@ -116,6 +132,7 @@ public class SSPDataImport {
     }
 
     private static void processAWSObjects() {
+        // Use AWS SDK to connect to S3 bucket and stream in the S3 objects
         S3Client s3Client = S3Client
                 .builder()
                 .region(region)
@@ -144,6 +161,7 @@ public class SSPDataImport {
                             ResponseTransformer.toInputStream()
                     );
 
+                    // Set up the CSV parsing of the S3 Object using the TelecomRecord class as a schema
                     CsvMapper csvMapper = new CsvMapper();
                     csvMapper.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
 
@@ -156,6 +174,7 @@ public class SSPDataImport {
                             .with(telecomSchema)
                             .readValues(result);
 
+                    // Convert each TelecomRecord to a JSON object using Jackson library
                     ObjectMapper objectMapper = new ObjectMapper();
                     int recordNum = 0;
 
@@ -163,8 +182,12 @@ public class SSPDataImport {
                         TelecomRecord telecomRecord = csvLines.next();
                         JsonNode jsonNode = objectMapper.valueToTree(telecomRecord);
 
+                        // Add the normalised timestamps to the record
+                        // These consist of timestamps adjusted to the start of the previous hour, day and week
+                        // to be used as aggregation keys
                         addTimestamps(jsonNode, telecomRecord.timestamp);
 
+                        // Publish the record to Kafka (and optionally Elasticsearch)
                         publishRecordToSink(jsonNode);
                         recordNum++;
                     }
@@ -263,6 +286,9 @@ public class SSPDataImport {
         }
     }
 
+    // Add the normalised timestamps to the record
+    // These consist of timestamps adjusted to the start of the previous hour, day and week
+    // to be used as aggregation keys
     private static void addTimestamps(JsonNode record, long timestamp) {
         Date timestampDate = new Date(timestamp);
         ((ObjectNode)record).put("timestamp_str", simpleDataFormat.format(timestampDate));
@@ -307,6 +333,7 @@ public class SSPDataImport {
         }
     }
 
+    // Schema class used for CSV parsing and JSON string production
     private static class TelecomRecord {
         public String cell_id;
         public long timestamp;

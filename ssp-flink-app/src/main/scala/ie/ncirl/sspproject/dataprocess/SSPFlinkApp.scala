@@ -1,3 +1,11 @@
+/*
+  Stephen McMullan x19139497@student.ncirl.ie
+
+  SSP Flink Data Processing Application
+
+  Processes stream from Kafka, aggregates and persists aggregate records to Elasticsearch
+*/
+
 package ie.ncirl.sspproject.dataprocess
 
 import java.text.SimpleDateFormat
@@ -64,16 +72,21 @@ object SSPFlinkApp {
       kafkaConsumer.setStartFromLatest()
     }
 
-
+    // Aggregate the TelecomRecords by an aggregate key based on the hourly, daily or weekly timestamp
+    // Reduce to a TelecomAgg record with the aggregation keys and the total counts
     def buildAggstream(eventStream: DataStream[TelecomRecord], interval: String) = {
+
       eventStream
+        // Use the timestamp and the area_code as the aggregation keys
         .keyBy(interval + "timestamp", "area_code")
+        // Use a tumbling window for aggregation with no overlap between aggregation periods
         .window(TumblingProcessingTimeWindows.of(Time.seconds(timeWindowSecs.toLong)))
         .process(
           new ProcessWindowFunction[TelecomRecord, TelecomAgg, Tuple, TimeWindow]() {
             override def process(key: Tuple, context: Context, recs: Iterable[TelecomRecord], out: Collector[TelecomAgg]): Unit = {
               LOGGER.info(s"Processing ${timeWindowSecs}sec window for $key with ${recs.size} events for $interval")
 
+              // Map the metrics and sum to total counts
               val total_calls_in: Double = recs.map(_.calls_in).sum
               val total_calls_out: Double = recs.map(_.calls_out).sum
               val total_sms_in: Double = recs.map(_.sms_in).sum
@@ -82,8 +95,9 @@ object SSPFlinkApp {
               val timestamp: Long = key.getField(0)
               val area_code: Int = key.getField(1)
 
+              // Convert the timestamp to a format that is recognised by Elasticsearch
               val simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-              val timestampDate = new Date(timestamp * 1000)
+              val timestampDate = new Date(timestamp * 1000) // convert to milliseconds
               val timestampStr = simpleDataFormat.format(timestampDate)
 
               val outAgg = TelecomAgg(
@@ -127,11 +141,14 @@ object SSPFlinkApp {
       esSinkBuilderHourly.build()
     }
 
+    // Initialise the Flink Stream Environment
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime)
 
+    // Add the Kafka source
     val messageStream: DataStream[String] = env.addSource(kafkaConsumer)
 
+    // Map and Reduce the TelecomRecord data stream to TelecomAgg aggregate records
     val telecomRecordStream: DataStream[TelecomRecord] = messageStream.map(
       new MapFunction[String, TelecomRecord] {
         override def map(jsonString: String): TelecomRecord = {
@@ -142,25 +159,33 @@ object SSPFlinkApp {
       }
     )
 
+    // In TRACE mode also write out the Telecom records to the console
     if (LOGGER.isTraceEnabled()) {
       telecomRecordStream.print
     }
 
+    // Produce separate stream for Hourly, Daily and Weekly aggregates to Elasticsearch
     val telecomHourlyAggsStream = buildAggstream(telecomRecordStream, Hourly)
     telecomHourlyAggsStream.addSink(buildEsSink(Hourly))
-    telecomHourlyAggsStream.print
 
     val telecomDailyAggsStream = buildAggstream(telecomRecordStream, Daily)
     telecomDailyAggsStream.addSink(buildEsSink(Daily))
-    telecomDailyAggsStream.print
 
     val telecomWeeklyAggsStream = buildAggstream(telecomRecordStream, Weekly)
     telecomWeeklyAggsStream.addSink(buildEsSink(Weekly))
-    telecomWeeklyAggsStream.print
 
+    // In DEBUG mode also write out the aggregate records to the console
+    if (LOGGER.isDebugEnabled()) {
+      telecomHourlyAggsStream.print
+      telecomDailyAggsStream.print
+      telecomWeeklyAggsStream.print
+    }
+
+    // Start the streaming engine
     env.execute
   }
 
+  // Schema class for Telecom Records (10 min aggregates)
   case class TelecomRecord
   (
     cell_id: String,
@@ -180,6 +205,7 @@ object SSPFlinkApp {
     weekly_timestamp_str: Date
   ) extends Serializable
 
+  // Schema class for Telecom Agg Records (Hourly/Daily/Weekly aggregates)
   case class TelecomAgg
   (
     timestamp: String,
