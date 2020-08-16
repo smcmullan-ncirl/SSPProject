@@ -89,7 +89,8 @@ object SSPFlinkApp {
         .process(
           new ProcessWindowFunction[TelecomRecord, TelecomAgg, Tuple, TimeWindow]() {
             override def process(key: Tuple, context: Context, recs: Iterable[TelecomRecord], out: Collector[TelecomAgg]): Unit = {
-              LOGGER.info(s"Processing ${timeWindowSecs}sec window for $key with ${recs.size} events for $interval")
+              LOGGER.info(s"${context.window.getStart} - ${context.window.getEnd}: " +
+                s"Processing ${timeWindowSecs}sec window for $key with ${recs.size} events for $interval")
 
               // Map the metrics and sum to total counts
               val total_calls_in: Double = recs.map(_.calls_in).sum
