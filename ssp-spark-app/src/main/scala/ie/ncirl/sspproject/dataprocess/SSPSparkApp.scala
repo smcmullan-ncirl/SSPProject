@@ -21,7 +21,7 @@ import org.apache.spark.sql.functions.{col, from_json, sum}
 import org.apache.spark.sql.streaming.{OutputMode, Trigger}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, ForeachWriter, Row, SparkSession}
-import org.elasticsearch.action.index.IndexRequest
+import org.elasticsearch.action.update.UpdateRequest
 import org.elasticsearch.client.{RequestOptions, RestClient, RestHighLevelClient}
 import org.elasticsearch.common.xcontent.XContentType
 import org.slf4j.LoggerFactory
@@ -32,9 +32,9 @@ class SSPSparkApp {
 object SSPSparkApp {
   private val LOGGER = LoggerFactory.getLogger(classOf[SSPSparkApp])
 
-  val Hourly = "hourly_"
-  val Daily = "daily_"
-  val Weekly = "weekly_"
+  val Hourly = "hourly"
+  val Daily = "daily"
+  val Weekly = "weekly"
 
   def main(args: Array[String]): Unit = {
     // Read in the config.properties file
@@ -56,6 +56,11 @@ object SSPSparkApp {
     // It is worth changing this property to the number of CPUs you have available across your cluster
     // Make sure it reflects the SPARK_WORKER_CORES environment setting in docker-compose.yml
     val sparkPartitions = properties.getProperty("spark.partitions")
+
+    // Aggregation time enablement
+    val enableHourlyAgg = properties.getProperty("enable.hourly.agg").toBoolean
+    val enableDailyAgg = properties.getProperty("enable.daily.agg").toBoolean
+    val enableWeeklyAgg = properties.getProperty("enable.weekly.agg").toBoolean
 
     import scala.collection.JavaConverters._
     val props = properties.asScala
@@ -82,7 +87,7 @@ object SSPSparkApp {
     // Reduce to a TelecomAgg record with the aggregation keys and the total counts
     def genAggs(streamDF: DataFrame, interval: String) = {
       streamDF
-        .groupBy(interval + "timestamp", "area_code" )
+        .groupBy(interval + "_timestamp", "area_code" )
         .agg(
           sum("calls_in").alias("total_calls_in"),
           sum("calls_out").alias("total_calls_out"),
@@ -102,16 +107,13 @@ object SSPSparkApp {
         .foreach(new ESForeachWriter(esServer, esPort, esScheme, interval + esIndex))
         .start
 
-      // In DEBUG mode also write out the aggregate records to the console
-      if (LOGGER.isDebugEnabled()) {
         aggStream
-          .orderBy(interval + "timestamp", "area_code")
+          .orderBy(col(interval + "_timestamp").desc, col("area_code"))
           .writeStream
           .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
           .outputMode(OutputMode.Complete)
           .format("console")
           .start
-      }
     }
 
     // Initialise the Spark Stream Environment
@@ -148,14 +150,21 @@ object SSPSparkApp {
     // Produce separate stream for Hourly, Daily and Weekly aggregates
 
     // Map and Reduce the TelecomRecord data stream to TelecomAgg aggregate records
-    val aggDF1 = genAggs(streamDF, Hourly)
-    val aggDF2 = genAggs(streamDF, Daily)
-    val aggDF3 = genAggs(streamDF, Weekly)
+    // then write streams To Elasticsearch and Console output
+    if (enableHourlyAgg) {
+      val aggDF1 = genAggs(streamDF, Hourly)
+      writeAggSink(aggDF1, Hourly)
+    }
 
-    // Write streams To Elasticsearch
-    writeAggSink(aggDF1, Hourly)
-    writeAggSink(aggDF2, Daily)
-    writeAggSink(aggDF3, Weekly)
+    if (enableDailyAgg) {
+      val aggDF2 = genAggs(streamDF, Daily)
+      writeAggSink(aggDF2, Daily)
+    }
+
+    if (enableWeeklyAgg) {
+      val aggDF3 = genAggs(streamDF, Weekly)
+      writeAggSink(aggDF3, Weekly)
+    }
 
     spark.streams.awaitAnyTermination
 
@@ -168,7 +177,7 @@ case class TelecomRecord
 (
   cell_id: String,
   timestamp: Long,
-  area_code: Int,
+  area_code: String,
   calls_in: Double,
   calls_out: Double,
   sms_in: Double,
@@ -187,7 +196,7 @@ case class TelecomRecord
 case class TelecomAgg
 (
   timestamp: String,
-  area_code: Int,
+  area_code: String,
   total_calls_in: Double,
   total_calls_out: Double,
   total_sms_in: Double,
@@ -197,7 +206,6 @@ case class TelecomAgg
 // Customer Foreach sink to write stream partitions to Elasticsearch
 class ESForeachWriter(esServer: String, esPort: String, esScheme:String, esIndex: String) extends ForeachWriter[Row] {
   var esClient: RestHighLevelClient = _
-  var esIndexRequest: IndexRequest = _
   var mapper: ObjectMapper = _
 
   override def open(partitionId: Long, epochId: Long): Boolean = {
@@ -207,8 +215,7 @@ class ESForeachWriter(esServer: String, esPort: String, esScheme:String, esIndex
       )
     )
 
-    esIndexRequest = new IndexRequest(esIndex)
-    esClient != null && esIndexRequest != null
+    esClient != null
   }
 
   override def process(aggValue: Row): Unit = {
@@ -216,7 +223,7 @@ class ESForeachWriter(esServer: String, esPort: String, esScheme:String, esIndex
     mapper.registerModule(DefaultScalaModule)
 
     val timestamp = aggValue(0).asInstanceOf[Timestamp]
-    val areaCode = aggValue(1).asInstanceOf[Int]
+    val areaCode = aggValue(1).asInstanceOf[String]
     val totalCallsIn = aggValue(2).asInstanceOf[Double]
     val totalCallsOut = aggValue(3).asInstanceOf[Double]
     val totalSmsIn = aggValue(4).asInstanceOf[Double]
@@ -235,10 +242,11 @@ class ESForeachWriter(esServer: String, esPort: String, esScheme:String, esIndex
       totalSmsOut
     )
 
+    val esUpdateRequest = new UpdateRequest(esIndex, timestampStr + " " + areaCode)
     val jsonData = mapper.writeValueAsString(aggRec)
-
-    esIndexRequest.source(jsonData, XContentType.JSON)
-    esClient.index(esIndexRequest, RequestOptions.DEFAULT)
+    esUpdateRequest.doc(jsonData, XContentType.JSON)
+    esUpdateRequest.docAsUpsert(true)
+    esClient.update(esUpdateRequest, RequestOptions.DEFAULT)
   }
 
   override def close(errorOrNull: Throwable): Unit = {

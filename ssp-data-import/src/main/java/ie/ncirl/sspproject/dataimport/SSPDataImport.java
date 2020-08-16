@@ -337,7 +337,7 @@ public class SSPDataImport {
     private static class TelecomRecord {
         public String cell_id;
         public long timestamp;
-        public int area_code;
+        public String area_code;
         public double calls_in;
         public double calls_out;
         public double sms_in;

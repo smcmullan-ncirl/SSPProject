@@ -39,9 +39,9 @@ class SSPFlinkApp {
 object SSPFlinkApp {
   private val LOGGER = LoggerFactory.getLogger(classOf[SSPFlinkApp])
 
-  val Hourly = "hourly_"
-  val Daily = "daily_"
-  val Weekly = "weekly_"
+  val Hourly = "hourly"
+  val Daily = "daily"
+  val Weekly = "weekly"
 
   def main(args: Array[String]): Unit = {
     // Read in the config.properties file
@@ -72,13 +72,18 @@ object SSPFlinkApp {
       kafkaConsumer.setStartFromLatest()
     }
 
+    // Aggregation time enablement
+    val enableHourlyAgg = properties.getProperty("enable.hourly.agg").toBoolean
+    val enableDailyAgg = properties.getProperty("enable.daily.agg").toBoolean
+    val enableWeeklyAgg = properties.getProperty("enable.weekly.agg").toBoolean
+
     // Aggregate the TelecomRecords by an aggregate key based on the hourly, daily or weekly timestamp
     // Reduce to a TelecomAgg record with the aggregation keys and the total counts
     def buildAggstream(eventStream: DataStream[TelecomRecord], interval: String) = {
 
       eventStream
         // Use the timestamp and the area_code as the aggregation keys
-        .keyBy(interval + "timestamp", "area_code")
+        .keyBy(interval + "_timestamp", "area_code")
         // Use a tumbling window for aggregation with no overlap between aggregation periods
         .window(TumblingProcessingTimeWindows.of(Time.seconds(timeWindowSecs.toLong)))
         .process(
@@ -93,7 +98,7 @@ object SSPFlinkApp {
               val total_sms_out: Double = recs.map(_.sms_out).sum
 
               val timestamp: Long = key.getField(0)
-              val area_code: Int = key.getField(1)
+              val area_code: String = key.getField(1)
 
               // Convert the timestamp to a format that is recognised by Elasticsearch
               val simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
@@ -119,7 +124,7 @@ object SSPFlinkApp {
       val httpHosts = new java.util.ArrayList[HttpHost]
       httpHosts.add(new HttpHost(esServer, esPort, "http"))
 
-      val esSinkBuilderHourly = new ElasticsearchSink.Builder[TelecomAgg](
+      val esSinkBuilder = new ElasticsearchSink.Builder[TelecomAgg](
         httpHosts,
         new ElasticsearchSinkFunction[TelecomAgg] {
           def process(aggRec: TelecomAgg, ctx: RuntimeContext, indexer: RequestIndexer) {
@@ -137,8 +142,8 @@ object SSPFlinkApp {
         }
       )
 
-      esSinkBuilderHourly.setBulkFlushMaxActions(1)
-      esSinkBuilderHourly.build()
+      esSinkBuilder.setBulkFlushMaxActions(1)
+      esSinkBuilder.build()
     }
 
     // Initialise the Flink Stream Environment
@@ -164,21 +169,23 @@ object SSPFlinkApp {
       telecomRecordStream.print
     }
 
-    // Produce separate stream for Hourly, Daily and Weekly aggregates to Elasticsearch
-    val telecomHourlyAggsStream = buildAggstream(telecomRecordStream, Hourly)
-    telecomHourlyAggsStream.addSink(buildEsSink(Hourly))
+    // Produce separate stream for Hourly, Daily and Weekly aggregates to Elasticsearch and Console
+    if (enableHourlyAgg) {
+      val telecomHourlyAggsStream = buildAggstream(telecomRecordStream, Hourly)
+      telecomHourlyAggsStream.addSink(buildEsSink(Hourly))
+      telecomHourlyAggsStream.print(Hourly)
+    }
 
-    val telecomDailyAggsStream = buildAggstream(telecomRecordStream, Daily)
-    telecomDailyAggsStream.addSink(buildEsSink(Daily))
+    if (enableDailyAgg) {
+      val telecomDailyAggsStream = buildAggstream(telecomRecordStream, Daily)
+      telecomDailyAggsStream.addSink(buildEsSink(Daily))
+      telecomDailyAggsStream.print(Daily)
+    }
 
-    val telecomWeeklyAggsStream = buildAggstream(telecomRecordStream, Weekly)
-    telecomWeeklyAggsStream.addSink(buildEsSink(Weekly))
-
-    // In DEBUG mode also write out the aggregate records to the console
-    if (LOGGER.isDebugEnabled()) {
-      telecomHourlyAggsStream.print
-      telecomDailyAggsStream.print
-      telecomWeeklyAggsStream.print
+    if (enableWeeklyAgg) {
+      val telecomWeeklyAggsStream = buildAggstream(telecomRecordStream, Weekly)
+      telecomWeeklyAggsStream.addSink(buildEsSink(Weekly))
+      telecomWeeklyAggsStream.print(Weekly)
     }
 
     // Start the streaming engine
@@ -190,7 +197,7 @@ object SSPFlinkApp {
   (
     cell_id: String,
     timestamp: Long,
-    area_code: Int,
+    area_code: String,
     calls_in: Double,
     calls_out: Double,
     sms_in: Double,
@@ -209,7 +216,7 @@ object SSPFlinkApp {
   case class TelecomAgg
   (
     timestamp: String,
-    area_code: Int,
+    area_code: String,
     total_calls_in: Double,
     total_calls_out: Double,
     total_sms_in: Double,
