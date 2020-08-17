@@ -9,21 +9,14 @@
 package ie.ncirl.sspproject.dataprocess
 
 import java.sql.Timestamp
-import java.text.SimpleDateFormat
-import java.util.{Date, Objects, Properties}
+import java.util.{Objects, Properties}
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import org.apache.http.HttpHost
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.functions.{col, from_json, sum}
 import org.apache.spark.sql.streaming.{OutputMode, Trigger}
 import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.{DataFrame, ForeachWriter, Row, SparkSession}
-import org.elasticsearch.action.update.UpdateRequest
-import org.elasticsearch.client.{RequestOptions, RestClient, RestHighLevelClient}
-import org.elasticsearch.common.xcontent.XContentType
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.slf4j.LoggerFactory
 
 class SSPSparkApp {
@@ -49,13 +42,12 @@ object SSPSparkApp {
     val esServer = properties.getProperty("es.server")
     val esPort = properties.getProperty("es.port")
     val esIndex = properties.getProperty("es.index")
-    val esScheme = properties.getProperty("es.scheme")
 
     val timeWindowSecs = properties.getProperty("time.window.secs")
 
-    // It is worth changing this property to the number of CPUs you have available across your cluster
+    // The number of CPUs you have available across your cluster
     // Make sure it reflects the SPARK_WORKER_CORES environment setting in docker-compose.yml
-    val sparkPartitions = properties.getProperty("spark.partitions")
+    val sparkPartitions = System.getProperty("SPARK_WORKER_CORES")
 
     // Aggregation time enablement
     val enableHourlyAgg = properties.getProperty("enable.hourly.agg").toBoolean
@@ -103,9 +95,10 @@ object SSPSparkApp {
       aggStream
         .writeStream
         .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
-        .outputMode(OutputMode.Complete)
-        .foreach(new ESForeachWriter(esServer, esPort, esScheme, interval + esIndex))
-        .start
+        .outputMode(OutputMode.Append)
+        .format("org.elasticsearch.spark.sql")
+        .option("checkpointLocation", "/tmp/checkpoint" + interval)
+        .start(interval + esIndex)
 
         aggStream
           .orderBy(col(interval + "_timestamp").desc, col("area_code"))
@@ -202,54 +195,3 @@ case class TelecomAgg
   total_sms_in: Double,
   total_sms_out: Double
 )
-
-// Customer Foreach sink to write stream partitions to Elasticsearch
-class ESForeachWriter(esServer: String, esPort: String, esScheme:String, esIndex: String) extends ForeachWriter[Row] {
-  var esClient: RestHighLevelClient = _
-  var mapper: ObjectMapper = _
-
-  override def open(partitionId: Long, epochId: Long): Boolean = {
-    esClient = new RestHighLevelClient(
-      RestClient.builder(
-        new HttpHost(esServer, Integer.parseInt(esPort), esScheme)
-      )
-    )
-
-    esClient != null
-  }
-
-  override def process(aggValue: Row): Unit = {
-    mapper = new ObjectMapper()
-    mapper.registerModule(DefaultScalaModule)
-
-    val timestamp = aggValue(0).asInstanceOf[Timestamp]
-    val areaCode = aggValue(1).asInstanceOf[String]
-    val totalCallsIn = aggValue(2).asInstanceOf[Double]
-    val totalCallsOut = aggValue(3).asInstanceOf[Double]
-    val totalSmsIn = aggValue(4).asInstanceOf[Double]
-    val totalSmsOut = aggValue(5).asInstanceOf[Double]
-
-    val simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-    val timestampDate = new Date(timestamp.getTime)
-    val timestampStr = simpleDataFormat.format(timestampDate)
-
-    val aggRec = TelecomAgg(
-      timestampStr,
-      areaCode,
-      totalCallsIn,
-      totalCallsOut,
-      totalSmsIn,
-      totalSmsOut
-    )
-
-    val esUpdateRequest = new UpdateRequest(esIndex, timestampStr + " " + areaCode)
-    val jsonData = mapper.writeValueAsString(aggRec)
-    esUpdateRequest.doc(jsonData, XContentType.JSON)
-    esUpdateRequest.docAsUpsert(true)
-    esClient.update(esUpdateRequest, RequestOptions.DEFAULT)
-  }
-
-  override def close(errorOrNull: Throwable): Unit = {
-    esClient.close()
-  }
-}
