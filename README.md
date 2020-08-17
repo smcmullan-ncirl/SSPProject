@@ -215,10 +215,10 @@ The Spark application will be packaged in a JAR file in:
 The application can be deployed to Spark with the following commands:
 
     cd SSPProject/ssp-spark-app/target
-    docker cp ssp-spark-app.jar sspproject_spark-master_1:/
-    docker cp ssp-spark-app.jar sspproject_spark-worker_1:/
+    docker cp ssp-spark-app.jar ubuntu_spark-master_1:/
+    docker cp ssp-spark-app.jar ubuntu_spark-worker_1:/
         
-    docker exec -it sspproject_spark-master_1 bin/spark-submit -v \
+    docker exec -it ubuntu_spark-master_1 bin/spark-submit -v \
     --master spark://spark-master:7077 \
     --deploy-mode cluster \
     --class ie.ncirl.sspproject.dataprocess.SSPSparkApp \
@@ -248,7 +248,7 @@ If there are issues submitting the application you will see some output from the
 
 If something like this occurs then check the following location:
 
-    docker exec -it sspproject_spark-worker_1 bash
+    docker exec -it ubuntu_spark-worker_1 bash
     cd /opt/bitnami/spark/work/
     ls -lrtd driver*
     cd <last driver directory>
@@ -264,7 +264,7 @@ When the application has been deployed it can be monitored using the Spark UI
 
 The Spark logs can be checked as follows:
 
-    docker exec -it sspproject_spark-master_1 bash
+    docker exec -it ubuntu_spark-master_1 bash
         cd /opt/bitnami/spark/work/
         ls -lrtd driver*
         cd <last driver directory>
@@ -288,9 +288,9 @@ The Flink application will be packaged in a JAR file in:
 The application can be deployed to Spark with the following commands:
 
     cd SSPProject/ssp-flink-app/target
-    docker cp ssp-flink-app.jar sspproject_flink-jobmanager_1:/
+    docker cp ssp-flink-app.jar ubuntu_flink-jobmanager_1:/
         
-    docker exec -it sspproject_flink-jobmanager_1 ./bin/flink run -c \
+    docker exec -it ubuntu_flink-jobmanager_1 ./bin/flink run -c \
     ie.ncirl.sspproject.dataprocess.SSPFlinkApp /ssp-flink-app.jar
 
 ### Flink deployment troubleshooting

@@ -1,0 +1,68 @@
+version: "3.5"
+services:
+    spark-master:
+        image: bitnami/spark:2.4.6
+        hostname: spark-master
+        environment:
+            - SPARK_MODE=master
+            - SPARK_RPC_AUTHENTICATION_ENABLED=no
+            - SPARK_RPC_ENCRYPTION_ENABLED=no
+            - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+            - SPARK_SSL_ENABLED=no
+            - SPARK_PUBLIC_DNS=localhost
+        ports:
+            - "7077:7077"
+            - "8080:8080"
+
+    spark-worker:
+        image: bitnami/spark:2.4.6
+        depends_on:
+            - spark-master
+        hostname: spark-worker
+        environment:
+            - SPARK_MODE=worker
+            - SPARK_MASTER_URL=spark://spark-master:7077
+            - SPARK_WORKER_MEMORY=16G
+            - SPARK_WORKER_CORES=8
+            - SPARK_RPC_AUTHENTICATION_ENABLED=no
+            - SPARK_RPC_ENCRYPTION_ENABLED=no
+            - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+            - SPARK_SSL_ENABLED=no
+            - SPARK_PUBLIC_DNS=localhost
+        ports:
+            - "4040:4040"
+            - "8081:8081"
+        extra_hosts:
+          - "kafka:192.168.50.192"
+          - "elasticsearch:192.168.50.141"
+
+
+    flink-jobmanager:
+        image: flink:1.10-scala_2.11
+        hostname: flink-jobmanager
+        expose:
+            - "6123"
+        ports:
+            - "9081:8081"
+        command: jobmanager
+        environment:
+            - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+
+    flink-taskmanager:
+        image: flink:1.10-scala_2.11
+        depends_on:
+            - flink-jobmanager
+        hostname: flink-taskmanager
+        expose:
+            - "6121"
+            - "6122"
+        command: taskmanager
+        links:
+            - "flink-jobmanager:jobmanager"
+        environment:
+            - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+        extra_hosts:
+            - "kafka:192.168.50.192"
+            - "elasticsearch:192.168.50.141"
+
+
