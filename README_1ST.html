@@ -1,0 +1,290 @@
+<h1>Scalable Systems Programming Project</h1>
+
+<p>Stephen McMullan (x19139497@student.ncirl.ie)</p>
+
+<p>Semester 3, Scalable Systems Programming, Postgraduate Diploma in Data Analytics</p>
+
+<p>National College of Ireland</p>
+
+<h2>GitHub Project Code Repository</h2>
+
+<p><a href="https://github.com/smcmullan-ncirl/SSPProject">GitHub SSP Project</a></p>
+
+<h2>Datasets</h2>
+
+<p><a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/QLCABU">Harvard Dataverse - Telecom Italia Datasets</a></p>
+
+<p>[1]Telecom Italia, ‘Telecommunications - SMS, Call, Internet - TN’. Harvard Dataverse, 2015, doi: 10.7910/DVN/QLCABU.</p>
+
+<p>The repository for the data is at the following location on AWS:</p>
+
+<p><a href="https://s3.console.aws.amazon.com/s3/buckets/x19139497/Telecommunications%2520-%2520SMS%252C%2520Call%252C%2520Internet%2520-%2520TN/?region=eu-west-1&amp;tab=overview">NCIRL AWS S3</a></p>
+
+<h3>About the Telecom Italia Big Data Challenge</h3>
+
+<p><a href="https://www.nature.com/articles/sdata201555">Telecom Italia Big Data Challenge</a></p>
+
+<p>[1]G. Barlacchi et al., ‘A multi-source dataset of urban life in the city of Milan and the Province of Trentino’, 
+Scientific Data, vol. 2, no. 1, Art. no. 1, Oct. 2015, doi: 10.1038/sdata.2015.55.</p>
+
+<h2>Software Application Description</h2>
+
+<p>The project consists of three software applications plus their runtime platform and infrastructure:</p>
+
+<ol>
+<li><p><strong>SSP Data Import</strong>: this Java application uses the AWS SDK to stream CSV files containing the Telecom Data from AWS 
+S3 which are stored as objects in a S3 bucket, transforms them to JSON format and sends them as a producer to a topic in 
+Apache Kafka message broker. This application runs on a Java Virtual Machine runtime environment.</p></li>
+<li><p><strong>SSP Spark Application</strong>: this Scala application is written using the Spark API and deploys to the Apache Spark 
+runtime platform running inside a Docker container. It acts as an Apache Kafka topic consumer, processes the topic 
+messages in JSON format and converts them to objects using Jackson Object Mapping, provides Map/Reduce functionality to 
+aggregate the totals for Calls In / Calls Out / SMS In / SMS Out on a per hourly/daily/weekly timestamp by country code
+and writes out the aggregated records to an Elasticsearch index which is then queried using Kibana user interface for 
+data representation.</p></li>
+<li><p><strong>SSP Flink Application</strong>: this Flink application is written using the Flink API and deploys to the Apache Flink 
+runtime platform running inside a Docker container. It acts as an Apache Kafka topic consumer, processes the topic 
+messages in JSON format and converts them to objects using Jackson Object Mapping, provides Map/Reduce functionality to 
+aggregate the totals for Calls In / Calls Out / SMS In / SMS Out on a per hourly/daily/weekly timestamp by country code
+and writes out the aggregated records to an Elasticsearch index which is then queried using Kibana user interface for 
+data representation.</p></li>
+<li><p>Java 8</p></li>
+<li>Scala 2.11</li>
+<li>AWS SDK 2.13.7</li>
+<li>Apache Kafka Client API 2.5.0</li>
+<li>Apache Spark API 2.4.6</li>
+<li>Apache Flink API 1.10</li>
+</ol>
+
+<h3>Setup Build Environment Instructions</h3>
+
+<p>The source code repository has been left in place on each OpenStack instance. The following steps should be performed
+on all three instances: </p>
+
+<ul>
+<li>x19139497-sspproj-1</li>
+<li>x19139497-sspproj-2</li>
+<li><p>x19139497-sspproj-3</p>
+
+<p>sudo apt-get update
+sudo apt-get upgrade</p>
+
+<p>sudo apt-get install openjdk-8-jdk
+sudo update-alternatives --config java (choose JDK8)</p>
+
+<p>sudo apt-get install maven
+sudo apt install git</p>
+
+<p>git clone https://github.com/smcmullan-ncirl/SSPProject.git (alternatively unzip the provided ZIP archive)</p>
+
+<p>cd SSPProject
+mvn clean package</p></li>
+</ul>
+
+<h3>Runtime Environment Description</h3>
+
+<p>The runtime environment consists of the following:</p>
+
+<ol>
+<li><p><strong>Amazon Web Services</strong>: The Telecom Italia data is stored in objects inside an AWS S3 bucket</p></li>
+<li><p><strong>Openstack</strong>: The application runtime platform is deployed on 3 VM instances on OpenStack with the XLarge profile:</p></li>
+<li><p>x19139497-sspproj-1</p></li>
+<li>x19139497-sspproj-2</li>
+<li>x19139497-sspproj-3</li>
+</ol>
+
+<p>The spec of each node is as follows:</p>
+
+<pre><code>1. 8 virtual CPUs
+2. 16 GB of RAM
+3. 40 GB of disk
+4. Ubuntu 18.04 (Bionic Beaver) operating system
+</code></pre>
+
+<ol>
+<li><p><strong>Docker</strong>: Each component of the application runtime platform is deployed as a standalone Docker container. This
+provides a VM-like environment where the application runtime image is downloaded from DockerHub and run as a container
+within the Docker runtime environment with its own operating system instance and application deployment.</p></li>
+<li><p><strong>Apache Kafka</strong>: Apache Kakfa is a clusterable, scalable Message Broker application whereby multiple applications 
+acting as Producers can publish messages to Topics to be consumed by multiple applications acting as Consumers. The 
+Producer in this instance is the SSP Data Import application and the Consumers are the SSP Spark App and the SSP Flink 
+App. In other words Kafka acts as the Data Source with respect to Spark and Flink.</p></li>
+<li><p><strong>Apache Spark</strong>: Apache Spark is a clusterable, scalable concurrent data processing platform capable of sourcing
+data from a variety of Data Sources, transforming the data sets using a variety of operators using the Map / Reduce
+paradigm and sending the results to a variety of Data Sinks. It can operate in Batch mode, Mini-Batch / Streaming mode
+or Continuous Streaming mode.</p></li>
+<li><p><strong>Apache Flink</strong>: Apache Flink is a clusterable, scalable concurrent data processing platform capable of sourcing
+data from a variety of Data Sources, transforming the data sets using a variety of operators using the Map / Reduce
+paradigm and sending the results to a variety of Data Sinks. It can operate in its primary Streaming mode or in Batch
+mode.</p></li>
+<li><p><strong>Elasticsearch</strong>: Elasticsearch is a clusterable, scalable data store with RESTful search and analytics 
+capabilities. It acts as the Data Sink for the aggregated Telecom data records produced by Spark and Flink.</p></li>
+<li><p><strong>Kibana</strong>: Kibana is a user interface that allows exploration and visualisation of the data indexed within
+Elasticsearch.</p></li>
+<li><p>Docker IO 19.03</p></li>
+<li>Apache Kakfa 2.5.0</li>
+<li>Apache Spark 2.4.6</li>
+<li>Apache Flink 1.10</li>
+<li>Elasticsearch 7.8.1</li>
+<li>Kibana 7.8.1</li>
+</ol>
+
+<h4>Architecture Diagram</h4>
+
+<h1>Overall Application Deployment</h1>
+
+<p><img src="images/SSP%20Project%20Software%20Architecture.png" alt="SSP Architecture" title="" /></p>
+
+<h2>Setup Runtime Environment Instructions</h2>
+
+<p>On each Openstack instance, perform the following steps:</p>
+
+<ol>
+<li><p>First install Docker and add your user to the docker group.</p>
+
+<p>sudo apt-get update
+sudo apt-get upgrade</p>
+
+<p>sudo apt install docker.io
+sudo usermod -aG docker ${USER}
+sudo apt install docker-compose</p></li>
+<li><p>You need to logout and log back in to take on the new group assignment.</p></li>
+<li><p>You can then check if Docker is running correctly by running the Hello World container:</p>
+
+<p>docker run hello-world</p></li>
+</ol>
+
+<h2>Run Instructions</h2>
+
+<p>Add the following to /etc/hosts on each OpenStack instance to allow the Kafka and Elasticsearch applications to be 
+addressable by the software applications. The IP addresses and hostnames below represent the deployment in the NCIRL 
+Openstack Cloud infrastructure:</p>
+
+<pre><code>sudo vi /etc/hosts
+
+127.0.0.1 localhost
+192.168.50.192 x19139497-sspproj-1 kafka zookeeper
+192.168.50.226 x19139497-sspproj-2 spark flink
+192.168.50.141 x19139497-sspproj-3 elasticsearch kibana
+</code></pre>
+
+<p>Bring up the Docker environment on each environment:</p>
+
+<p>x19139497-sspproj-1:</p>
+
+<pre><code>docker-compose -f SSPProject/ssp-deployment/openstack-three-node/docker-compose-1.yml up -d
+docker-compose ps (Kafka and Zookeeper should be listed)
+</code></pre>
+
+<p>x19139497-sspproj-2:</p>
+
+<pre><code>docker-compose -f SSPProject/ssp-deployment/openstack-three-node/docker-compose-2.yml up -d
+docker-compose ps (Spark Master, Spark Worker and Flink Job Manager, Task Manager should be listed)
+</code></pre>
+
+<p>x19139497-sspproj-3:</p>
+
+<pre><code>docker-compose -f SSPProject/ssp-deployment/openstack-three-node/docker-compose-3.yml up -d
+docker-compose ps (Elastisearch and Kibana should be listed)
+</code></pre>
+
+<h2>SSPSparkApp - The Spark Streaming Processor application</h2>
+
+<p><img src="images/Apache%20Spark%20Cluster.png" alt="Spark Architecture" title="" /></p>
+
+<h3>Building and deploying the application to Spark</h3>
+
+<p>A Spark Master and Spark Worker is deployed on the second Openstack instance, x19139497-sspproj-2</p>
+
+<p>The application can be deployed to Spark on that host with the following commands:</p>
+
+<pre><code>cd SSPProject/ssp-spark-app/target
+docker ps (should list the Docker containers referenced below)
+docker cp ssp-spark-app.jar openstack-three-node_spark-master_1:/
+docker cp ssp-spark-app.jar openstack-three-node_spark-worker_1:/
+
+docker exec -it openstack-three-node_spark-master_1 bin/spark-submit -v \
+--master spark://spark-master:7077 \
+--deploy-mode cluster \
+--class ie.ncirl.sspproject.dataprocess.SSPSparkApp \
+file:///ssp-spark-app.jar
+</code></pre>
+
+<h2>SSPFlinkApp - The Flink Streaming Processor application</h2>
+
+<p><img src="images/Apache%20Flink%20Cluster.png" alt="Flink Architecture" title="" /></p>
+
+<h3>Building and deploying the application to Flink</h3>
+
+<p>A Flink Job Manager and Task Manager is deployed on the second Openstack instance, x19139497-sspproj-2</p>
+
+<p>The application can be deployed to Flink on that host with the following commands:</p>
+
+<pre><code>cd SSPProject/ssp-flink-app/target
+docker ps (should list the Docker containers referenced below)
+docker cp ssp-flink-app.jar penstack-three-node_flink-jobmanager_1:/
+
+docker exec -it openstack-three-node_flink-jobmanager_1 ./bin/flink run -d -p 8 \
+-c ie.ncirl.sspproject.dataprocess.SSPFlinkApp /ssp-flink-app.jar
+</code></pre>
+
+<h2>Starting Processing Instructions</h2>
+
+<h3>SSPDataImport - The Data Collection Processor application</h3>
+
+<p>A Kafka broker is deployed on the first Openstack instance, x19139497-sspproj-1</p>
+
+<p>The following commands will start the processing of the data records from the AWS bucket to the Kafka broker.</p>
+
+<pre><code>cd SSPProject/ssp-data-import
+</code></pre>
+
+<p>and then</p>
+
+<pre><code>mvn exec:java
+</code></pre>
+
+<p>or</p>
+
+<pre><code>java -jar target/ssp-data-import-jar-with-dependencies.jar
+</code></pre>
+
+<h2>Data Mining/Visualisation UI and other application management UIs</h2>
+
+<p>An Elasticsearch data sink and Kibana UI is deployed on the third Openstack instance, x19139497-sspproj-3</p>
+
+<p>Access to the UI is achieved using SSH tunnelling and establishing local port forwarding to the target machine. The
+following SSH tunnels can be established to access the Kibana UI and other application management UIs:</p>
+
+<p><img src="images/SSHTunnel.PNG" alt="SSH Tunnels" title="" /></p>
+
+<pre><code>Kibana: http://localhost:5601/app/kibana
+Spark Master UI: http://localhost:8080
+Spark Worker UI: http://localhost:8081
+Spark Application UI: http://localhost:4040
+Flink UI: http://localhost:9081
+</code></pre>
+
+<h2>Environment Shutdown Instructions</h2>
+
+<p>The Docker containers on each Openstack instance can be shutdown by:</p>
+
+<p>x19139497-sspproj-1:</p>
+
+<pre><code>docker-compose -f SSPProject/ssp-deployment/openstack-three-node/docker-compose-1.yml down
+</code></pre>
+
+<p>x19139497-sspproj-2:</p>
+
+<pre><code>docker-compose -f SSPProject/ssp-deployment/openstack-three-node/docker-compose-2.yml down
+</code></pre>
+
+<p>x19139497-sspproj-3:</p>
+
+<pre><code>docker-compose -f SSPProject/ssp-deployment/openstack-three-node/docker-compose-3.yml down
+</code></pre>
+
+<p>A lot of diskspace can be consumed over time with Docker with containers, images and volumes under 
+/var/lib/docker/volume. These can all be removed by running the following command on all instance hosts:</p>
+
+<pre><code>docker system prune --all --volumes
+</code></pre>
