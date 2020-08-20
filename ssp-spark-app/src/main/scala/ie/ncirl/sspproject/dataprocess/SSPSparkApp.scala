@@ -114,16 +114,19 @@ object SSPSparkApp {
       aggStream
         .writeStream
         .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
+        .outputMode(OutputMode.Append)
         .foreach(new ESForeachWriter(esServer, esPort, esScheme, interval + esIndex))
         .start
 
-      aggStream
-        .orderBy(col(interval + "_timestamp").desc, col("area_code"))
-        .writeStream
-        .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
-        .outputMode(OutputMode.Complete)
-        .format("console")
-        .start
+      if (LOGGER.isDebugEnabled()) {
+        aggStream
+          .orderBy(col(interval + "_timestamp").desc, col("area_code"))
+          .writeStream
+          .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
+          .outputMode(OutputMode.Complete)
+          .format("console")
+          .start
+      }
     }
 
     // Initialise the Spark Stream Environment

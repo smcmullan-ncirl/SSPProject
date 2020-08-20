@@ -174,19 +174,28 @@ object SSPFlinkApp {
     if (enableHourlyAgg) {
       val telecomHourlyAggsStream = buildAggstream(telecomRecordStream, Hourly)
       telecomHourlyAggsStream.addSink(buildEsSink(Hourly))
-      telecomHourlyAggsStream.print(Hourly)
+
+      if (LOGGER.isDebugEnabled()) {
+        telecomHourlyAggsStream.print(Hourly)
+      }
     }
 
     if (enableDailyAgg) {
       val telecomDailyAggsStream = buildAggstream(telecomRecordStream, Daily)
       telecomDailyAggsStream.addSink(buildEsSink(Daily))
-      telecomDailyAggsStream.print(Daily)
+
+      if (LOGGER.isDebugEnabled()) {
+        telecomDailyAggsStream.print(Daily)
+      }
     }
 
     if (enableWeeklyAgg) {
       val telecomWeeklyAggsStream = buildAggstream(telecomRecordStream, Weekly)
       telecomWeeklyAggsStream.addSink(buildEsSink(Weekly))
-      telecomWeeklyAggsStream.print(Weekly)
+
+      if (LOGGER.isDebugEnabled()) {
+        telecomWeeklyAggsStream.print(Weekly)
+      }
     }
 
     // Start the streaming engine
