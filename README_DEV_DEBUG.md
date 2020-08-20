@@ -108,6 +108,7 @@ The logs are also viewable via the Spark UI : http://localhost:8080
     # Elasticsearch connection properties (Data Sink)
     es.server = elasticsearch
     es.port = 9200
+    es.scheme = http
     es.index = sparkcdr
     
     # Aggregation Window settings (Tumbling Window)
