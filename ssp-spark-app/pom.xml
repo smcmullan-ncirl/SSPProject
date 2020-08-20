@@ -32,9 +32,18 @@
             <version>${spark.version}</version>
         </dependency>
 
+<!--        These are for the standard Elasticsearch sink - it doesn't seem to be able to do the name resolution -->
+<!--        within the Docker container-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.elasticsearch</groupId>-->
+<!--            <artifactId>elasticsearch-spark-20_${spark.scala.version}</artifactId>-->
+<!--            <version>${elasticsearch.version}</version>-->
+<!--        </dependency>-->
+
         <dependency>
-            <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch-spark-20_${spark.scala.version}</artifactId>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
             <version>${elasticsearch.version}</version>
         </dependency>
 
