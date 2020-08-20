@@ -75,7 +75,6 @@ public class SSPDataImport {
     private static String esPort = null;
     private static String esScheme = null;
     private static String esIndex = null;
-    private static IndexRequest esIndexRequest = null;
 
     private static long startTime = 0;
     private static int processedFiles = 0;
@@ -241,8 +240,6 @@ public class SSPDataImport {
                         new HttpHost(esServer, Integer.parseInt(esPort), esScheme)
                 )
         );
-
-        esIndexRequest = new IndexRequest(esIndex);
     }
 
     private static void publishRecordToSink(JsonNode record) {
@@ -276,6 +273,7 @@ public class SSPDataImport {
     }
 
     private static void publishRecordToEs(JsonNode record) {
+        IndexRequest esIndexRequest = new IndexRequest(esIndex);
         esIndexRequest.source(record.toString(), XContentType.JSON);
 
         try {

@@ -8,15 +8,22 @@
 
 package ie.ncirl.sspproject.dataprocess
 
-import java.sql.Timestamp
+import java.sql.{Date, Timestamp}
+import java.text.SimpleDateFormat
 import java.util.{Objects, Properties}
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import org.apache.http.HttpHost
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.functions.{col, from_json, sum}
 import org.apache.spark.sql.streaming.{OutputMode, Trigger}
 import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, ForeachWriter, Row, SparkSession}
+import org.elasticsearch.action.index.IndexRequest
+import org.elasticsearch.client.{RequestOptions, RestClient, RestHighLevelClient}
+import org.elasticsearch.common.xcontent.XContentType
 import org.slf4j.LoggerFactory
 
 class SSPSparkApp {
@@ -42,6 +49,7 @@ object SSPSparkApp {
     val esServer = properties.getProperty("es.server")
     val esPort = properties.getProperty("es.port")
     val esIndex = properties.getProperty("es.index")
+    val esScheme = properties.getProperty("es.scheme")
 
     val timeWindowSecs = properties.getProperty("time.window.secs")
 
@@ -89,25 +97,33 @@ object SSPSparkApp {
         )
     }
 
-    // Write the aggregate records to Elasticsearch using a customer Foreach sink
-    // Unfortunately the standard Elasticsearch sink only supports Append mode with a Watermark which
-    // doesn't work well with historical data
     def writeAggSink(aggStream: DataFrame, interval: String) = {
+      // Elasticsearch sink only supports Append mode. Howvever Append output mode not supported when there are
+      // streaming aggregations on streaming DataFrames/DataSets without watermark which is not possible to use when
+      // streaming historical data
+      //
+      //      aggStream
+      //        .writeStream
+      //        .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
+      //        .outputMode(OutputMode.Append)
+      //        .format("org.elasticsearch.spark.sql")
+      //        .option("checkpointLocation", "/tmp/checkpoint" + interval)
+      //        .start(interval + esIndex)
+
+      // To counter this problem use a custom Foreach sink built with the Elasticsearch REST high level client
       aggStream
         .writeStream
         .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
-        .outputMode(OutputMode.Append)
-        .format("org.elasticsearch.spark.sql")
-        .option("checkpointLocation", "/tmp/checkpoint" + interval)
-        .start(interval + esIndex)
+        .foreach(new ESForeachWriter(esServer, esPort, esScheme, interval + esIndex))
+        .start
 
-        aggStream
-          .orderBy(col(interval + "_timestamp").desc, col("area_code"))
-          .writeStream
-          .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
-          .outputMode(OutputMode.Complete)
-          .format("console")
-          .start
+      aggStream
+        .orderBy(col(interval + "_timestamp").desc, col("area_code"))
+        .writeStream
+        .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
+        .outputMode(OutputMode.Complete)
+        .format("console")
+        .start
     }
 
     // Initialise the Spark Stream Environment
@@ -196,3 +212,53 @@ case class TelecomAgg
   total_sms_in: Double,
   total_sms_out: Double
 )
+
+// Customer Foreach sink to write stream partitions to Elasticsearch
+class ESForeachWriter(esServer: String, esPort: String, esScheme:String, esIndex: String) extends ForeachWriter[Row] {
+  var esClient: RestHighLevelClient = _
+  var mapper: ObjectMapper = _
+
+  override def open(partitionId: Long, epochId: Long): Boolean = {
+    esClient = new RestHighLevelClient(
+      RestClient.builder(
+        new HttpHost(esServer, Integer.parseInt(esPort), esScheme)
+      )
+    )
+
+    esClient != null
+  }
+
+  override def process(aggValue: Row): Unit = {
+    mapper = new ObjectMapper()
+    mapper.registerModule(DefaultScalaModule)
+
+    val timestamp = aggValue(0).asInstanceOf[Timestamp]
+    val areaCode = aggValue(1).asInstanceOf[String]
+    val totalCallsIn = aggValue(2).asInstanceOf[Double]
+    val totalCallsOut = aggValue(3).asInstanceOf[Double]
+    val totalSmsIn = aggValue(4).asInstanceOf[Double]
+    val totalSmsOut = aggValue(5).asInstanceOf[Double]
+
+    val simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+    val timestampDate = new Date(timestamp.getTime)
+    val timestampStr = simpleDataFormat.format(timestampDate)
+
+    val aggRec = TelecomAgg(
+      timestampStr,
+      areaCode,
+      totalCallsIn,
+      totalCallsOut,
+      totalSmsIn,
+      totalSmsOut
+    )
+
+    val esIndexRequest = new IndexRequest(esIndex)
+    val jsonData = mapper.writeValueAsString(aggRec)
+    esIndexRequest.source(jsonData, XContentType.JSON)
+    esClient.index(esIndexRequest, RequestOptions.DEFAULT)
+  }
+
+  override def close(errorOrNull: Throwable): Unit = {
+    esClient.close()
+  }
+}
