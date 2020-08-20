@@ -103,7 +103,7 @@ The logs are also viewable via the Spark UI : http://localhost:8080
     kafka.server = kafka:9092
     kafka.topics = telecom_trento
     kafka.topic.starting.offset = earliest
-    kafka.max.offsets.per.trigger = 250000
+    kafka.max.offsets.per.trigger = 500000
     
     # Elasticsearch connection properties (Data Sink)
     es.server = elasticsearch
@@ -111,7 +111,7 @@ The logs are also viewable via the Spark UI : http://localhost:8080
     es.index = sparkcdr
     
     # Aggregation Window settings (Tumbling Window)
-    time.window.secs = 30
+    time.window.secs = 60
     
     # Aggregation time enablement
     enable.hourly.agg = true
@@ -131,7 +131,7 @@ The logs are also viewable via the Spark UI : http://localhost:8080
     es.index = flinkcdr
     
     # Aggregation Window settings (Tumbling Window)
-    time.window.secs = 300
+    time.window.secs = 60
     
     # Aggregation time enablement
     enable.hourly.agg = true
