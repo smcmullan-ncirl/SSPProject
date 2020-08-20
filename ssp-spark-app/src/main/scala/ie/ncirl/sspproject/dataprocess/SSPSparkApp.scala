@@ -45,10 +45,6 @@ object SSPSparkApp {
 
     val timeWindowSecs = properties.getProperty("time.window.secs")
 
-    // The number of CPUs you have available across your cluster
-    // Make sure it reflects the SPARK_WORKER_CORES environment setting in docker-compose.yml
-    val sparkPartitions = System.getProperty("SPARK_WORKER_CORES")
-
     // Aggregation time enablement
     val enableHourlyAgg = properties.getProperty("enable.hourly.agg").toBoolean
     val enableDailyAgg = properties.getProperty("enable.daily.agg").toBoolean
@@ -57,6 +53,11 @@ object SSPSparkApp {
     import scala.collection.JavaConverters._
     val props = properties.asScala
     props.foreach((e: (String, String)) => LOGGER.info(s"${e._1} : ${e._2}"))
+
+    // The number of CPUs you have available across your cluster
+    // Make sure it reflects the SPARK_WORKER_CORES environment setting in docker-compose.yml
+    val sparkPartitions = System.getenv("SPARK_WORKER_CORES")
+    LOGGER.info("Setting parallelism to {}", sparkPartitions)
 
     // Set the Spark cluster configuration
     val conf: SparkConf = new SparkConf()
