@@ -22,8 +22,9 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -71,7 +72,8 @@ public class SSPDataImport {
     private static String kafkaTopic = null;
 
     private static RestHighLevelClient esClient = null;
-    private static ActionListener<IndexResponse> esListener = null;
+    private static ActionListener<BulkResponse> esListener = null;
+    private static BulkRequest esBulkRequest = null;
     private static Boolean esPersist = false;
     private static String esServer = null;
     private static String esPort = null;
@@ -191,6 +193,16 @@ public class SSPDataImport {
                         // Publish the record to Kafka (and optionally Elasticsearch)
                         publishRecordToSink(jsonNode);
                         recordNum++;
+
+                        if (esPersist) {
+                            if (recordNum % 1000 == 0) {
+                                flushRecordstoEs();
+                            }
+                        }
+                    }
+
+                    if (esPersist) {
+                        flushRecordstoEs();
                     }
 
                     long fileProcessingTime = (System.currentTimeMillis() - fileStartTime)/1000;
@@ -243,17 +255,20 @@ public class SSPDataImport {
                 )
         );
 
-        esListener = new ActionListener<IndexResponse>() {
+        esListener = new ActionListener<BulkResponse>() {
             @Override
-            public void onResponse(IndexResponse indexResponse) {
-                LOGGER.debug("Successfully published request to Elasticsearch: {}", indexResponse.getResult());
+            public void onResponse(BulkResponse bulkItemResponses) {
+                LOGGER.debug("Successfully published bulk request to Elasticsearch: {}",
+                        bulkItemResponses.buildFailureMessage());
             }
 
             @Override
             public void onFailure(Exception e) {
-                LOGGER.error("Error sending record to Elasticsearch", e);
+                LOGGER.error("Error sending bulk request to Elasticsearch", e);
             }
         };
+
+        esBulkRequest = new BulkRequest();
     }
 
     private static void publishRecordToSink(JsonNode record) {
@@ -289,7 +304,12 @@ public class SSPDataImport {
     private static void publishRecordToEs(JsonNode record) {
         IndexRequest esIndexRequest = new IndexRequest(esIndex);
         esIndexRequest.source(record.toString(), XContentType.JSON);
-        esClient.indexAsync(esIndexRequest, RequestOptions.DEFAULT, esListener);
+        esBulkRequest.add(esIndexRequest);
+    }
+
+    private static void flushRecordstoEs() {
+        esClient.bulkAsync(esBulkRequest, RequestOptions.DEFAULT, esListener);
+        esBulkRequest = new BulkRequest();
     }
 
     // Add the normalised timestamps to the record
