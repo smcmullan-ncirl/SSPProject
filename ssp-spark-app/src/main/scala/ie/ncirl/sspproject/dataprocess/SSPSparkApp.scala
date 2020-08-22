@@ -22,7 +22,8 @@ import org.apache.spark.sql.streaming.{OutputMode, Trigger}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, ForeachWriter, Row, SparkSession}
 import org.elasticsearch.action.ActionListener
-import org.elasticsearch.action.index.{IndexRequest, IndexResponse}
+import org.elasticsearch.action.bulk.{BulkRequest, BulkResponse}
+import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.client.{RequestOptions, RestClient, RestHighLevelClient}
 import org.elasticsearch.common.xcontent.XContentType
 import org.slf4j.LoggerFactory
@@ -229,7 +230,8 @@ class ESForeachWriter(esServer: String, esPort: String, esScheme:String, esIndex
   private val LOGGER = LoggerFactory.getLogger(classOf[ESForeachWriter])
 
   var esClient: RestHighLevelClient = _
-  var esListener: ActionListener[IndexResponse] = _
+  var esListener: ActionListener[BulkResponse] = _
+  var esBulkRequest: BulkRequest = _
   var mapper: ObjectMapper = _
 
   // Called on opening the data partition
@@ -241,19 +243,19 @@ class ESForeachWriter(esServer: String, esPort: String, esScheme:String, esIndex
       )
     )
 
-    esListener = new ActionListener[IndexResponse]() {
-      override def onResponse(indexResponse: IndexResponse): Unit = {
-        LOGGER.debug("Successfully published request to Elasticsearch: {}", indexResponse.getResult)
+    esListener = new ActionListener[BulkResponse]() {
+      override def onResponse(bulkItemResponses: BulkResponse): Unit = {
+        LOGGER.debug("Successfully published bulk request to Elasticsearch: {}", bulkItemResponses.buildFailureMessage)
       }
 
-      override
-
-      def onFailure(e: Exception): Unit = {
-        LOGGER.error("Error sending record to Elasticsearch", e)
+      override def onFailure(e: Exception): Unit = {
+        LOGGER.error("Error sending bulk request to Elasticsearch", e)
       }
     }
 
-    esClient != null
+    esBulkRequest = new BulkRequest
+
+    esClient != null && esListener != null && esBulkRequest != null
   }
 
   // Called to process each record in the data partition
@@ -285,10 +287,11 @@ class ESForeachWriter(esServer: String, esPort: String, esScheme:String, esIndex
     val esIndexRequest = new IndexRequest(esIndex)
     val jsonData = mapper.writeValueAsString(aggRec)
     esIndexRequest.source(jsonData, XContentType.JSON)
-    esClient.indexAsync(esIndexRequest, RequestOptions.DEFAULT, esListener)
+    esBulkRequest.add(esIndexRequest)
   }
 
   override def close(errorOrNull: Throwable): Unit = {
+    esClient.bulkAsync(esBulkRequest, RequestOptions.DEFAULT, esListener)
     esClient.close()
   }
 }
