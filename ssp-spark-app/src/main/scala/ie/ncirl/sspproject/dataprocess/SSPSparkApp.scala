@@ -21,7 +21,8 @@ import org.apache.spark.sql.functions.{col, from_json, sum}
 import org.apache.spark.sql.streaming.{OutputMode, Trigger}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, ForeachWriter, Row, SparkSession}
-import org.elasticsearch.action.index.IndexRequest
+import org.elasticsearch.action.ActionListener
+import org.elasticsearch.action.index.{IndexRequest, IndexResponse}
 import org.elasticsearch.client.{RequestOptions, RestClient, RestHighLevelClient}
 import org.elasticsearch.common.xcontent.XContentType
 import org.slf4j.LoggerFactory
@@ -225,19 +226,37 @@ case class TelecomAgg
 
 // Customer Foreach sink to write stream partitions to Elasticsearch
 class ESForeachWriter(esServer: String, esPort: String, esScheme:String, esIndex: String) extends ForeachWriter[Row] {
+  private val LOGGER = LoggerFactory.getLogger(classOf[ESForeachWriter])
+
   var esClient: RestHighLevelClient = _
+  var esListener: ActionListener[IndexResponse] = _
   var mapper: ObjectMapper = _
 
+  // Called on opening the data partition
   override def open(partitionId: Long, epochId: Long): Boolean = {
+    // Create a new Elasticsearch client and asynchronous listener
     esClient = new RestHighLevelClient(
       RestClient.builder(
         new HttpHost(esServer, Integer.parseInt(esPort), esScheme)
       )
     )
 
+    esListener = new ActionListener[IndexResponse]() {
+      override def onResponse(indexResponse: IndexResponse): Unit = {
+        LOGGER.debug("Successfully published request to Elasticsearch: {}", indexResponse.getResult)
+      }
+
+      override
+
+      def onFailure(e: Exception): Unit = {
+        LOGGER.error("Error sending record to Elasticsearch", e)
+      }
+    }
+
     esClient != null
   }
 
+  // Called to process each record in the data partition
   override def process(aggValue: Row): Unit = {
     mapper = new ObjectMapper()
     mapper.registerModule(DefaultScalaModule)
@@ -262,10 +281,11 @@ class ESForeachWriter(esServer: String, esPort: String, esScheme:String, esIndex
       totalSmsOut
     )
 
+    // Persist asynchronously to Elasticsearch
     val esIndexRequest = new IndexRequest(esIndex)
     val jsonData = mapper.writeValueAsString(aggRec)
     esIndexRequest.source(jsonData, XContentType.JSON)
-    esClient.index(esIndexRequest, RequestOptions.DEFAULT)
+    esClient.indexAsync(esIndexRequest, RequestOptions.DEFAULT, esListener)
   }
 
   override def close(errorOrNull: Throwable): Unit = {

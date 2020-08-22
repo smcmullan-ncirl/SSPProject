@@ -167,3 +167,11 @@ The logs are also viewable via the Spark UI : http://localhost:8080
 ### Elasticsearch Java High Level REST Client
 
     https://www.elastic.co/guide/en/elasticsearch/client/java-rest/7.8/java-rest-high.html
+    
+### Flink Elasticsearch Connector
+
+    https://ci.apache.org/projects/flink/flink-docs-stable/dev/connectors/elasticsearch.html
+    
+### Kafka API
+
+    https://kafka.apache.org/documentation/

@@ -21,6 +21,7 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -70,6 +71,7 @@ public class SSPDataImport {
     private static String kafkaTopic = null;
 
     private static RestHighLevelClient esClient = null;
+    private static ActionListener<IndexResponse> esListener = null;
     private static Boolean esPersist = false;
     private static String esServer = null;
     private static String esPort = null;
@@ -240,6 +242,18 @@ public class SSPDataImport {
                         new HttpHost(esServer, Integer.parseInt(esPort), esScheme)
                 )
         );
+
+        esListener = new ActionListener<IndexResponse>() {
+            @Override
+            public void onResponse(IndexResponse indexResponse) {
+                LOGGER.debug("Successfully published request to Elasticsearch: {}", indexResponse.getResult());
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                LOGGER.error("Error sending record to Elasticsearch", e);
+            }
+        };
     }
 
     private static void publishRecordToSink(JsonNode record) {
@@ -275,13 +289,7 @@ public class SSPDataImport {
     private static void publishRecordToEs(JsonNode record) {
         IndexRequest esIndexRequest = new IndexRequest(esIndex);
         esIndexRequest.source(record.toString(), XContentType.JSON);
-
-        try {
-            IndexResponse indexResponse = esClient.index(esIndexRequest, RequestOptions.DEFAULT);
-            LOGGER.debug("Successfully published request to Elasticsearch: {}", indexResponse.getResult());
-        } catch (IOException e) {
-            LOGGER.error("Error sending record to Elasticsearch", e);
-        }
+        esClient.indexAsync(esIndexRequest, RequestOptions.DEFAULT, esListener);
     }
 
     // Add the normalised timestamps to the record
