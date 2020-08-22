@@ -89,6 +89,7 @@ The logs are also viewable via the Spark UI : http://localhost:8080
     es.port = 9200
     es.scheme = http
     es.index = dataimportcdr
+    es.bulk.offset = 10000
 
 ### SSPSparkApp (ssp-spark-app/src/main/resources/config.properties)
 

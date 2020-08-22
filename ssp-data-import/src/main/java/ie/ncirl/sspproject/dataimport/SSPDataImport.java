@@ -61,6 +61,7 @@ public class SSPDataImport {
     private static final String ES_PORT = "es.port";
     private static final String ES_SCHEME = "es.scheme";
     private static final String ES_INDEX = "es.index";
+    private static final String ES_BULK_OFFSET = "es.bulk.offset";
 
     private static String bucketName = null;
     private static String objectPrefix = null;
@@ -79,6 +80,7 @@ public class SSPDataImport {
     private static String esPort = null;
     private static String esScheme = null;
     private static String esIndex = null;
+    private static int esBulkOffset = 0;
 
     private static long startTime = 0;
     private static int processedFiles = 0;
@@ -129,6 +131,8 @@ public class SSPDataImport {
             esPort = prop.getProperty(ES_PORT);
             esScheme = prop.getProperty(ES_SCHEME);
             esIndex = prop.getProperty(ES_INDEX);
+            esIndex = prop.getProperty(ES_INDEX);
+            esBulkOffset = Integer.parseInt(prop.getProperty(ES_BULK_OFFSET));
         } catch (IOException e) {
             LOGGER.error("Unable to load config.properties from classpath");
         }
@@ -194,13 +198,15 @@ public class SSPDataImport {
                         publishRecordToSink(jsonNode);
                         recordNum++;
 
+                        // Flush records to Elastisearch in a bulk loading manner esBulkOffset records at a time
                         if (esPersist) {
-                            if (recordNum % 1000 == 0) {
+                            if (recordNum % esBulkOffset == 0) {
                                 flushRecordstoEs();
                             }
                         }
                     }
 
+                    // Flush the remainining records to Elastisearch
                     if (esPersist) {
                         flushRecordstoEs();
                     }
@@ -302,12 +308,14 @@ public class SSPDataImport {
     }
 
     private static void publishRecordToEs(JsonNode record) {
+        // Add individual JSON records to the Elasticsearch Bulk Request
         IndexRequest esIndexRequest = new IndexRequest(esIndex);
         esIndexRequest.source(record.toString(), XContentType.JSON);
         esBulkRequest.add(esIndexRequest);
     }
 
     private static void flushRecordstoEs() {
+        // Execute the Elasticsearch Bulk Request asynchronously and initialise a new empty Bulk Request object
         esClient.bulkAsync(esBulkRequest, RequestOptions.DEFAULT, esListener);
         esBulkRequest = new BulkRequest();
     }
