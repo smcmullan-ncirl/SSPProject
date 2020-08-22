@@ -21,7 +21,6 @@ import org.apache.spark.sql.functions.{col, from_json, sum}
 import org.apache.spark.sql.streaming.{OutputMode, Trigger}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, ForeachWriter, Row, SparkSession}
-import org.elasticsearch.action.ActionListener
 import org.elasticsearch.action.bulk.{BulkRequest, BulkResponse}
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.client.{RequestOptions, RestClient, RestHighLevelClient}
@@ -227,33 +226,14 @@ case class TelecomAgg
 class ESForeachWriter(esServer: String, esPort: String, esScheme:String, esIndex: String) extends ForeachWriter[Row] {
   private val LOGGER = LoggerFactory.getLogger(classOf[ESForeachWriter])
 
-  var esClient: RestHighLevelClient = _
-  var esListener: ActionListener[BulkResponse] = _
   var esBulkRequest: BulkRequest = _
   var mapper: ObjectMapper = _
 
   // Called on opening the data partition
   override def open(partitionId: Long, epochId: Long): Boolean = {
-    // Create a new Elasticsearch client and asynchronous listener
-    esClient = new RestHighLevelClient(
-      RestClient.builder(
-        new HttpHost(esServer, Integer.parseInt(esPort), esScheme)
-      )
-    )
-
-    esListener = new ActionListener[BulkResponse]() {
-      override def onResponse(bulkItemResponses: BulkResponse): Unit = {
-        LOGGER.debug("Successfully published bulk request to Elasticsearch: {}", bulkItemResponses.buildFailureMessage)
-      }
-
-      override def onFailure(e: Exception): Unit = {
-        LOGGER.error("Error sending bulk request to Elasticsearch", e)
-      }
-    }
-
     esBulkRequest = new BulkRequest
 
-    esClient != null && esListener != null && esBulkRequest != null
+    esBulkRequest != null
   }
 
   // Called to process each record in the data partition
@@ -289,7 +269,20 @@ class ESForeachWriter(esServer: String, esPort: String, esScheme:String, esIndex
   }
 
   override def close(errorOrNull: Throwable): Unit = {
-    esClient.bulkAsync(esBulkRequest, RequestOptions.DEFAULT, esListener)
+    // Create a new Elasticsearch client and asynchronous listener
+    val esClient = new RestHighLevelClient(
+      RestClient.builder(
+        new HttpHost(esServer, Integer.parseInt(esPort), esScheme)
+      )
+    )
+
+    LOGGER.info("Persisting {} records to Elasticsearch", esBulkRequest.requests().size())
+    val bulkResponse: BulkResponse = esClient.bulk(esBulkRequest, RequestOptions.DEFAULT)
+    if (bulkResponse.hasFailures) {
+      LOGGER.error(bulkResponse.buildFailureMessage())
+    }
+
     esClient.close()
+    esBulkRequest = null
   }
 }
