@@ -61,7 +61,6 @@ services:
             - "flink-jobmanager:jobmanager"
         environment:
             - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
-            - taskmanager.heap.size=8G
         extra_hosts:
             - "kafka:192.168.50.192"
             - "elasticsearch:192.168.50.141"
