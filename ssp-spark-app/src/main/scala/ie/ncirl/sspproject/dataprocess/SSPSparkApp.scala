@@ -94,7 +94,6 @@ object SSPSparkApp {
     // Reduce to a TelecomAgg record with the aggregation keys and the total counts
     def genAggs(streamDF: DataFrame, interval: String) = {
       streamDF
-        .withWatermark(interval + "_timestamp", "0 seconds")
         .groupBy(interval + "_timestamp", "area_code" )
         .agg(
           sum("calls_in").alias("total_calls_in"),
@@ -106,8 +105,7 @@ object SSPSparkApp {
 
     def writeAggSink(aggStream: DataFrame, interval: String) = {
       // Elasticsearch sink only supports Append mode. However Append output mode is only supported when there are
-      // streaming aggregations on streaming DataFrames/DataSets with a watermark specified. This is set to 0 seconds
-      // above as we're streaming historical data
+      // streaming aggregations on streaming DataFrames/DataSets with a watermark specified.
 
       // Standard Elasticsearch sink doesn't seem to be able to do the host name resolution within the Docker container
       //
@@ -123,7 +121,7 @@ object SSPSparkApp {
       aggStream
         .writeStream
         .trigger(Trigger.ProcessingTime(timeWindowSecs + " seconds"))
-        .outputMode(OutputMode.Append)
+        .outputMode(OutputMode.Update)
         .foreach(new ESForeachWriter(esServer, esPort, esScheme, interval + esIndex))
         .start
 
