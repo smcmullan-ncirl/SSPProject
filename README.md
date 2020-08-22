@@ -252,11 +252,13 @@ following SSH tunnels can be established to access the Kibana UI and other appli
 
 ![SSH Tunnels](images/SSHTunnel.PNG)
 
-    Kibana: http://localhost:5601/app/kibana
+    Kibana UI: http://localhost:5601/app/kibana
     Spark Master UI: http://localhost:8080
     Spark Worker UI: http://localhost:8081
     Spark Application UI: http://localhost:4040
     Flink UI: http://localhost:9081
+    
+The Kibana UI dashboards and visualisations can be restored from the export file at SSPProject/kibana/export.ndjson
     
 ## Environment Shutdown Instructions
 
