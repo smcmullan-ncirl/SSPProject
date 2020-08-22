@@ -241,7 +241,7 @@ and then
     
 or
 
-    java -jar target/ssp-data-import-jar-with-dependencies.jar
+    java -Xmx6g -jar target/ssp-data-import-jar-with-dependencies.jar
 
 ## Data Mining/Visualisation UI and other application management UIs
 

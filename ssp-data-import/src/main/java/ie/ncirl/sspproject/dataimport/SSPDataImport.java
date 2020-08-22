@@ -115,6 +115,7 @@ public class SSPDataImport {
     private static void loadConfigProperties() {
         try {
             prop.load(Objects.requireNonNull(SSPDataImport.class.getClassLoader().getResourceAsStream(CONFIG_PROPERTIES)));
+            prop.forEach((key, value) -> LOGGER.info(key + ": " + value));
 
             // AWS S3 Bucket location
             bucketName = prop.getProperty(AWS_BUCKET_NAME);
@@ -122,15 +123,24 @@ public class SSPDataImport {
 
             // Kafka properties
             kafkaPersist = Boolean.parseBoolean(prop.getProperty(KAFKA_PERSIST));
+            if (kafkaPersist) {
+                LOGGER.info("Kafka persistence is ON");
+            } else {
+                LOGGER.info("Kafka persistence is OFF");
+            }
             kafkaServer = prop.getProperty(KAFKA_SERVER);
             kafkaTopic = prop.getProperty(KAFKA_TOPIC);
 
             // Elasticsearch properties
             esPersist = Boolean.parseBoolean(prop.getProperty(ES_PERSIST));
+            if (esPersist) {
+                LOGGER.info("Elasticsearch persistence is ON");
+            } else {
+                LOGGER.info("Elasticsearch persistence is OFF");
+            }
             esServer = prop.getProperty(ES_SERVER);
             esPort = prop.getProperty(ES_PORT);
             esScheme = prop.getProperty(ES_SCHEME);
-            esIndex = prop.getProperty(ES_INDEX);
             esIndex = prop.getProperty(ES_INDEX);
             esBulkOffset = Integer.parseInt(prop.getProperty(ES_BULK_OFFSET));
         } catch (IOException e) {
@@ -198,7 +208,7 @@ public class SSPDataImport {
                         publishRecordToSink(jsonNode);
                         recordNum++;
 
-                        // Flush records to Elastisearch in a bulk loading manner esBulkOffset records at a time
+                        // Flush records to Elasticsearch in a bulk loading manner esBulkOffset records at a time
                         if (esPersist) {
                             if (recordNum % esBulkOffset == 0) {
                                 flushRecordstoEs();
